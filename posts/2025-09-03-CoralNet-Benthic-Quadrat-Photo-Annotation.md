@@ -11,7 +11,7 @@ projects: NSF CAREER
 
 [CoralNet](https://coralnet.ucsd.edu/source/) is a resource for benthic image analysis. It allows users to upload images and classify the benthic cover based on labels of their choosing. You can read more about CoralNet in [Beijbom et al. 2015](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0130312) and [Williams et al. 2019](https://www.frontiersin.org/journals/marine-science/articles/10.3389/fmars.2019.00222/full) if interested. 
 
-#### Field methods 
+### Field methods 
 
 Benthic transects are done in Kaneohe Bay, Hawaii at Patch Reef 13 during our seasonal sampling trips. We follow methods described in [Matsuda et al. 2020](https://www.frontiersin.org/journals/ecology-and-evolution/articles/10.3389/fevo.2020.00178/full). 
 
