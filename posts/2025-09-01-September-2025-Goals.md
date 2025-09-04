@@ -51,3 +51,26 @@ September 2025 goals and daily notebook entries.
 - Booked HI flights 
 - Got rest of calc data for field corals and plotted
 - Got April 2023 - Sept 2023 for logger data and plotted 
+- Wrote a little of AST 2021 discussion 
+
+### 20250903
+
+- Meeting with Nick re sperm smRNAs 
+- Meeting with Danielle re coralnet 
+- Writing coralnet instructions 
+- Got Apex stuff to take home 
+- Amassed miRNA reference fasta files 
+- Started running shortstack on Apoc and Nvec trimmed reads --> didnt identify many miRNAs 
+- Requested mirdeep2 for unity 
+- Writing for AST 2021 
+
+### 20250904
+
+- Writing for AST 2021 
+- Sperm smRNA coding 
+
+
+to do 
+
+- pay loans 
+- coordinate with Eric from UCR to send porites from HI 

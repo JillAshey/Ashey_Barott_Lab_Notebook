@@ -121,4 +121,4 @@ There are a lot of potential labels to use and some can be redundant. To avoid c
 
 Other labels that may be used could be [PocDam](https://www.marinelifephotography.com/corals/cauliflower/pocillopora-damicornis.htm) (Pocillopora damicornis, now Pocillopora acuta; hard coral), [zoanthid](https://www.waikikiaquarium.org/experience/animal-guide/invertebrates/zoanthids/) (other invertebrates), or [LPurp](https://www.marinelifephotography.com/corals/faviidae/leptastrea-purpurea.htm) (Leptastrea purpurea; hard coral). These will be much less common.
 
-If you can't figure out how to label a point, send it to me or label it as Unk (Unknown). 
+If you can't figure out how to label a point, send it to me or label it as Unk (Unknown). Some of the images or image features may be grainy or difficult to see, but do the best you can!
