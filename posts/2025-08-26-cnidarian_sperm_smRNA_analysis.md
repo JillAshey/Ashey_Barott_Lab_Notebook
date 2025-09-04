@@ -13,9 +13,7 @@ Sperm from three cnidarian species (*Nematostella vectensis*, *Astrangia poculat
 
 The fastq files were initially stored on Box but I have moved them to Unity for analysis (`/project/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA`). My scripts and output will be stored here: `/work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA`. 
 
-### Initial QC 
-
-In the scripts folder: `nano raw_qc.sh`
+Run initial QC. In the scripts folder: `nano raw_qc.sh`
 
 ```
 #!/usr/bin/env bash
@@ -79,9 +77,6 @@ nvec_4_S35_L001_R1_001.fastq.gz:7667363
 ```
 
 MultiQC results are here: XXXXX
-
-
-
 
 The QC looks good overall. Reads are 75bp long. There is a lot of adapter content from the Illumina 3' smRNA adapter. Before trimming, make a scratch workspace for intermediate files: 
 
@@ -333,6 +328,7 @@ apoc_4_S33_L001_R1_001_trim.fastq \
 --dn_mirna
 
 echo "Apoc shortstack complete"
+conda deactivate
 ```
 
 Submitted batch job 42222961. Still got the same result...I wonder if I can relax the shortstack parameters? I'm going to look more at the shortstack github [wiki](https://github.com/MikeAxtell/ShortStack/wiki/Vignette-%231-%3A-A-%22complete%22-run). Interestingly, the recommended inputs are "one or more untrimmed FASTQ files of small RNA-seq data". Shortstack has an `--autotrim` flag, which (according to the wiki): "tells ShortStack that the reads from --readfile need to be adapter trimmed, and that ShortStack should infer the adapter sequence. This is the recommended way to trim the adapters off of sRNA-seq data." Let's try running the same code but with the raw reads instead. 
@@ -395,6 +391,172 @@ Ap11:1291990-1292408	Cluster_11	Ap11	1291990	1292408	419	116	4	1.0	+	GAGAUUGAUAU
 Ap11:1507811-1508227	Cluster_12	Ap11	1507811	1508227	417	51	3	0.0	-	CUACGUCCUGAAGUGCC	47	51	0	0	0	0	0	N	N	NA
 ```
 
+Most clusters have 0 in the 21-22 size categories (columns 15 and 16), which is typical miRNA size. My trimmed data looks like this: 
+
+![](https://raw.githubusercontent.com/JillAshey/Ashey_Barott_Lab_Notebook/refs/heads/main/images/trimmed_fastqc_sequence_length_distribution_plot.png)
+
+There is little to no peak around 21-22bp, where I would expect miRNAs to be. There are lots of peaks between 27-35, where I could expect piRNAs to be. Maybe its mostly piRNAs? Maybe I can relax some of the shortstack parameters to see if that helps? 
+
+```
+usage: ShortStack [-h] [--version] (--genomefile GENOMEFILE | --autotrim_only) [--known_miRNAs KNOWN_MIRNAS] (--readfile [READFILE ...] | --bamfile [BAMFILE ...]) [--outdir OUTDIR]
+                  [--adapter ADAPTER | --autotrim] [--autotrim_key AUTOTRIM_KEY] [--threads THREADS] [--mmap {u,f,r}] [--align_only] [--dicermin DICERMIN] [--dicermax DICERMAX]
+                  [--locifile LOCIFILE | --locus LOCUS] [--nohp] [--dn_mirna] [--strand_cutoff STRAND_CUTOFF] [--mincov MINCOV] [--pad PAD] [--make_bigwigs]
+options:
+  -h, --help            show this help message and exit
+  --version             show program's version number and exit
+  --genomefile GENOMEFILE
+                        FASTA file of the reference genome
+  --autotrim_only       If this switch is set, ShortStack quits after performing auto-trimming of input reads.
+  --known_miRNAs KNOWN_MIRNAS
+                        FASTA file of known/suspected mature microRNAs
+  --readfile [READFILE ...]
+                        One or more files of reads (fq, fa, gzip OK)
+  --bamfile [BAMFILE ...]
+                        One or more BAM alignment files
+  --outdir OUTDIR       Output directory name. Defaults to ShortStack_time
+  --adapter ADAPTER     3-primer adapter sequence to trim off ofreads. If given applies to all input fastq files. Mutually exclusive with --autotrim.
+  --autotrim            If this switch is set, automatically discover the 3-prime adapter from each input readfile, and trim it. This uses the sequence from --autotrim_key to discover the
+                        adapter sequence. Mutually exlcusive with --adapter.
+  --autotrim_key AUTOTRIM_KEY
+                         Sequence of an abundant, known small RNA to be used to discover the 3-prime adapter sequence. Has no effect unless --autotrim is specified. Defaults to
+                        TCGGACCAGGCTTCATTCCCC (miR166). Can be upper or lower-case, T or U and must be 20-30 bases long.
+  --threads THREADS     Number of threads to use (integer) - default: 1
+  --mmap {u,f,r}        Protocol for multi-mapped reads: u, f, or r - default: u
+  --align_only          If this switch is set, ShortStack quits after performing alignments without any analyses performed.
+  --dicermin DICERMIN   Minimum size of a valid Dicer-processed small RNA. Must be integer >= 15 and <= dicermax. Default: 20.
+  --dicermax DICERMAX   Maximum size of a valid Dicer-processed small RNA. Must be integer >= 15 and <= dicermax. Default: 24.
+  --locifile LOCIFILE   File listing intervals to analyze. Can be simple tab-delimited, .bed, or .gff3. Tab-delimited format is column 1 with coordinates Chr:start-stop, column 2 with names.
+                        Input file assumed to be simple tab-delimited unless file name ends in .bed or .gff3. Mutually exclusive with --locus.
+  --locus LOCUS         Analyze the specified interval, given in format Chr:start-stop. Mutually exclusive with --locifile.
+  --nohp                If this switch is set, RNA folding will not take place, thus MIRNA loci cannot be annotated. This does however save CPU time.
+  --dn_mirna            If this switch is set, a de novo search for new MIRNA loci will be performed. By default, de novo MIRNA finding is not performed and MIRNA searches are limited to loci
+                        matching RNAs from --known_miRNAs that align to the genome
+  --strand_cutoff STRAND_CUTOFF
+                        Cutoff for calling the strandedness of a small RNA locus. Must be a floating point > 0.5 and < 1. Default: 0.8.
+  --mincov MINCOV       Minimum alignment depth required to nucleate a small RNA cluster during de novo cluster search. In units of reads per million. Must be a floating point number. Default:
+                        0.5
+  --pad PAD             Initial peaks (continuous regions with depth exceeding argument mincov are merged if they are this distance or less from each other. Must be an integer >= 1. Default: 200
+  --make_bigwigs        If this switch is set then bigwigs will be made from alignments.
+```
+
+Lets try to decrease the minimum coverage to see if miRNAs are just lowly expressed. Decreasing from 0.5 to 0.1. Also going back to using the trimmed data instead of letting shortstack do the trimming. 
+
+In the scripts folder: `nano shortstack_mincov0.1_apoc.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=2
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=200GB
+#SBATCH -t 100:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts
+
+module load uri/main
+module load conda/latest # need to load before making any conda envs
+
+conda activate /work/pi_hputnam_uri_edu/conda/envs/ShortStack4 
+
+echo "Running short stack on trimmed reads for apoc with mincov set to 0.1"
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc 
+
+#gunzip *fastq.gz
+
+ShortStack \
+--genomefile /work/pi_hputnam_uri_edu/genomes/Apoc/apoculata.genome.fasta \
+--readfile apoc_2_S31_L001_R1_001_trim.fastq \
+apoc_3_S32_L001_R1_001_trim.fastq \
+apoc_4_S33_L001_R1_001_trim.fastq \
+--mincov 0.1 \
+--known_miRNAs /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/data/miRNA_reference.fasta \
+--outdir /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/output/apoc_shortstack_mincov0.1 \
+--dn_mirna
+
+echo "Apoc shortstack complete"
+
+conda deactivate
+```
+
+Submitted batch job 42225432. Still not identifying a lot of miRNAs. In the results.txt file, I am seeing though that we are getting hits to the known miRNAs (including the ones from the Apoc adults). 
+
+```
+head(mirna_known)
+                   Locus         Name Chrom    Start      End Length Reads DistinctSequences FracTop Strand                MajorRNA
+1 Ap11:16932436-16932852 Cluster_1246  Ap11 16932436 16932852    417     3                 2       0      -       GUAGAACCUCAAUGAGC
+2 Ap11:17370295-17370714 Cluster_1284  Ap11 17370295 17370714    420     3                 1       1      +    GUUAGAGCAACUGUUAAAGG
+3   Ap10:2155340-2155761 Cluster_1831  Ap10  2155340  2155761    422     6                 6       1      +   CUGAAAUUAAAGGACUUGCCU
+4 Ap10:13290211-13290627 Cluster_2700  Ap10 13290211 13290627    417     2                 1       1      +       GCUGAAUCCUCCAGGUC
+5   Ap14:3503170-3503592 Cluster_3563  Ap14  3503170  3503592    423     5                 3       1      + UGAUCUUGUAGGUUCCAUCUUAU
+6   Ap14:4191041-4191458 Cluster_3626  Ap14  4191041  4191458    418     3                 3       0      -      AGGAUUGUAGUGAGAACA
+  MajorRNAReads Short Long X21 X22 X23 X24 DicerCall MIRNA                                                              known_miRNAs
+1             2     2    0   1   0   0   0         N     N Cluster_137.mature::chromosome_1:16932636-16932657(-)::Astrangia_poculata
+2             3     3    0   0   0   0   0         N     N                                                           mmu-miR-466i-5p
+3             1     2    0   2   2   0   0         N     N   Cluster_247.mature::chromosome_2:2155540-2155561(+)::Astrangia_poculata
+4             2     2    0   0   0   0   0         N     N                                           mmu-miR-466i-5p;mmu-miR-466i-5p
+5             3     2    0   0   0   3   0         N     N   Cluster_492.mature::chromosome_3:3503370-3503391(+)::Astrangia_poculata
+6             1     3    0   0   0   0   0         N     N                                           mmu-miR-466i-5p;mmu-miR-466i-5p
+  mature_length
+1            17
+2            20
+3            21
+4            17
+5            23
+6            18
+```
+
+Very strange...I am so confused haha. Requested for mirdeep2 to be added as module to Unity. 
+
+Try adjusting the dicer min and max. The default is 21 and 24, respectively. Going to set it to 18 and 26, respectively. 
+
+In the scripts folder: `nano shortstack_mincov0.1_dmin18_dmax26_apoc.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=2
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=200GB
+#SBATCH -t 100:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts
+
+module load uri/main
+module load conda/latest # need to load before making any conda envs
+
+conda activate /work/pi_hputnam_uri_edu/conda/envs/ShortStack4 
+
+echo "Running short stack on trimmed reads for apoc with mincov set to 0.1, dicer min = 18, and dicer max = 26"
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc 
+
+#gunzip *fastq.gz
+
+ShortStack \
+--genomefile /work/pi_hputnam_uri_edu/genomes/Apoc/apoculata.genome.fasta \
+--readfile apoc_2_S31_L001_R1_001_trim.fastq \
+apoc_3_S32_L001_R1_001_trim.fastq \
+apoc_4_S33_L001_R1_001_trim.fastq \
+--mincov 0.1 \
+--dicermin 18 \
+--dicermax 26 \
+--known_miRNAs /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/data/miRNA_reference.fasta \
+--outdir /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/output/apoc_shortstack_mincov0.1_dmin18_dmax26 \
+--dn_mirna
+
+echo "Apoc shortstack complete"
+
+conda deactivate
+```
+
+Submitted batch job 42239097. Doesn't look much different bleh. 
 
 
 
