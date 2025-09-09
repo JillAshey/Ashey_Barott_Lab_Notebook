@@ -69,9 +69,33 @@ September 2025 goals and daily notebook entries.
 - Writing for AST 2021 
 - Sperm smRNA coding 
 
+### 20250905
+
+- Coding 
+- Lab meeting 
+- Katie meeting 
+- AST writing 
+
+### 20250906 
+
+Nothing 
+
+### 20250907
+
+Nothing 
+
+### 20250908 
+
+- Put together apex stuff to make sure it works 
+- Got Danielle started on CoralNet 
+- Running Sept2023 data on HPC - success! 
+- Gathering TCB pi curve and TPC metadata  
+- Metadata organization for NSF career
+
 
 to do 
 
 - pay loans 
 - coordinate with Eric from UCR to send porites from HI 
 - run pi sept 2023 script on unity 
+- Put miRNA bams on box and email nick
