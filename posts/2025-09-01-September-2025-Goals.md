@@ -108,6 +108,13 @@ Nothing
 - Brandon meeting 
 - smRNA coding 
 
+### 20250912
+
+- Lab meeting 
+- e5 meeting 
+- Katie meeting 
+- Downloading rest of Kbay temp data + plotting 
+- Pacbio smrt grant writing 
 
 
 to do 
