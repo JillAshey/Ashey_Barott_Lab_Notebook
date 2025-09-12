@@ -76,7 +76,7 @@ nvec_3_S34_L001_R1_001.fastq.gz:7685020
 nvec_4_S35_L001_R1_001.fastq.gz:7667363
 ```
 
-MultiQC results are here: XXXXX
+MultiQC results are [here](https://github.com/JillAshey/Cnidarian_sperm_smRNA/blob/main/data/multiqc_report_raw.html). 
 
 The QC looks good overall. Reads are 75bp long. There is a lot of adapter content from the Illumina 3' smRNA adapter. Before trimming, make a scratch workspace for intermediate files: 
 
@@ -168,7 +168,7 @@ nvec_3_S34_L001_R1_001_trim.fastq.gz:7250936
 nvec_4_S35_L001_R1_001_trim.fastq.gz:6457956
 ```
 
-MultiQC results are here: XXXXX
+MultiQC results are [here](https://github.com/JillAshey/Cnidarian_sperm_smRNA/blob/main/data/multiqc_report_trim.html). 
 
 Data looks good. Ahya 2 dropped quite a bit in number of reads but that sample also had the most adapter content. 
 
@@ -331,7 +331,7 @@ echo "Apoc shortstack complete"
 conda deactivate
 ```
 
-Submitted batch job 42222961. Still got the same result...I wonder if I can relax the shortstack parameters? I'm going to look more at the shortstack github [wiki](https://github.com/MikeAxtell/ShortStack/wiki/Vignette-%231-%3A-A-%22complete%22-run). Interestingly, the recommended inputs are "one or more untrimmed FASTQ files of small RNA-seq data". Shortstack has an `--autotrim` flag, which (according to the wiki): "tells ShortStack that the reads from --readfile need to be adapter trimmed, and that ShortStack should infer the adapter sequence. This is the recommended way to trim the adapters off of sRNA-seq data." Let's try running the same code but with the raw reads instead. 
+Submitted batch job 42222961. Still got the same result...Results [here](https://github.com/JillAshey/Cnidarian_sperm_smRNA/tree/main/output/shortstack/apoc/trimmed_default). I wonder if I can relax the shortstack parameters? I'm going to look more at the shortstack github [wiki](https://github.com/MikeAxtell/ShortStack/wiki/Vignette-%231-%3A-A-%22complete%22-run). Interestingly, the recommended inputs are "one or more untrimmed FASTQ files of small RNA-seq data". Shortstack has an `--autotrim` flag, which (according to the wiki): "tells ShortStack that the reads from --readfile need to be adapter trimmed, and that ShortStack should infer the adapter sequence. This is the recommended way to trim the adapters off of sRNA-seq data." Let's try running the same code but with the raw reads instead. 
 
 In the scripts folder: `nano shortstack_apoc_rawreads.sh`
 
@@ -373,7 +373,7 @@ echo "Apoc shortstack complete"
 conda deactivate
 ```
 
-Submitted batch job 42223404. Still the same problem...only IDing three miRNAs. It seems to be IDing other known miRNAs but just not marking them as miRNAs? Looking at the `Results.txt` file: 
+Submitted batch job 42223404. Still the same problem...Results [here](https://github.com/JillAshey/Cnidarian_sperm_smRNA/tree/main/output/shortstack/apoc/raw_default). Only IDing three miRNAs. It seems to be IDing other known miRNAs but just not marking them as miRNAs? Looking at the `Results.txt` file: 
 
 ```
 Locus	Name	Chrom	Start	End	Length	Reads	DistinctSequences	FracTop	Strand	MajorRNA	MajorRNAReads	Short	Long	21	22	23	24	DicerCall	MIRNA	known_miRNAs
@@ -482,7 +482,7 @@ echo "Apoc shortstack complete"
 conda deactivate
 ```
 
-Submitted batch job 42225432. Still not identifying a lot of miRNAs. In the results.txt file, I am seeing though that we are getting hits to the known miRNAs (including the ones from the Apoc adults). 
+Submitted batch job 42225432. Still not identifying a lot of miRNAs. See results [here](https://github.com/JillAshey/Cnidarian_sperm_smRNA/tree/main/output/shortstack/apoc/mincov0.1). In the results.txt file, I am seeing though that we are getting hits to the known miRNAs (including the ones from the Apoc adults). 
 
 ```
 head(mirna_known)
@@ -556,7 +556,229 @@ echo "Apoc shortstack complete"
 conda deactivate
 ```
 
-Submitted batch job 42239097. Doesn't look much different bleh. 
+Submitted batch job 42239097. Doesn't look much different bleh; see results [here](https://github.com/JillAshey/Cnidarian_sperm_smRNA/tree/main/output/shortstack/apoc/mincov0.1_dmin18_dmax26). 
+
+Let's try to install mirdeep2. 
+
+```
+cd /work/pi_hputnam_uri_edu/conda/envs
+module load conda/latest # need to load before making any conda envs
+conda config --add channels bioconda
+conda config --add channels conda-forge
+conda config --set channel_priority strict
+conda create --prefix /work/pi_hputnam_uri_edu/conda/envs/mirdeep2 mirdeep2
+conda activate /work/pi_hputnam_uri_edu/conda/envs/mirdeep2 
+```
+
+Success! Okay lets try to run mapping/collapsing step first on one sample. The genome was already indexed through shortstack above so I do not need to do it again. If I did, I would use bowtie (NOT bowtie2) to index the genome. 
+
+```
+salloc --mem=30g
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc 
+module load conda/latest # need to load before making any conda envs
+conda activate /work/pi_hputnam_uri_edu/conda/envs/mirdeep2 
+mapper.pl apoc_2_S31_L001_R1_001_trim.fastq -e -h -m -s apoc_2_processed.fa -t apoc_2_mappings.arf -p /work/pi_hputnam_uri_edu/genomes/Apoc/apoculata.genome.fasta
+```
+
+- `-e` input is fastq format 
+- `-h` parse to fasta format 
+- `-m` collapse reads 
+- `-s` prints processed reads to this file 
+- `-t` prints read mappings to this file 
+- `-p` path to genome 
+
+Success. Look at the log output
+
+```
+Log file for this run is in mapper_logs and called mapper.log_1684750
+Mapping statistics
+#desc   total   mapped  unmapped        %mapped %unmapped
+total: 6555995  1977598 4578397 30.165  69.835
+seq: 6555995    1977598 4578397 30.165  69.835
+# reads processed: 1143802
+# reads with at least one alignment: 150321 (13.14%)
+# reads that failed to align: 993481 (86.86%)
+# reads with alignments suppressed due to -m: 14433 (1.26%)
+Reported 326273 alignments
+```
+
+Identify miRNAs with the mirdeep2 script 
+
+```
+miRDeep2.pl apoc_2_processed.fa /work/pi_hputnam_uri_edu/genomes/Apoc/apoculata.genome.fasta apoc_2_mappings.arf /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/data/miRNA_reference.fasta none none -t N.vectensis -P
+```
+
+Immediately got this error: 
+
+```
+Error: problem with /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/data/miRNA_reference.fasta
+Error in line 79: The identifier
+cel-let-7-5p MIMAT0000001 Caenorhabditis elegans let-7-5p
+contains white spaces
+Please check your file for the following issues:
+I.  Sequences are allowed only to comprise characters [ACGTNacgtn].
+II. Identifiers are not allowed to have withespaces.
+You could run remove_white_space_in_id.pl inputfile > newfile
+This will remove everything from the id line after the first whitespace
+```
+
+Remove white spaces
+
+```
+remove_white_space_in_id.pl /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/data/miRNA_reference.fasta > /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/data/miRNA_reference_cleaned.fasta
+```
+
+Going to submit it as a job. In the scripts folder: `nano mirdeep2_id_apoc_2.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=2
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=200GB
+#SBATCH -t 100:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts
+
+module load uri/main
+module load conda/latest # need to load before making any conda envs
+
+conda activate /work/pi_hputnam_uri_edu/conda/envs/mirdeep2 
+
+echo "Running mirdeep2 miRNA ID on apoc2"
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc 
+
+miRDeep2.pl apoc_2_processed.fa /work/pi_hputnam_uri_edu/genomes/Apoc/apoculata.genome.fasta apoc_2_mappings.arf /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/data/miRNA_reference_cleaned.fasta none none -t N.vectensis -P
+
+echo "Mirdeep2 complete for apoc2"
+conda deactivate
+```
+
+Submitted batch job 42994685. Ran! Hmm very interesting...Identifying more possible miRNAs than shortstack. [Here](https://github.com/JillAshey/Cnidarian_sperm_smRNA/tree/main/output/mirdeep2/apoc/apoc_2) are the results for Apoc 2. According to the results, mirdeep2 identified 36 novel miRNAs with a mirdeep2 score > 0 and 101 known miRNAs (I think). See `result_11_09_2025_t_15_17_45.csv` and `result_11_09_2025_t_15_17_45.html` for more details. For the known miRNAs, lots of my AST2021 miRNAs got hits but some were not classified as miRNAs by mirdeep2 because they had a negative mirdeep2 score. Its difficult to know what cutoff to use for mirdeep2 scores. In most coral papers, they use a cutoff of 10 but in other taxa, they use 0. 
+
+I like this figure from [McCreight et al. 2017](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0176596): 
+
+![](https://journals.plos.org/plosone/article/figure/image?size=large&id=10.1371/journal.pone.0176596.g004)
+
+Its a nice illustration of the mirdeep2 scores and number of miRNAs. They also include this in the methods: "miRDeep2 was used to predict novel and identify previously annotated miRNA [66]. Merged, trimmed reads were mapped to their respective genomes using the miRDeep2 mapper.pl module with the following parameters: -c -j -l 18 -m -p -s -t–v. MiRDeep2 was executed with default parameters. When making novel miRNA predictions, miRDeep2’s algorithm accounts for already known miRNAs of the species being analyzed and of any related species. We retrieved a list of known miRNAs from miRBase (release 21) for any of our primates that were in the database (H. sapiens, P. troglodytes, P. paniscus, G. gorilla, P. pygmaeus, M. mulatta), and used all known metazoan miRNAs as our “related species” reference. MiRDeep2 assigned a score from -10 to 10 to each miRNA, with a higher number corresponding to increased likelihood that the putative miRNA is functional. This score is partially determined by the availability of any known miRNA, which would inherently result in lower scores for our primates with no information in miRBase. Because of this, we chose a relaxed score cut-off of 0 and minimum read depth of 3 to include a miRNA in our analyses, with the expectation that false positives would be removed during paralog clustering and alignment."
+
+Hmm...what to do...let's run mapper and mirdeep2 on the other apoc samples. I also moved all the apoc 2 stuff into its own folder: `/scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc/apoc_2`. 
+
+```
+salloc --mem=30g
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc 
+module load conda/latest # need to load before making any conda envs
+conda activate /work/pi_hputnam_uri_edu/conda/envs/mirdeep2 
+
+# Apoc 3
+mapper.pl apoc_3_S32_L001_R1_001_trim.fastq -e -h -m -s apoc_3_processed.fa -t apoc_3_mappings.arf -p /work/pi_hputnam_uri_edu/genomes/Apoc/apoculata.genome.fasta
+Log file for this run is in mapper_logs and called mapper.log_3219686
+Mapping statistics
+#desc   total   mapped  unmapped        %mapped %unmapped
+total: 5968483  1025679 4942804 17.185  82.815
+seq: 5968483    1025679 4942804 17.185  82.815
+Setting the index via positional argument will be deprecated in a future release. Please use -x option instead.
+# reads processed: 986952
+# reads with at least one alignment: 84692 (8.58%)
+# reads that failed to align: 902260 (91.42%)
+# reads with alignments suppressed due to -m: 5554 (0.56%)
+Reported 222079 alignments
+
+# Apoc 4
+mapper.pl apoc_4_S33_L001_R1_001_trim.fastq -e -h -m -s apoc_4_processed.fa -t apoc_4_mappings.arf -p /work/pi_hputnam_uri_edu/genomes/Apoc/apoculata.genome.fasta
+Log file for this run is in mapper_logs and called mapper.log_3219860
+Mapping statistics
+#desc   total   mapped  unmapped        %mapped %unmapped
+total: 5005980  701506  4304474 14.013  85.987
+seq: 5005980    701506  4304474 14.013  85.987
+Setting the index via positional argument will be deprecated in a future release. Please use -x option instead.
+# reads processed: 978632
+# reads with at least one alignment: 73845 (7.55%)
+# reads that failed to align: 904787 (92.45%)
+# reads with alignments suppressed due to -m: 5118 (0.52%)
+Reported 193356 alignments
+```
+
+Do apoc 3 first. In the scripts folder: `nano mirdeep2_id_apoc_3.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=2
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=200GB
+#SBATCH -t 100:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts
+
+module load uri/main
+module load conda/latest # need to load before making any conda envs
+
+conda activate /work/pi_hputnam_uri_edu/conda/envs/mirdeep2 
+
+echo "Running mirdeep2 miRNA ID on apoc3"
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc 
+
+miRDeep2.pl apoc_3_processed.fa /work/pi_hputnam_uri_edu/genomes/Apoc/apoculata.genome.fasta apoc_3_mappings.arf /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/data/miRNA_reference_cleaned.fasta none none -t N.vectensis -P
+
+echo "Mirdeep2 complete for apoc3"
+conda deactivate
+```
+
+Submitted batch job 43001459. While this script runs, rerun shortstack on Nvec samples. Downloaded the Nvec genome from [here](https://simrbase.stowers.org/starletseaanemone) and saved it here: `/scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/genome`.  
+
+In the scripts folder: `nano shortstack_nvec.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=2
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=200GB
+#SBATCH -t 100:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts
+
+module load uri/main
+module load conda/latest # need to load before making any conda envs
+
+conda activate /work/pi_hputnam_uri_edu/conda/envs/ShortStack4 
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec 
+
+echo "Running shortstack for Nvec samples"
+
+#gunzip *fastq.gz
+
+ShortStack \
+--genomefile /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/genome/Nvec200.fasta \
+--readfile nvec_1_S25_L001_R1_001_trim.fastq \
+nvec_2_S26_L001_R1_001_trim.fastq \
+nvec_3_S34_L001_R1_001_trim.fastq \
+nvec_4_S35_L001_R1_001_trim.fastq \
+--known_miRNAs /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/data/miRNA_reference.fasta \
+--outdir /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/output/nvec_shortstack \
+--dn_mirna
+
+echo "Nvec shortstack complete"
+
+conda deactivate
+```
+
+Submitted batch job 43003911. In the meantime, apoc 3 finished running. Results are [here](https://github.com/JillAshey/Cnidarian_sperm_smRNA/tree/main/output/mirdeep2/apoc/apoc_3). Still a very limited number of miRNAs identified...annoying that mirdeep2 does not maintain the names of the miRNAs between samples. Nvec shortstack finished running as well. Same issue with the Apoc data...only like 5 miRNAs identified. See results [here](https://github.com/JillAshey/Cnidarian_sperm_smRNA/tree/main/output/shortstack/nvec/trimmed_default). 
+
+Is this an extraction or library prep issue? I need to contact Nick for extraction and library prep details. 
 
 
 

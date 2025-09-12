@@ -92,10 +92,27 @@ Nothing
 - Gathering TCB pi curve and TPC metadata  
 - Metadata organization for NSF career
 
+### 20250909 
+
+- Met w/ Sarah 
+- Coding for TCB pi curves 
+- TCB and field comparison 
+
+### 20250910 
+
+- Methods + results writing + coding for PI TPC paper 
+
+### 20250911
+
+- Writing meeting 
+- Brandon meeting 
+- smRNA coding 
+
+
 
 to do 
 
 - pay loans 
 - coordinate with Eric from UCR to send porites from HI 
-- run pi sept 2023 script on unity 
-- Put miRNA bams on box and email nick
+- Email Nick 
+- Post to Shortstack github 
