@@ -116,10 +116,26 @@ Nothing
 - Downloading rest of Kbay temp data + plotting 
 - Pacbio smrt grant writing 
 
+### 20250913
+
+- Looked at timeseries metabolite data  
+
+### 20250914
+
+- Lizard island postdoc apps 
+
+### 20250915
+
+- Gathering supplies for packing 
+- Testing hobo pendants 
+- Temp coding 
+- TPC coding 
+
+
+
 
 to do 
 
-- pay loans 
 - coordinate with Eric from UCR to send porites from HI 
 - Email Nick 
 - Post to Shortstack github 
