@@ -172,6 +172,8 @@ MultiQC results are [here](https://github.com/JillAshey/Cnidarian_sperm_smRNA/bl
 
 Data looks good. Ahya 2 dropped quite a bit in number of reads but that sample also had the most adapter content. 
 
+### miRNAs
+
 Install shortstack on Unity. See [shortstack github](https://github.com/MikeAxtell/ShortStack?tab=readme-ov-file#installation) for installation instructions. 
 
 ```
@@ -781,18 +783,271 @@ Submitted batch job 43003911. In the meantime, apoc 3 finished running. Results 
 Is this an extraction or library prep issue? I need to contact Nick for extraction and library prep details. 
 
 
+### piRNAs
+
+Moving to identifying piRNAs from the data, given that there seems to be a high prevalence of piRNAs in the data. Following methods outlined in Ashey et al. 2025. Using code from [deep dive repo](https://github.com/urol-e5/deep-dive/tree/main). 
+
+First, remove redundant reads from trimmed fastqs, keep reads between 25 and 35 nt, remove low complexity reads and change the format for SeqMap alignment. 
+
+In the scripts folder: `nano piRNA_prep.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=2
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=200GB
+#SBATCH -t 100:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts
+
+module load uri/main
+module load Perl/5.40.0-GCCcore-14.2.0
+
+echo "Apoc piRNA read prep"
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc/
+
+# Apoc 
+for f in /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc/*.fastq
+do
+perl /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts/ngs_toolbox/TBr2_collapse.pl -i ${f} -o ${f}.collapsed
+perl /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts/ngs_toolbox/TBr2_length-filter.pl -i ${f}.collapsed -o ${f}.collapsed.filt -min 25 -max 35
+perl /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts/ngs_toolbox/TBr2_duster.pl -i ${f}.collapsed.filt
+done
+
+echo "Nvec piRNA read prep"
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/
+
+# Nvec 
+for f in /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/*.fastq
+do
+perl /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts/ngs_toolbox/TBr2_collapse.pl -i ${f} -o ${f}.collapsed
+perl /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts/ngs_toolbox/TBr2_length-filter.pl -i ${f}.collapsed -o ${f}.collapsed.filt -min 25 -max 35
+perl /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts/ngs_toolbox/TBr2_duster.pl -i ${f}.collapsed.filt
+done
+
+echo "Ahya piRNA read prep"
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/
+
+# Nvec 
+for f in /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/*.fastq
+do
+perl /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts/ngs_toolbox/TBr2_collapse.pl -i ${f} -o ${f}.collapsed
+perl /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts/ngs_toolbox/TBr2_length-filter.pl -i ${f}.collapsed -o ${f}.collapsed.filt -min 25 -max 35
+perl /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts/ngs_toolbox/TBr2_duster.pl -i ${f}.collapsed.filt
+done
+```
+
+Submitted batch job 43327763
+
+While this is running, install [tRNAscan](https://github.com/UCSC-LoweLab/tRNAscan-SE) and [barnap](https://github.com/tseemann/barrnap) via conda. 
+
+```
+cd /work/pi_hputnam_uri_edu/conda/envs
+module load conda/latest # need to load before making any conda envs
+conda config --add channels bioconda
+conda config --add channels conda-forge
+conda config --set channel_priority strict
+
+# trnascan-se
+conda create --prefix /work/pi_hputnam_uri_edu/conda/envs/trnascan trnascan-se
+conda activate /work/pi_hputnam_uri_edu/conda/envs/trnascan
+tRNAscan-SE -h
+conda deactivate 
+
+# barrnap
+conda create --prefix /work/pi_hputnam_uri_edu/conda/envs/barrnap barrnap
+conda activate /work/pi_hputnam_uri_edu/conda/envs/barrnap
+barrnap -h
+conda deactivate 
+```
+
+Run tRNAscan and barrnap on all genomes. In the scripts folder: `nano tRNAscan_barrnap.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=2
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=200GB
+#SBATCH -t 100:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts
+
+module load conda/latest # need to load before making any conda envs
+conda activate /work/pi_hputnam_uri_edu/conda/envs/trnascan
+
+echo "Starting apoc tRNA ID"
+echo "Apoc tRNAscan"
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc 
+
+tRNAscan-SE \
+-E \
+-o Apoc-tRNA.out \
+-f Apoc-tRNA_struct.out \
+-m Apoc-tRNA_stats.out \
+-b Apoc-tRNA.bed \
+-j Apoc-tRNA.gff3 \
+-a Apoc-tRNA.fasta \
+-d \
+/work/pi_hputnam_uri_edu/genomes/Apoc/apoculata.genome.fasta 
+
+echo "Apoc tRNA ID complete, Starting nvec tRNA ID"
+echo "Nvec tRNAscan"
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec
+
+tRNAscan-SE \
+-E \
+-o Nvec-tRNA.out \
+-f Nvec-tRNA_struct.out \
+-m Nvec-tRNA_stats.out \
+-b Nvec-tRNA.bed \
+-j Nvec-tRNA.gff3 \
+-a Nvec-tRNA.fasta \
+-d \
+/work/pi_hputnam_uri_edu/genomes/Nvec/Nvec200.fasta 
+
+echo "Nvec tRNA ID complete, Starting ahya tRNA ID"
+echo "Ahya tRNAscan"
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya
+
+tRNAscan-SE \
+-E \
+-o Ahya-tRNA.out \
+-f Ahya-tRNA_struct.out \
+-m Ahya-tRNA_stats.out \
+-b Ahya-tRNA.bed \
+-j Ahya-tRNA.gff3 \
+-a Ahya-tRNA.fasta \
+-d \
+/work/pi_hputnam_uri_edu/refs/Ahyacinthus_genome/Ahyacinthus_genome_V1/Ahyacinthus.chrsV1.fasta
+
+echo "Ahya tRNA ID complete, all spp done"
+
+conda deactivate
+conda activate /work/pi_hputnam_uri_edu/conda/envs/barrnap
+
+echo "Starting apoc rRNA ID"
+echo "Apoc barrnap"
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc 
+
+barrnap \
+--kingdom euk \
+--outseq Apoc-rRNA.fasta \
+/work/pi_hputnam_uri_edu/genomes/Apoc/apoculata.genome.fasta 
+
+echo "Apoc rRNA ID complete, Starting nvec rRNA ID"
+echo "Nvec barrnap"
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec
+
+barrnap \
+--kingdom euk \
+--outseq Nvec-rRNA.fasta \
+/work/pi_hputnam_uri_edu/genomes/Nvec/Nvec200.fasta 
+
+echo "Nvec rRNA ID complete, Starting ahya rRNA ID"
+echo "Ahya barrnap"
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya
+
+barrnap \
+--kingdom euk \
+--outseq Ahya-rRNA.fasta \
+/work/pi_hputnam_uri_edu/refs/Ahyacinthus_genome/Ahyacinthus_genome_V1/Ahyacinthus.chrsV1.fasta
+
+echo "Ahya rRNA ID complete, all spp done"
+
+conda deactivate
+```
+
+Submitted batch job 43338150. Check number of tRNAs and rRNAs identified, and cat together. 
+
+```
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc
+grep -c ">" Apoc-rRNA.fasta 
+228
+grep -c ">" Apoc-tRNA.fasta 
+11196
+cat Apoc-rRNA.fasta Apoc-tRNA.fasta > Apoc_tRNA_rRNA.fasta 
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec
+grep -c ">" Nvec-rRNA.fasta 
+1097
+grep -c ">" Nvec-tRNA.fasta 
+9910
+cat Nvec-rRNA.fasta Nvec-tRNA.fasta > Nvec_tRNA_rRNA.fasta  
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya
+grep -c ">" Ahya-rRNA.fasta 
+1738
+grep -c ">" Ahya-tRNA.fasta 
+8629
+cat Ahya-rRNA.fasta Ahya-tRNA.fasta > Ahya_tRNA_rRNA.fasta
+```
+
+Install [sortmerna](https://github.com/sortmerna/sortmerna) to clear tRNA and rRNA reads 
+
+```
+cd /work/pi_hputnam_uri_edu/conda/envs
+module load conda/latest # need to load before making any conda envs
+conda config --add channels bioconda
+conda config --add channels conda-forge
+conda config --set channel_priority strict
+conda create --prefix /work/pi_hputnam_uri_edu/conda/envs/sortmerna sortmerna
+conda activate /work/pi_hputnam_uri_edu/conda/envs/sortmerna
+sortmerna -h
+conda deactivate 
+```
+
+Run sortmerna. In the scripts folder: `nano sortmerna.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=2
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=200GB
+#SBATCH -t 100:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts
+
+module load uri/main
+module load Perl/5.40.0-GCCcore-14.2.0
+
+echo "Apoc sortmerna"
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc/
 
 
 
-
-
-
-
-
-
-
-
-
+for f in *no-dust
+do
+mkdir /scratch/jeirinlo/javirodr/sncRNA_E5_corals/20240617_ProTRAC_individual_samples/PEVE/sortmerna/${f/-S1-TP2-fastp-adapters-polyG-31bp-merged.fq.collapsed.filt.no-dust}
+sortmerna \
+--ref /scratch/jeirinlo/javirodr/sncRNA_E5_corals/genomes/PEVE/PEVE_otherSmallRNAs.filt.fasta \
+--reads /scratch/jeirinlo/javirodr/sncRNA_E5_corals/20240617_ProTRAC_individual_samples/PEVE/${f} \
+--workdir /scratch/jeirinlo/javirodr/sncRNA_E5_corals/20240617_ProTRAC_individual_samples/PEVE/sortmerna/${f/-S1-TP2-fastp-adapters-polyG-31bp-merged.fq.collapsed.filt.no-dust} \
+--fastx \
+--other
+done
+```
 
 
  
