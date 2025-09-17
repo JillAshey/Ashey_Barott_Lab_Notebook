@@ -132,11 +132,24 @@ Nothing
 - TPC coding 
 - piRNA coding
 
+### 20250916
+
+- piRNA coding 
+- Repeat masker for Apoc, Nvec, Ahya genomes 
+- Cnidarian smRNA methods writing 
+- Booked Sarah flights 
+
+### 20250917
+
+- Changed my return flight 
+- Tried to book annual exam--need to call before 8am 
+- Messaged Hollie re term bill for summer 2025 
+- AST 2021 making last couple of plots + writing + coding 
+
 
 
 
 to do 
 
 - coordinate with Eric from UCR to send porites from HI 
-- Email Nick 
 - Post to Shortstack github 

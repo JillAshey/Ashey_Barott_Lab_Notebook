@@ -1028,26 +1028,197 @@ Run sortmerna. In the scripts folder: `nano sortmerna.sh`
 #SBATCH -e slurm-%j.error
 #SBATCH -D /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts
 
-module load uri/main
-module load Perl/5.40.0-GCCcore-14.2.0
+module load conda/latest # need to load before making any conda envs
+conda activate /work/pi_hputnam_uri_edu/conda/envs/sortmerna
 
-echo "Apoc sortmerna"
+echo "Starting apoc sortmerna"
 
 cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc/
 
-
-
 for f in *no-dust
 do
-mkdir /scratch/jeirinlo/javirodr/sncRNA_E5_corals/20240617_ProTRAC_individual_samples/PEVE/sortmerna/${f/-S1-TP2-fastp-adapters-polyG-31bp-merged.fq.collapsed.filt.no-dust}
+mkdir /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc/sortmerna/${f/-collapsed.filt.no-dust}
 sortmerna \
---ref /scratch/jeirinlo/javirodr/sncRNA_E5_corals/genomes/PEVE/PEVE_otherSmallRNAs.filt.fasta \
---reads /scratch/jeirinlo/javirodr/sncRNA_E5_corals/20240617_ProTRAC_individual_samples/PEVE/${f} \
---workdir /scratch/jeirinlo/javirodr/sncRNA_E5_corals/20240617_ProTRAC_individual_samples/PEVE/sortmerna/${f/-S1-TP2-fastp-adapters-polyG-31bp-merged.fq.collapsed.filt.no-dust} \
+--ref Apoc_tRNA_rRNA.fasta \
+--reads ${f} \
+--workdir /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc/sortmerna/${f/-collapsed.filt.no-dust} \
 --fastx \
 --other
 done
+
+echo "Apoc sortmerna complete, starting nvec sortmerna"
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/
+
+for f in *no-dust
+do
+mkdir /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/sortmerna/${f/-collapsed.filt.no-dust}
+sortmerna \
+--ref Nvec_tRNA_rRNA.fasta \
+--reads ${f} \
+--workdir /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/sortmerna/${f/-collapsed.filt.no-dust} \
+--fastx \
+--other
+done
+
+echo "Nvec sortmerna complete, starting ahya sortmerna"
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/
+
+for f in *no-dust
+do
+mkdir /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/sortmerna/${f/-collapsed.filt.no-dust}
+sortmerna \
+--ref Ahya_tRNA_rRNA.fasta \
+--reads ${f} \
+--workdir /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/sortmerna/${f/-collapsed.filt.no-dust} \
+--fastx \
+--other
+done
+
+echo "Ahya sortmerna complete"
+conda deactivate 
 ```
+
+Submitted batch job 43348919. Success. The sequences to move forward with are stored in the file `other.fq` under each sample folder created. Okay for some reason the apoc3 fastq file was in a different folder and did not get run with all the others. Write a script to do all the previous things for apoc3. `nano apoc3_piRNA_prep.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=2
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=200GB
+#SBATCH -t 100:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts
+
+module load uri/main
+module load Perl/5.40.0-GCCcore-14.2.0
+
+echo "Apoc 3 piRNA read prep"
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc/
+
+perl /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts/ngs_toolbox/TBr2_collapse.pl -i apoc_3_S32_L001_R1_001_trim.fastq -o apoc_3_S32_L001_R1_001_trim.fastq.collapsed
+
+perl /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts/ngs_toolbox/TBr2_length-filter.pl -i apoc_3_S32_L001_R1_001_trim.fastq.collapsed -o apoc_3_S32_L001_R1_001_trim.fastq.collapsed.filt -min 25 -max 35
+
+perl /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts/ngs_toolbox/TBr2_duster.pl -i apoc_3_S32_L001_R1_001_trim.fastq.collapsed.filt
+
+module load conda/latest # need to load before making any conda envs
+conda activate /work/pi_hputnam_uri_edu/conda/envs/sortmerna
+
+echo "Starting apoc 3 sortmerna"
+
+for f in apoc_3*no-dust
+do
+mkdir /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc/sortmerna/${f/-collapsed.filt.no-dust}
+sortmerna \
+--ref Apoc_tRNA_rRNA.fasta \
+--reads ${f} \
+--workdir /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc/sortmerna/${f/-collapsed.filt.no-dust} \
+--fastx \
+--other
+done
+
+echo "Apoc 3 sortmerna complete"
+```
+
+Submitted batch job 43350906. Success. Time to run sRNAmapper. In the scripts folder: `nano sRNAmapper.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=2
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=200GB
+#SBATCH -t 100:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts
+
+module load uri/main
+module load Perl/5.40.0-GCCcore-14.2.0
+
+echo "Starting apoc putative piRNA mapping"
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc/sortmerna
+
+for f in apoc_*_L001_R1_001_trim.fastq.collapsed.filt.no-dust
+do
+perl /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts/ngs_toolbox/sRNAmapper.pl \
+-input ${f}/out/other.fq \
+-genome /work/pi_hputnam_uri_edu/genomes/Apoc/apoculata.genome.fasta \
+-alignments best 
+done
+
+echo "Apoc putative piRNA mapping complete, starting nvec putative piRNA mapping "
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/sortmerna
+
+for f in nvec_*_L001_R1_001_trim.fastq.collapsed.filt.no-dust
+do
+perl /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts/ngs_toolbox/sRNAmapper.pl \
+-input ${f}/out/other.fq \
+-genome /work/pi_hputnam_uri_edu/genomes/Nvec/Nvec200.fasta \
+-alignments best 
+done
+
+echo "Nvec putative piRNA mapping complete, starting ahya putative piRNA mapping "
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/sortmerna
+
+for f in ahya_*_L001_R1_001_trim.fastq.collapsed.filt.no-dust
+do
+perl /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts/ngs_toolbox/sRNAmapper.pl \
+-input ${f}/out/other.fq \
+-genome /work/pi_hputnam_uri_edu/refs/Ahyacinthus_genome/Ahyacinthus_genome_V1/Ahyacinthus.chrsV1.fasta \
+-alignments best 
+done
+
+echo "Ahya putative piRNA mapping complete"
+```
+
+Submitted batch job 43350967. While this runs, run repeatmasker on the genomes. In the scripts folder: `nano repeatmasker.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=2
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=200GB
+#SBATCH -t 100:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts
+
+module load uri/main
+module load RepeatMasker/4.1.5-foss-2022a
+
+echo "Apoc repeatmasker"
+
+RepeatMasker -norna -dir /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc/ /work/pi_hputnam_uri_edu/genomes/Apoc/apoculata.genome.fasta
+
+echo "Nvec repeatmasker"
+
+RepeatMasker -norna -dir /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/ /work/pi_hputnam_uri_edu/genomes/Nvec/Nvec200.fasta
+
+echo "Ahya repeatmasker"
+
+RepeatMasker -norna -dir /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/ /work/pi_hputnam_uri_edu/refs/Ahyacinthus_genome/Ahyacinthus_genome_V1/Ahyacinthus.chrsV1.fasta
+```
+
+Submitted batch job 43362252
+
+
+
 
 
  
