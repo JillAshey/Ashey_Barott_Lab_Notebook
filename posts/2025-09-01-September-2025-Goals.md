@@ -146,10 +146,41 @@ Nothing
 - Messaged Hollie re term bill for summer 2025 
 - AST 2021 making last couple of plots + writing + coding 
 
+### 20250918
+
+- Katie meeting
+- AST 2021 making last couple of plots + writing + coding 
+- Attempting to make chambers 
+- Seminar + lunch 
+
+### 20250919 
+
+- Making chambers 
+- Lab meeting 
+- Filling dewar
+- Caroline defense 
+
+### 20250920
+
+- Picked up dremel and fitings at home depot  
+
+### 20250921
+
+- Making chambers 
+- Writing AST 2021 discussion 
+- Submitted waste request 
+- Redid AST supp tables (except phys S1)
+
 
 
 
 to do 
 
 - coordinate with Eric from UCR to send porites from HI 
-- Post to Shortstack github 
+- Send out dewar on Tuesday 
+- Print permit + grant
+- Pack lab stuff 
+- Make packing list for Sarah 
+- Water lab plants before I leave 
+- Deal with waste pickup 
+- Call airgas re picking up cylinders 
