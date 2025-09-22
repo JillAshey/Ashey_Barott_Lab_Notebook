@@ -171,6 +171,13 @@ Nothing
 - Submitted waste request 
 - Redid AST supp tables (except phys S1)
 
+### 20250922
+
+- Let freezer person in 
+- Finished AST 2021 phys table and fig 
+- Finished writing for AST 2021!!
+- Packed equipment for HI 
+- Some writing for lizard island app 
 
 
 
@@ -179,8 +186,7 @@ to do
 - coordinate with Eric from UCR to send porites from HI 
 - Send out dewar on Tuesday 
 - Print permit + grant
-- Pack lab stuff 
 - Make packing list for Sarah 
 - Water lab plants before I leave 
-- Deal with waste pickup 
 - Call airgas re picking up cylinders 
+- ask Kristen for TPC alk data and scripts 
