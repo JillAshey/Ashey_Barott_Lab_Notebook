@@ -179,14 +179,31 @@ Nothing
 - Packed equipment for HI 
 - Some writing for lizard island app 
 
+### 20250923
+
+- Shipped dewar 
+- TSA precheck enrollment 
+- Read Pacuta proof 
+- Updated resolution for Pacuta figs 
+- Brandon meeting 
+
+### 20250924
+
+- Writing time 
+- Edited Pacuta proof 
+- AST 2021 edits 
+- Amelia meeting 
 
 
 to do 
 
 - coordinate with Eric from UCR to send porites from HI 
-- Send out dewar on Tuesday 
-- Print permit + grant
-- Make packing list for Sarah 
 - Water lab plants before I leave 
 - Call airgas re picking up cylinders 
-- ask Kristen for TPC alk data and scripts 
+- extend scratch workspace 
+- call kelsey re himb housing 
+- Send brandon papers re coral repro
+- Katie meeting agenda  
+- Write for lizard island app
+- Bring lab laptop home w me 
+- pack!!!!
