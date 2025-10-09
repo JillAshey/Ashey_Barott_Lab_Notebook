@@ -1215,7 +1215,142 @@ echo "Ahya repeatmasker"
 RepeatMasker -norna -dir /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/ /work/pi_hputnam_uri_edu/refs/Ahyacinthus_genome/Ahyacinthus_genome_V1/Ahyacinthus.chrsV1.fasta
 ```
 
-Submitted batch job 43362252
+Submitted batch job 43362252. 
+
+Extended scratch workspace on 9/25/25 for 30 days. My `43350967` job timed out, it takes a lot longer to align the reads with sRNAmapper than I anticipated. It ended in the middle of nvec 3, so I need to run Nvec 3 and 4 and Ahya 1, 2, 3, and 4. I am going to run these all as separate jobs. 
+
+`nano sRNAmapper_nvec_3.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=5 --ntasks-per-node=10
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=200GB
+#SBATCH -t 300:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts
+
+module load uri/main
+module load Perl/5.40.0-GCCcore-14.2.0
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/sortmerna/nvec_3_S34_L001_R1_001_trim.fastq.collapsed.filt.no-dust/out
+
+echo "Starting nvec 3 putative piRNA mapping "
+
+perl /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts/ngs_toolbox/sRNAmapper.pl \
+-input other.fq \
+-genome /work/pi_hputnam_uri_edu/genomes/Nvec/Nvec200.fasta \
+-alignments best 
+done
+
+echo "Nvec 3 putative piRNA mapping complete"
+```
+
+Submitted batch job 44107785
+
+`nano sRNAmapper_nvec_4.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=5 --ntasks-per-node=10
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=200GB
+#SBATCH -t 300:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts
+
+module load uri/main
+module load Perl/5.40.0-GCCcore-14.2.0
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/sortmerna/nvec_4_S35_L001_R1_001_trim.fastq.collapsed.filt.no-dust/out
+
+echo "Starting nvec 4 putative piRNA mapping "
+
+perl /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts/ngs_toolbox/sRNAmapper.pl \
+-input other.fq \
+-genome /work/pi_hputnam_uri_edu/genomes/Nvec/Nvec200.fasta \
+-alignments best 
+done
+
+echo "Nvec 4 putative piRNA mapping complete"
+```
+
+Submitted batch job 44107893
+
+`nano sRNAmapper_ahya_1.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=5 --ntasks-per-node=10
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=200GB
+#SBATCH -t 300:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts
+
+module load uri/main
+module load Perl/5.40.0-GCCcore-14.2.0
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/sortmerna/ahya_1_S27_L001_R1_001_trim.fastq.collapsed.filt.no-dust
+
+echo "Starting ahya 1 putative piRNA mapping "
+
+perl /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts/ngs_toolbox/sRNAmapper.pl \
+-input other.fq \
+-genome /work/pi_hputnam_uri_edu/genomes/Nvec/Nvec200.fasta \
+-alignments best 
+done
+
+echo "Ahya 1 putative piRNA mapping complete"
+```
+
+Submitted batch job 44108094
+
+`nano sRNAmapper_ahya_2.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=5 --ntasks-per-node=10
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=200GB
+#SBATCH -t 300:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts
+
+module load uri/main
+module load Perl/5.40.0-GCCcore-14.2.0
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/sortmerna/ahya_2_S28_L001_R1_001_trim.fastq.collapsed.filt.no-dust
+
+echo "Starting ahya 2 putative piRNA mapping "
+
+perl /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts/ngs_toolbox/sRNAmapper.pl \
+-input other.fq \
+-genome /work/pi_hputnam_uri_edu/genomes/Nvec/Nvec200.fasta \
+-alignments best 
+done
+
+echo "Ahya 2 putative piRNA mapping complete"
+```
+
+Submitted batch job 44110353
+
 
 
 

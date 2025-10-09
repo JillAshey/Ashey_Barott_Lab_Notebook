@@ -193,17 +193,72 @@ Nothing
 - Edited Pacuta proof 
 - AST 2021 edits 
 - Amelia meeting 
+- Read intro and methods of journal club paper 
+- Called and emailed Kelsey 
 
+### 20250925
 
-to do 
+- Sent HIMB waivers 
+- Called and emailed Airgas 
+- Submitted Pacuta proofs 
+- Emailed Ford re arrival and housing 
+- Emailed Eric re Porites nubs
+- Thinned data and ran regressions for Sept23 TPC 
+- Moved most of samples back to freezer 
 
-- coordinate with Eric from UCR to send porites from HI 
-- Water lab plants before I leave 
-- Call airgas re picking up cylinders 
-- extend scratch workspace 
-- call kelsey re himb housing 
-- Send brandon papers re coral repro
-- Katie meeting agenda  
-- Write for lizard island app
-- Bring lab laptop home w me 
-- pack!!!!
+### 20250926
+
+- Moved rest of samples back to freezer 
+- Started sRNAmapper for rest of nvec samples 
+- Lab meeting 
+- Sarah meeting 
+- Made bday video 
+- Packed 
+
+### 20250927 
+
+- Packed 
+- in NJ for a little 
+
+### 20250928
+
+- Packed, ran errands 
+- Picked up laptop from lab 
+- Added hypotheses for e5 methylation and gene regulation 
+- Registered for GMGI science forum 
+- Booked amtrak ticket for 10/22
+
+### 20250929
+
+- Travel to Hawaii 
+
+### 20250930 
+
+- Prep day - labeled tubes and bags, set up resp equipment, prepped for field collections tomorrow 
+
+## How did I do with my goals this month? 
+
+### Writing and manuscripts 
+
+1. Results for PI TPC paper - yes, for all results that we have so far. 
+2. Outlining potential projects - not really
+3. Finish writing results / discussion for miRNA-mRNA interactions for AST 2021 - yes full draft complete! 
+4. Connect w/ Chloe re AST histology - no, will connect after I get back from the field
+
+### Sample processing
+
+1. Nothing that I can think of...
+
+### Data analysis
+
+1. PI curve analysis for existing timepoints (Sept 2023 field + TCB) - yes
+2. Calcification analysis for existing timepoints (April + Sept 2023 field + TCB) - yes
+3. Trim Mcap 2023 smRNA data and run shortstack - no
+4. Run shortstack for sperm smRNAs - yes, running into some issues with not identifying many miRNAs in sperm smRNA data. This could be biologically accurate or some artifact of the extraction/library prep methods. I want to extract/prep/sequence adult AST and Nemastostella with these methods to ground truth 
+
+### Field work / travel 
+
+1. Plan for fall 2025 HI trip -- currently in the field 
+	- Test Apex equipment - yes
+	- Make TPC chambers - yes
+	- Pack - yes 
