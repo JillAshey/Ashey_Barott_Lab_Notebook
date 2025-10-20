@@ -782,6 +782,207 @@ Submitted batch job 43003911. In the meantime, apoc 3 finished running. Results 
 
 Is this an extraction or library prep issue? I need to contact Nick for extraction and library prep details. 
 
+Okay talked with Nick! Very helpful. He said the following: 
+
+XXXXXXX
+
+My plan is to move forward with mirdeep2 for now. Let's finish the Apoc samples. I already ran the mapping part for Apoc 4. `nano mirdeep2_id_apoc_3.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=2
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB
+#SBATCH -t 30:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts
+
+module load uri/main
+module load conda/latest # need to load before making any conda envs
+
+conda activate /work/pi_hputnam_uri_edu/conda/envs/mirdeep2 
+
+echo "Running mirdeep2 miRNA ID on apoc4"
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc 
+
+miRDeep2.pl apoc_4_processed.fa /work/pi_hputnam_uri_edu/genomes/Apoc/apoculata.genome.fasta apoc_4_mappings.arf /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/data/miRNA_reference_cleaned.fasta none none -t N.vectensis -P
+
+echo "Mirdeep2 complete for apoc4"
+conda deactivate
+```
+
+Submitted batch job 46990553. While that is running, map the Nvec and Ahya samples with mirdeep2.
+
+```
+salloc --mem=30g
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec 
+module load conda/latest # need to load before making any conda envs
+conda activate /work/pi_hputnam_uri_edu/conda/envs/mirdeep2 
+```
+
+Map Nvec. As a note, the mapping stats is what shows up on the screen after the mapping runs. The reads processed and what not is from the bowtie.log file (mirdeep2 software uses bowtie as an aligner).
+
+```
+# Nvec 1
+mapper.pl nvec_1_S25_L001_R1_001_trim.fastq -e -h -m -s nvec_1_processed.fa -t nvec_1_mappings.arf -p /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/genome/Nvec200.fasta
+Log file for this run is in mapper_logs and called mapper.log_1217577
+Mapping statistics
+#desc   total   mapped  unmapped        %mapped %unmapped
+total: 6011442  356824  5654618 5.936   94.064
+seq: 6011442    356824  5654618 5.936   94.064
+Setting the index via positional argument will be deprecated in a future release. Please use -x option instead.
+# reads processed: 946124
+# reads with at least one alignment: 148870 (15.73%)
+# reads that failed to align: 797254 (84.27%)
+# reads with alignments suppressed due to -m: 71963 (7.61%)
+Reported 129175 alignments
+
+# Nvec 2
+mapper.pl nvec_2_S26_L001_R1_001_trim.fastq -e -h -m -s nvec_2_processed.fa -t nvec_2_mappings.arf -p /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/genome/Nvec200.fasta
+Log file for this run is in mapper_logs and called mapper.log_1217687
+Mapping statistics
+#desc   total   mapped  unmapped        %mapped %unmapped
+total: 8054309  257649  7796660 3.199   96.801
+seq: 8054309    257649  7796660 3.199   96.801
+Setting the index via positional argument will be deprecated in a future release. Please use -x option instead.
+# reads processed: 1353805
+# reads with at least one alignment: 138973 (10.27%)
+# reads that failed to align: 1214832 (89.73%)
+# reads with alignments suppressed due to -m: 73206 (5.41%)
+Reported 108506 alignments
+
+# Nvec 3
+mapper.pl nvec_3_S34_L001_R1_001_trim.fastq -e -h -m -s nvec_3_processed.fa -t nvec_3_mappings.arf -p /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/genome/Nvec200.fasta
+Log file for this run is in mapper_logs and called mapper.log_1634874
+Mapping statistics
+#desc   total   mapped  unmapped        %mapped %unmapped
+total: 7134137  227350  6906787 3.187   96.813
+seq: 7134137    227350  6906787 3.187   96.813
+Setting the index via positional argument will be deprecated in a future release. Please use -x option instead.
+# reads processed: 1014934
+# reads with at least one alignment: 156894 (15.46%)
+# reads that failed to align: 858040 (84.54%)
+# reads with alignments suppressed due to -m: 68474 (6.75%)
+Reported 142027 alignments
+
+# Nvec 4
+mapper.pl nvec_4_S35_L001_R1_001_trim.fastq -e -h -m -s nvec_4_processed.fa -t nvec_4_mappings.arf -p /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/genome/Nvec200.fasta
+Log file for this run is in mapper_logs and called mapper.log_1634913
+Mapping statistics
+#desc   total   mapped  unmapped        %mapped %unmapped
+total: 6236194  217165  6019029 3.482   96.518
+seq: 6236194    217165  6019029 3.482   96.518
+Setting the index via positional argument will be deprecated in a future release. Please use -x option instead.
+# reads processed: 1032159
+# reads with at least one alignment: 131481 (12.74%)
+# reads that failed to align: 900678 (87.26%)
+# reads with alignments suppressed due to -m: 61901 (6.00%)
+Reported 109402 alignments
+```
+
+Hooray now we can run mirdeep2 on the Nvec samples! `nano mirdeep2_nvec.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=2
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB
+#SBATCH -t 50:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts
+
+module load uri/main
+module load conda/latest # need to load before making any conda envs
+
+conda activate /work/pi_hputnam_uri_edu/conda/envs/mirdeep2 
+
+echo "Running mirdeep2 miRNA ID on nvec1"
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec 
+
+miRDeep2.pl nvec_1_processed.fa /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/genome/Nvec200.fasta nvec_1_mappings.arf /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/data/miRNA_reference_cleaned.fasta none none -t N.vectensis -P
+
+echo "Mirdeep2 complete for nvec1"
+echo "Running mirdeep2 miRNA ID on nvec2"
+
+miRDeep2.pl nvec_2_processed.fa /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/genome/Nvec200.fasta nvec_2_mappings.arf /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/data/miRNA_reference_cleaned.fasta none none -t N.vectensis -P
+
+echo "Mirdeep2 complete for nvec2"
+echo "Running mirdeep2 miRNA ID on nvec3"
+
+miRDeep2.pl nvec_3_processed.fa /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/genome/Nvec200.fasta nvec_3_mappings.arf /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/data/miRNA_reference_cleaned.fasta none none -t N.vectensis -P
+
+echo "Mirdeep2 complete for nvec3"
+echo "Running mirdeep2 miRNA ID on nvec4"
+
+miRDeep2.pl nvec_4_processed.fa /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/genome/Nvec200.fasta nvec_4_mappings.arf /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/data/miRNA_reference_cleaned.fasta none none -t N.vectensis -P
+
+echo "Mirdeep2 complete for nvec4"
+
+conda deactivate
+```
+
+Submitted batch job 47009181
+
+Before mapping Ahya, I need to generate the bowtie index for the genome (didn't run shortstack with this genome). Need to run as a job bleh. `nano ahya_bowtie_index.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=1
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB
+#SBATCH -t 10:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts
+
+module load uri/main
+module load Bowtie/1.3.1-GCC-11.3.0
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya
+bowtie-build Ahyacinthus.chrsV1.fasta Ahyacinthus.chrsV1
+```
+
+Submitted batch job 46996202. Success! Mapping Ahya with mirdeep2.
+
+```
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya
+
+# Ahya 1
+mapper.pl ahya_1_S27_L001_R1_001_trim.fastq -e -h -m -s ahya_1_processed.fa -t ahya_1_mappings.arf -p Ahyacinthus.chrsV1.fasta
+mapper.pl ahya_1_S27_L001_R1_001_trim.fastq -e -h -m -s ahya_1_processed.fa -t ahya_1_mappings.arf -p Ahyacinthus.chrsV1
+Log file for this run is in mapper_logs and called mapper.log_1635617
+Mapping statistics
+#desc   total   mapped  unmapped        %mapped %unmapped
+total: 3854254  0       3854254 0.000   100.000
+seq: 3854254    0       3854254 0.000   100.000
+```
+
+Weird...nothing mapped at all. Tried mapping ahya 2 as well and didn't work. The bowtie log file says this: 
+
+```
+Setting the index via positional argument will be deprecated in a future release. Please use -x option instead.
+Illegal instruction
+```
+
+Why do you hate me Ahya??? Should I try a different genome? Is there an indexing issue? IDK!!!!!
+
+
+
+
+
 
 ### piRNAs
 
@@ -1244,13 +1445,15 @@ echo "Starting nvec 3 putative piRNA mapping "
 perl /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts/ngs_toolbox/sRNAmapper.pl \
 -input other.fq \
 -genome /work/pi_hputnam_uri_edu/genomes/Nvec/Nvec200.fasta \
--alignments best 
-done
+-alignments best
 
 echo "Nvec 3 putative piRNA mapping complete"
 ```
 
-Submitted batch job 44107785
+Submitted batch job 44107785. This stopped running -- I needed to remove the 'done'. Submitted batch job 47008570. Waiting to see how this one does before starting the others. 
+
+
+
 
 `nano sRNAmapper_nvec_4.sh`
 
@@ -1349,10 +1552,20 @@ done
 echo "Ahya 2 putative piRNA mapping complete"
 ```
 
-Submitted batch job 44110353
+Submitted batch job 44110353. timed out again...need to look into why this keeps failing. is it an sbatch issue? 
+
+
+### tRNA derived RNAs 
+
+Nick and I have been talking about other smRNAs to identify. He studies tRNA derived RNAs (tDRs), which are small RNAs that originate from tRNAs. Based on evidence from [model systems](https://pmc.ncbi.nlm.nih.gov/articles/PMC10766869/), these RNAs can perform selective translation regulation (miRNA-like mechanism and interaction with RNA binding proteins) or global translation regulation (eIF4F sequestration and interaction with ribosomes). However, even in model systems, work is pretty limited and often is more experimental than bioinformatical. Nick has a [paper](https://www.biorxiv.org/content/10.1101/2025.04.14.648817v1#:~:text=Abstract,paternal%20non%2Dgenetic%20inheritance%20mechanistically.) on biorxiv that exakined tDRs as a non-genetic inheritance mechanism via sperm in Celegans, which is super cool. 
+
+The tools that I have found for tDR bioinformatic analysis are [tsRNAsearch](https://academic.oup.com/bioinformatics/article/37/23/4424/6320783#supplementary-data) (github [here](https://github.com/GiantSpaceRobot/tsRNAsearch); published 2021) and [tDRmapper](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-015-0800-0) (github [here](https://github.com/sararselitsky/tDRmapper); published 2015). In the tsRNAsearch paper, it compared the two tools and found "The comparison between tsRNAsearch and tDRmapper using the heavily trimmed data resulted in an average Pearson’s r = 0.70 and a standard deviation of ±0.15." Pretty comparable.  
 
 
 
+
+
+I also found [tRFTarget](http://trftarget.net/online_targets), which can be used to identify the targets of tDRs. 
 
 
 
