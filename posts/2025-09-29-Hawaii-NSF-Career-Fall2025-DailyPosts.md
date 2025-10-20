@@ -72,13 +72,73 @@ Around 8pm, we used the mini PAM from the ToBo lab to PAM our corals. Usually, w
 
 Marcelina uploaded the photos we took yesterday to Box. Today, we did all the PI curves for the phys samples (5 rounds). 
 
-Notes on PI curves: 
+PI curve round 1
+
+| Light level (%) | PAR  | Time started | Mins    |
+| --------------- | ---- | ------------ | ------- |
+| 10              | 220  | 8:35         | 15 mins |
+| 20              | 445  | 8:52         | 10 mins |
+| 40              | 707  | 9:03         | 10 mins |
+| 60              | 1013 | 9:15         | 10 mins |
+| 80              | 1284 | 9:26         | 10 mins |
+| 100             | 1570 | 9:37         | 15 mins |
+| 0               | 0    | 9:54         | 15 mins |
 
 - For Round 1, temperature probes 1 and 5 were in the incorrect locations for the first 15 mins. We switched them to the correct positions at the start of 20% light. These data (when we switched them) will need to be removed. 
+
+PI curve round 2
+
+| Light level (%) | PAR  | Time started | Mins    |
+| --------------- | ---- | ------------ | ------- |
+| 10              | 220  | 10:33        | 15 mins |
+| 20              | 445  | 10:50        | 10 mins |
+| 40              | 707  | 11:01        | 10 mins |
+| 60              | 1013 | 11:12        | 10 mins |
+| 80              | 1284 | 11:23        | 10 mins |
+| 100             | 1570 | 11:34        | 15 mins |
+| 0               | 0    | 11:50        | 15 mins |
+
+PI curve round 3
+
+| Light level (%) | PAR  | Time started | Mins    |
+| --------------- | ---- | ------------ | ------- |
+| 10              | 220  | 12:17        | 15 mins |
+| 20              | 445  | 12:35        | 10 mins |
+| 40              | 707  | 12:46        | 10 mins |
+| 60              | 1013 | 12:58        | 10 mins |
+| 80              | 1284 | 13:09        | 10 mins |
+| 100             | 1570 | 13:20        | 15 mins |
+| 0               | 0    | 13:36        | 15 mins |
+
 - Round 3 -- During 20 - 40% light, the incoming seawater was turned off for ~20 mins while the sand filters were replaced by CRL techs. The water levels dropped quite a bit, so we brought in water from the outdoor tanks to fill the tank while the water was off. Water also probably heated up a bit during this time but won't know until we read out the hobo logger data. 
+
+PI curve round 4
+
+| Light level (%) | PAR  | Time started | Mins    |
+| --------------- | ---- | ------------ | ------- |
+| 10              | 220  | 14:06        | 15 mins |
+| 20              | 445  | 14:23        | 10 mins |
+| 40              | 707  | 14:34        | 10 mins |
+| 60              | 1013 | 14:45        | 10 mins |
+| 80              | 1284 | 14:57        | 10 mins |
+| 100             | 1570 | 15:08        | 15 mins |
+| 0               | 0    | 15:25        | 15 mins |
+
 - Temp probe 4 was sticking out a little during 10% light, stuck back in all the way at start of 20% light
 
-After PI curves were finished, I read out the pendant logger (21257935) that I had deployed for measuring the water temperature during the PI curves. 
+PI curve round 5
+
+| Light level (%) | PAR  | Time started | Mins    |
+| --------------- | ---- | ------------ | ------- |
+| 10              | 220  | 15:56        | 15 mins |
+| 20              | 445  | 16:12        | 10 mins |
+| 40              | 707  | 16:23        | 10 mins |
+| 60              | 1013 | 16:34        | 10 mins |
+| 80              | 1284 | 16:46        | 10 mins |
+| 100             | 1570 | 16:57        | 15 mins |
+| 0               | 0    | 17:14        | 15 mins |
+
+After PI curves were finished, I read out the pendant logger (21257935) that I had deployed for measuring the water temperature during the PI curves. I also ead out U22 loggers (21152007 and 21152009; 21152009 currently lost on reef) from reef and pendant logger (21257935) from PI curves. Will need to relaunch U22s before putting them back on reef. Would be curious to compare our U22 data to CRL data from PR13.   
 
 I also reglued two TPC chambers that leaked during my fill test. We also played around with the best way to seal them from the top for TPC time. 
 
@@ -115,6 +175,162 @@ My birthday! Woo.
 Today is mostly another prep day. We checked in with CRL at their kickoff meeting where we coordinated space in the wet lab for this week and boat needs for next week. 
 
 The digitial pipette that Marcelina usually uses for titrations isn't working (won't charge), so we are going to use one of CRLs for the TPC titrations. 
+
+I filled 2mL tubes with 1mL of DNA/RNA shield for TPC coral clippings after the runs. We also remeasured the light levels with the lids on to get the proper light intensity. 
+
+We filled a bucket with water and started chilling it overnight to 18C with the chiller. We also added an airstone to aerate the water. 
+
+I also started a collections [log](https://docs.google.com/spreadsheets/d/1yhxCiS8EuygY_HrMUdU5mH5U_ejDvqG1fHJpZ1K69F8/edit?gid=0#gid=0) to record number of fragments collected for SAP reporting. 
+
+## 20251007
+
+Sarah and Marcelina packed up the porites corals to ship to Eric and dropped them at the top of the hill this morning. Package picked up around 12:30pm. 
+
+First TPC day! I am on TPCs, and Sarah and Marcelina are titrating in the point lab. 
+
+TPC round 1 
+
+| Target temp | Start temp | Mid temp | End temp | Average temp  | Lights over corals | Lights removed | Notes                                                                   |
+| ----------- | ---------- | -------- | -------- | ------------- | ------------------ | -------------- | ----------------------------------------------------------------------- |
+| 18          | 17.9       | 18.2     | 18.0     | 18.0333333333 | 8:06               | 9:07           |                                                                         |
+| 22          | 21.8       | 21.4     | 22.3     | 21.8333333333 | 9:41               | 10:42          | Temp probes 8 and 10 fell out at beginning of run, put back in at 10:12 |
+| 25          | 24.8       | 25.3     | 24.2     | 24.7666666667 | 11:11              | 12:12          |                                                                         |
+| 28          | 28         | 28.1     | 27.4     | 27.8333333333 | 12:41              | 13:43          |                                                                         |
+| 31          | 30.4       | 31.9     | 31.6     | 31.3          | 14:30              | 15:32          | Presens crashed during the start of 31C, had to restart after 15 mins   |
+| 34          | 34.0       | 34.5     | 34.7     | 34.4          | 15:57              | 17:00          |                                                                         |
+| 38          | 36.9       | 37.3     | 37.3     | 37.1666666667 | 17:26              | 18:27          |                                                                         |
+
+Apex disconnected from fusion at 13:39. Waiting a few mins to see if it will turn back on. Came back on after about 10 mins. Looking at Fusion, it seems like Apex went offline a few times over the past 24 hrs. Likely due to the instability of HIMB wifi. 
+
+I need to calibrate the apex probes in the morning before runs because they are off (by a degree C or more) from the traceable temp probe. Makes it difficult to adjust the heaters in real time. 
+
+It was hard to reach and maintain 38C - I had to add both 600W heaters and three 50W heaters to the water bath to get it to temp. 
+
+Started chilling water with chiller + airstone at 18C for tomorrow runs at 5:45pm. I also filled up two coolers to chill at room temp for tomorrow. 
+
+## 20251008
+
+Calibrated apex probes before runs, but still kinda off. 
+
+TPC round 2
+
+| Target temp | Start temp | Mid temp | End temp | Average temp  | Lights over corals | Lights removed |
+| ----------- | ---------- | -------- | -------- | ------------- | ------------------ | -------------- |
+| 18          | 18.5       | 18.4     | 18       | 18.3          | 8:10               | 9:11           |
+| 22          | 21.2       | 21.6     | 21       | 21.2666666667 | 9:35               | 10:35          |
+| 25          | 24.5       | 24.5     | 25.1     | 24.7          | 11:02              | 12:02          |
+| 28          | 28.3       | 28.4     | 28.5     | 28.4          | 12:27              | 13:28          |
+| 31          | 32.2       | 31.9     | 31.7     | 31.9333333333 | 13:58              | 15:00          |
+| 34          | 34.8       | 34.1     | 34.7     | 34.5333333333 | 15:24              | 16:24          |
+| 38          | 37.5       | 37.6     | 37.8     | 37.6333333333 | 16:48              | 17:49          |
+
+Porites reached UC riverside today, waiting to hear back on their condition. 
+
+Started chilling water with chiller + airstone at 18C for tomorrow runs at 6pm. I also filled up two coolers to chill at room temp for tomorrow. 
+
+## 20251009
+
+Calibrated apex probes before runs, but still kinda off. 
+
+| Target temp | Start temp | Mid temp | End temp | Average temp  | Lights over corals | Lights removed |
+| ----------- | ---------- | -------- | -------- | ------------- | ------------------ | -------------- |
+| 18          | 18.4       | 18.3     | 18.1     | 18.2666666667 | 8:04               | 9:04           |
+| 22          | 21.4       | 22.0     | 22.6     | 22            | 9:25               | 10:26          |
+| 25          | 24.5       | 25.3     | 25.8     | 25.2          | 10:50              | 11:52          |
+| 28          | 27.9       | 28.0     | 28.1     | 28            | 12:15              | 13:17          |
+| 31          | 30.5       | 31.0     | 32.3     | 31.2666666667 | 13:39              | 14:43          |
+| 34          | 33.9       | 34.5     | 34       | 34.1333333333 | 15:04              | 16:05          |
+| 38          | 37.5       | 37       | 38.7     | 37.7333333333 | 16:27              | 17:37          |
+
+Eric said Porites were received and are in tanks now! 
+
+I ran the 38C ~10 mins longer today - the temp dropped a little during the run and I wasn't seeing metabolic depression yet. 
+
+Started chilling water with chiller + airstone at 18C for tomorrow runs at 6:30pm. I also filled up two coolers to chill at room temp for tomorrow. 
+
+## 20251010
+
+| Target temp | Start temp | Mid temp | End temp | Average temp  | Lights over corals | Lights removed |
+| ----------- | ---------- | -------- | -------- | ------------- | ------------------ | -------------- |
+| 18          | 18.7       | 18.6     | 18.4     | 18.5666666667 | 8:10               | 9:11           |
+| 22          | 22.1       | 22.0     | 22.1     | 22.0666666667 | 9:34               | 10:35          |
+| 25          | 24.8       | 25.3     | 24.9     | 25            | 11:11              | 12:12          |
+| 28          | 27.8       | 28.1     | 28.2     | 28.0333333333 | 12:34              | 13:35          |
+| 31          | 30.9       | 31.6     | 31.3     | 31.2666666667 | 13:57              | 14:58          |
+| 34          | 34.7       | 34       | 34.6     | 34.4333333333 | 15:20              | 16:21          |
+| 38          | 37.3       | 37.7     | 37.5     | 37.5          | 16:44              | 17:45          |
+
+Issue with stir bars at beginning of 25C, had to restart run after 10 mins. 
+
+34C - channel 8 looks very wonky, big spike up about 10 mins in, no real increase after that. This frag also looks kinda bleachy. 
+
+Started chilling water with chiller and airstone at 18C for the LAST RUN tomorrow at 6:30pm. 
+
+Temps can be a little all over the place for 38C, as I am trying to maintain it at 38C but can be difficult because that is so warm and none of our heaters actually reach those temperatures. 
+
+Started chilling water with chiller and airstone at 18C for the LAST RUN tomorrow at 6:30pm. I also filled up two coolers to chill at room temp for tomorrow. 
+
+## 20251011
+
+| Target temp | Start temp | Mid temp | End temp | Average temp  | Lights over corals | Lights removed |
+| ----------- | ---------- | -------- | -------- | ------------- | ------------------ | -------------- |
+| 18          | 18.6       | 18.7     | 18.0     | 18.4333333333 | 8:06               | 9:07           |
+| 22          | 21.8       | 21.5     | 21.9     | 21.7333333333 | 9:26               | 10:28          |
+| 25          | 24.8       | 25.2     | 25.3     | 25.1          | 10:46              | 11:47          |
+| 28          | 27.9       | 28.1     | 28.3     | 28.1          | 12:07              | 13:08          |
+| 31          | 30.5       | 31.9     | 31.7     | 31.3666666667 | 13:27              | 14:28          |
+| 34          | 35.1       | 34.2     | 34.5     | 34.6          | 14:48              | 15:49          |
+| 38          | 37.4       | 38.9     | 37.9     | 38.0666666667 | 16:10              | 17:32          |
+
+
+For the TPC fragments, 225 and 226 are in the wrong whirlpaks --> 225 is in 226 and vice versa. I wrote a note on the 226 whirlpak waterproof paper.  
+
+For 38C, I didnt really see metabolic depression until about 50 mins in. Ran for an extra 15 mins. 
+
+DONE with resp equipment! I wiped down all temp and O2 probes with ethanol and unplugged them from the presens. I also rinsed all heaters and pumps and put out to dry. 
+
+## 20251012
+
+Cleaned up a lot of our stuff in CRL today. We shut down and packed up the apex, packed up resp equipment and put in creepy closet, and packed up most of our gear from CRL. I mopped the floors as well, since I got them very dirty from spilling water all week. I also started running the chiller with freshwater to flush any saltwater from it. 
+
+I exported all TPC data from presens onto Box, as well as the temp data from the pendant logger. 
+
+I also redeployed a pendant logger for the reef since we lost one of our U22s. 
+
+Marcelina printed out the shipping label for the dewar to ship tomorrow. We also gathered materials and prepped for the field tomorrow. 
+
+## 20251013
+
+CRL kickoff meeting and then photogrammatry field day with myself, Marcelina, Sarah, Kama, and Maddie. 
+
+Marcelina and Kama did the 4 photogrammatry reef spirals while Maddie and I did the 4 benthic transects. We did forgoet our photoquad but still took pictures every 2 meters with the color card/ruler. 
+
+Marcelina, Kama, Maddie and I did the colony level photogrammatry. Maddie and I deployed the temp loggers - the U22s are in the first channel and the pendant is at the far side of the reef. 
+
+## 20251014
+
+Pretty chill day! Marcelina and I led CRL journal club - we discussed Brown et al. 2023. Sarah left in the afternoon. Marcelina uploaded all photogrammatry and transect photos from yesterday to Box. We also got the chiller from the lab to pack and prepped slides for CRL lab meeting tomorrow. 
+
+## 20251015
+
+Another pretty chill day. We presented our ongoing work for the NSF career in CRL lab meeting today, as well as some of my previous Mcap larval work. Marcelina printed out a copy of the permit, and I packed the action packers, as well as my personal stuff. I also parafilmed the histology tubes and found a freezer box for the TPC shield tubes. 
+
+## 20251016
+
+Departure day! Before I left, we got the boxes with the histology and shield tubes and packed them with ice packs in the action packers. Our TPC frags didn't fit in the dewar so we are leaving them behind for the time being in CRL's freezer. Took a picture of their location and sent to Ford so he knows where they are. 
+
+We also collected ~100 Aiptasia from CRL tanks to bring back to Penn for undergrad teaching labs. They went into 2 50mL falcon tubes with seawater and were packed in the action packer. 
+
+## 20251017
+
+I arrived in Philly at 5:30am. Went to lab to drop off action packers and put away samples. The histology samples went into the 4C mini-fridge upstairs. The TPC samples went into the bottom shelf of the -80C downstairs. The Aiptasia were put in a container with fresh seawater and put in the 18C incubator. The dewar was also in the downstairs lab, so I put away the biopsy and phys frags in two separate ziplock bags that are stored on the bottom shelf of the -80C. 
+
+
+
+
+
+
+
 
 
 
