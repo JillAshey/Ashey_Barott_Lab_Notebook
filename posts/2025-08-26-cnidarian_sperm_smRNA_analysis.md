@@ -931,7 +931,7 @@ echo "Mirdeep2 complete for nvec4"
 conda deactivate
 ```
 
-Submitted batch job 47009181
+Submitted batch job 47009181. This finished running after about 12 hours. 
 
 Before mapping Ahya, I need to generate the bowtie index for the genome (didn't run shortstack with this genome). Need to run as a job bleh. `nano ahya_bowtie_index.sh`
 
@@ -977,9 +977,154 @@ Setting the index via positional argument will be deprecated in a future release
 Illegal instruction
 ```
 
-Why do you hate me Ahya??? Should I try a different genome? Is there an indexing issue? IDK!!!!!
+Why do you hate me Ahya??? Should I try a different genome? Is there an indexing issue? IDK!!!!! Come back to this...Maybe let's try running shortstack on Ahya and see what we get, as I did not run any shortstack on this species, just apoc and nvec. `nano shortstack_ahya.sh`
 
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=2
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB
+#SBATCH -t 50:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts
 
+module load uri/main
+module load conda/latest # need to load before making any conda envs
+
+conda activate /work/pi_hputnam_uri_edu/conda/envs/ShortStack4 
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya 
+
+echo "Running shortstack for Ahya samples"
+
+#gunzip *fastq.gz
+
+ShortStack \
+--genomefile Ahyacinthus.chrsV1.fasta \
+--readfile ahya_1_S27_L001_R1_001_trim.fastq \
+ahya_2_S28_L001_R1_001_trim.fastq \
+ahya_3_S29_L001_R1_001_trim.fastq \
+ahya_4_S30_L001_R1_001_trim.fastq \
+--known_miRNAs /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/data/miRNA_reference.fasta \
+--outdir /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/output/ahya_shortstack \
+--dn_mirna
+
+echo "Ahya shortstack complete"
+
+conda deactivate
+```
+
+Submitted batch job 47066266. Interestingly, the Ahya shortstack [results](https://github.com/JillAshey/Cnidarian_sperm_smRNA/tree/main/output/shortstack/ahya/trimmed_default) are much more in line with what I was expecting from corals...it looks like 30ish miRNAs were identified, many of them being prior Acropora miRNAs. Why don't the nvec or apoc have more miRNAs present?? Maybe related to how the samples were preserved? I believe the Ahya sample is from Moorea and was preserved in shield, but I'm not sure how the apoc or nvec samples were preserved (need to ask Ben). Or maybe its just low sequencing depth?? 
+
+Let's try running mirdeep2 on Ahya and compare the results. I know I tried to run it above and it didn't work but maybe the script will use the files created by shortstack and that will work. 
+
+Run the mapper script first. 
+
+```
+mapper.pl ahya_1_S27_L001_R1_001_trim.fastq -e -h -m -s ahya_1_processed.fa -t ahya_1_mappings.arf -p /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/Ahyacinthus.chrsV1.fasta
+Log file for this run is in mapper_logs and called mapper.log_1419116
+Mapping statistics
+#desc   total   mapped  unmapped        %mapped %unmapped
+total: 3854254  1450157 2404097 37.625  62.375
+seq: 3854254    1450157 2404097 37.625  62.375
+Setting the index via positional argument will be deprecated in a future release. Please use -x option instead.
+# reads processed: 1059849
+# reads with at least one alignment: 414285 (39.09%)
+# reads that failed to align: 645564 (60.91%)
+# reads with alignments suppressed due to -m: 134761 (12.72%)
+Reported 562591 alignments
+
+mapper.pl ahya_2_S28_L001_R1_001_trim.fastq -e -h -m -s ahya_2_processed.fa -t ahya_2_mappings.arf -p /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/Ahyacinthus.chrsV1.fasta
+Log file for this run is in mapper_logs and called mapper.log_1419189
+Mapping statistics
+#desc   total   mapped  unmapped        %mapped %unmapped
+total: 2358949  367553  1991396 15.581  84.419
+seq: 2358949    367553  1991396 15.581  84.419
+Setting the index via positional argument will be deprecated in a future release. Please use -x option instead.
+# reads processed: 443141
+# reads with at least one alignment: 68451 (15.45%)
+# reads that failed to align: 374690 (84.55%)
+# reads with alignments suppressed due to -m: 21205 (4.79%)
+Reported 92142 alignments
+
+mapper.pl ahya_3_S29_L001_R1_001_trim.fastq -e -h -m -s ahya_3_processed.fa -t ahya_3_mappings.arf -p /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/Ahyacinthus.chrsV1.fasta
+Log file for this run is in mapper_logs and called mapper.log_1419249
+Mapping statistics
+#desc   total   mapped  unmapped        %mapped %unmapped
+total: 5907632  2059409 3848223 34.860  65.140
+seq: 5907632    2059409 3848223 34.860  65.140
+Setting the index via positional argument will be deprecated in a future release. Please use -x option instead.
+# reads processed: 1344290
+# reads with at least one alignment: 562244 (41.82%)
+# reads that failed to align: 782046 (58.18%)
+# reads with alignments suppressed due to -m: 176750 (13.15%)
+Reported 743523 alignments
+
+mapper.pl ahya_4_S30_L001_R1_001_trim.fastq -e -h -m -s ahya_4_processed.fa -t ahya_4_mappings.arf -p /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/Ahyacinthus.chrsV1.fasta
+Log file for this run is in mapper_logs and called mapper.log_1419312
+Mapping statistics
+#desc   total   mapped  unmapped        %mapped %unmapped
+total: 6235983  2122036 4113947 34.029  65.971
+seq: 6235983    2122036 4113947 34.029  65.971
+Setting the index via positional argument will be deprecated in a future release. Please use -x option instead.
+# reads processed: 1130403
+# reads with at least one alignment: 418508 (37.02%)
+# reads that failed to align: 711895 (62.98%)
+# reads with alignments suppressed due to -m: 132251 (11.70%)
+Reported 559265 alignments
+```
+
+WOW!!!! These alignments are so high!! Way more comparable to data that I've analyzed in the past. Very interesting...the plot thickens or at least gives me some more info on the differences between species. `nano mirdeep2_ahya.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=1
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB
+#SBATCH -t 50:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts
+
+module load uri/main
+module load conda/latest # need to load before making any conda envs
+
+conda activate /work/pi_hputnam_uri_edu/conda/envs/mirdeep2 
+
+echo "Running mirdeep2 miRNA ID on ahya 1"
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya 
+
+miRDeep2.pl ahya_1_processed.fa /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/Ahyacinthus.chrsV1.fasta ahya_1_mappings.arf /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/data/miRNA_reference_cleaned.fasta none none -t N.vectensis -P
+
+echo "Mirdeep2 complete for ahya 1"
+echo "Running mirdeep2 miRNA ID on ahya 2"
+
+miRDeep2.pl ahya_2_processed.fa /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/Ahyacinthus.chrsV1.fasta ahya_2_mappings.arf /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/data/miRNA_reference_cleaned.fasta none none -t N.vectensis -P
+
+echo "Mirdeep2 complete for ahya 2"
+echo "Running mirdeep2 miRNA ID on ahya 3"
+
+miRDeep2.pl ahya_3_processed.fa /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/Ahyacinthus.chrsV1.fasta ahya_3_mappings.arf /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/data/miRNA_reference_cleaned.fasta none none -t N.vectensis -P
+
+echo "Mirdeep2 complete for ahya 3"
+echo "Running mirdeep2 miRNA ID on ahya 4"
+
+miRDeep2.pl ahya_4_processed.fa /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/Ahyacinthus.chrsV1.fasta ahya_4_mappings.arf /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/data/miRNA_reference_cleaned.fasta none none -t N.vectensis -P
+
+echo "Mirdeep2 complete for ahya 4"
+
+conda deactivate
+```
+
+Submitted batch job 47248281
 
 
 
@@ -1425,11 +1570,11 @@ Extended scratch workspace on 9/25/25 for 30 days. My `43350967` job timed out, 
 ```
 #!/usr/bin/env bash
 #SBATCH --export=NONE
-#SBATCH --nodes=5 --ntasks-per-node=10
+#SBATCH --nodes=1 --ntasks-per-node=5
 #SBATCH --partition=uri-cpu
 #SBATCH --no-requeue
-#SBATCH --mem=200GB
-#SBATCH -t 300:00:00
+#SBATCH --mem=100GB
+#SBATCH -t 50:00:00
 #SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
 #SBATCH -o slurm-%j.out
 #SBATCH -e slurm-%j.error
@@ -1452,19 +1597,24 @@ echo "Nvec 3 putative piRNA mapping complete"
 
 Submitted batch job 44107785. This stopped running -- I needed to remove the 'done'. Submitted batch job 47008570. Waiting to see how this one does before starting the others. 
 
+If it errors out again with time, try: 
 
+```
+#SBATCH -t 4-00:00:00
+#SBATCH -q long
+```
 
-
-`nano sRNAmapper_nvec_4.sh`
+Come back to nvec 4 and the ahya samples after nvec 3 sRNA mapper runs. Okay Nvec 3 ran in about 2 days. I'm going to start nvec 4 and ahya 1. `nano sRNAmapper_nvec_4.sh`
 
 ```
 #!/usr/bin/env bash
 #SBATCH --export=NONE
-#SBATCH --nodes=5 --ntasks-per-node=10
+#SBATCH --nodes=1 --ntasks-per-node=5
 #SBATCH --partition=uri-cpu
 #SBATCH --no-requeue
-#SBATCH --mem=200GB
-#SBATCH -t 300:00:00
+#SBATCH --mem=100GB
+#SBATCH -t 5-00:00:00
+#SBATCH -q long
 #SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
 #SBATCH -o slurm-%j.out
 #SBATCH -e slurm-%j.error
@@ -1480,24 +1630,22 @@ echo "Starting nvec 4 putative piRNA mapping "
 perl /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts/ngs_toolbox/sRNAmapper.pl \
 -input other.fq \
 -genome /work/pi_hputnam_uri_edu/genomes/Nvec/Nvec200.fasta \
--alignments best 
-done
+-alignments best
 
 echo "Nvec 4 putative piRNA mapping complete"
 ```
 
-Submitted batch job 44107893
-
-`nano sRNAmapper_ahya_1.sh`
+Submitted batch job 47247790. Run ahya 1 as well to see how long it will take to run those samples. `nano sRNAmapper_ahya_1.sh`
 
 ```
 #!/usr/bin/env bash
 #SBATCH --export=NONE
-#SBATCH --nodes=5 --ntasks-per-node=10
+#SBATCH --nodes=1 --ntasks-per-node=5
 #SBATCH --partition=uri-cpu
 #SBATCH --no-requeue
-#SBATCH --mem=200GB
-#SBATCH -t 300:00:00
+#SBATCH --mem=100GB
+#SBATCH -t 5-00:00:00
+#SBATCH -q long
 #SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
 #SBATCH -o slurm-%j.out
 #SBATCH -e slurm-%j.error
@@ -1508,7 +1656,7 @@ module load Perl/5.40.0-GCCcore-14.2.0
 
 cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/sortmerna/ahya_1_S27_L001_R1_001_trim.fastq.collapsed.filt.no-dust
 
-echo "Starting ahya 1 putative piRNA mapping "
+echo "Starting ahya 1 putative piRNA mapping"
 
 perl /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts/ngs_toolbox/sRNAmapper.pl \
 -input other.fq \
@@ -1519,18 +1667,31 @@ done
 echo "Ahya 1 putative piRNA mapping complete"
 ```
 
-Submitted batch job 44108094
+Submitted batch job 47247858. Both jobs are pending, hopefully they run soon. 
 
-`nano sRNAmapper_ahya_2.sh`
+
+
+
+
+
+
+
+
+
+
+
+
+
+Okay while I figure out the sRNAmapper stuff, I'm going to move forward with the Apoc piRNA data. After sRNA mapping, I will use the reallocate script for origin assignment for reads with multiple mappings (following Ashey et al. 2025 github [code](https://github.com/urol-e5/deep-dive/blob/main/E-Peve/code/18-PEVE-piRNA-proTRAC.Rmd) from Javi). `nano reallocate_apoc.sh`
 
 ```
 #!/usr/bin/env bash
 #SBATCH --export=NONE
-#SBATCH --nodes=5 --ntasks-per-node=10
+#SBATCH --nodes=1 --ntasks-per-node=2
 #SBATCH --partition=uri-cpu
 #SBATCH --no-requeue
 #SBATCH --mem=200GB
-#SBATCH -t 300:00:00
+#SBATCH -t 100:00:00
 #SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
 #SBATCH -o slurm-%j.out
 #SBATCH -e slurm-%j.error
@@ -1539,34 +1700,497 @@ Submitted batch job 44108094
 module load uri/main
 module load Perl/5.40.0-GCCcore-14.2.0
 
-cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/sortmerna/ahya_2_S28_L001_R1_001_trim.fastq.collapsed.filt.no-dust
+echo "Starting apoc origin assessment for reads with multiple mapping locations"
 
-echo "Starting ahya 2 putative piRNA mapping "
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc/sortmerna
 
-perl /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts/ngs_toolbox/sRNAmapper.pl \
--input other.fq \
--genome /work/pi_hputnam_uri_edu/genomes/Nvec/Nvec200.fasta \
--alignments best 
+for f in apoc_*_L001_R1_001_trim.fastq.collapsed.filt.no-dust
+do
+perl /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts/ngs_toolbox/reallocate.pl ${f}/out/other.fq.map 10000 1000 b 0
 done
 
-echo "Ahya 2 putative piRNA mapping complete"
+echo "Apoc origin assessment complete"
 ```
 
-Submitted batch job 44110353. timed out again...need to look into why this keeps failing. is it an sbatch issue? 
+Submitted batch job 47068517. Complete after a few hours! Time to run proTRAC, which predicts piRNA clusters in each sample. `nano protrac_apoc.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=2
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB
+#SBATCH -t 50:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts
+
+module load uri/main
+module load Perl/5.40.0-GCCcore-14.2.0
+
+echo "Starting protrac for apoc"
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc/sortmerna
+
+for f in apoc_*_L001_R1_001_trim.fastq.collapsed.filt.no-dust
+do
+perl /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts/ngs_toolbox/proTRAC_2.4.2.pl \
+-map ${f}/out/other.fq.map.weighted-10000-1000-b-0 \
+-genome /work/pi_hputnam_uri_edu/genomes/Apoc/apoculata.genome.fasta \
+-repeatmasker /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc/apoculata.genome.fasta.out \
+-geneset /work/pi_hputnam_uri_edu/genomes/Apoc/apoculata.gtf
+done
+
+echo "Apoc protrac complete!"
+```
+
+Submitted batch job 47074553. Success! Looking at the slurm output file:
+
+```
+## Apoc 2 -- proTRAC_other.fq.map.weighted-10000-1000-b-0_2025y10m21d17h2m44s
+Predicted Cluster: Ap14 14605235-14607384 directionality: mono:plus
+Predicted Cluster: Ap12 7323688-7324994 directionality: mono:plus
+Predicted Cluster: Ap9 26361024-26368010 directionality: mono:plus
+Predicted Cluster: Ap7 6545108-6552425 directionality: mono:plus
+Predicted Cluster: Ap6 22072131-22076641 directionality: mono:minus
+Predicted Cluster: Ap13 5529006-5531171 directionality: mono:minus
+Predicted Cluster: Ap2 28449661-28453270 directionality: mono:plus
+Predicted Cluster: Ap2 28609004-28613642 directionality: mono:minus
+Predicted Cluster: Ap1 11987043-11991524 directionality: mono:minus
+Predicted Cluster: Ap1 32291280-32293852 directionality: mono:minus
+Predicted Cluster: Ap4 8249079-8254709 directionality: mono:minus
+Predicted Cluster: Ap4 14674394-14681635 directionality: mono:minus
+Predicted Cluster: Ap4 15216264-15217852 directionality: mono:minus
+Predicted Cluster: Ap4 16367577-16368633 directionality: mono:plus
+Predicted Cluster: Ap4 16429408-16431300 directionality: mono:minus
+Predicted Cluster: Ap4 19551586-19556522 directionality: mono:plus
+Predicted Cluster: Ap4 20112688-20114149 directionality: mono:minus
+Predicted Cluster: Ap4 21144289-21149927 directionality: mono:plus
+Predicted Cluster: Ap4 22095192-22098356 directionality: mono:minus
+Predicted Cluster: Ap4 23905724-23909328 directionality: mono:minus
+Predicted Cluster: Ap4 23967567-23975496 directionality: mono:plus
+Predicted Cluster: Ap4 24418700-24423869 directionality: mono:minus
+Predicted Cluster: Ap4 24817260-24822015 directionality: mono:minus
+Predicted Cluster: Ap4 25548882-25551839 directionality: mono:plus
+Predicted Cluster: Ap4 26247700-26249983 directionality: mono:plus
+Predicted Cluster: Ap4 28311087-28315846 directionality: mono:plus
+Predicted Cluster: Ap4 28359164-28360486 directionality: mono:plus
+Predicted Cluster: Ap4 28792033-28806012 directionality: mono:plus
+Predicted Cluster: Ap4 29339861-29348771 directionality: mono:plus
+Predicted Cluster: Ap4 29847190-29856948 directionality: mono:minus
+Predicted Cluster: Ap4 29921571-29923015 directionality: mono:plus
+Predicted Cluster: Ap4 30057962-30062685 directionality: mono:minus
+Predicted Cluster: Ap4 32416234-32418457 directionality: mono:minus
+Predicted Cluster: Ap4 32616138-32620445 directionality: mono:plus
+Predicted Cluster: Ap4 35477812-35481957 directionality: mono:minus
+Total size of 35 predicted piRNA clusters: 154641 bp (0.034%)
+
+## Apoc 3 - proTRAC_other.fq.map.weighted-10000-1000-b-0_2025y10m21d17h3m59s
+Predicted Cluster: Ap14 22536285-22543883 directionality: mono:plus
+Predicted Cluster: Ap4 23914752-23918489 directionality: mono:minus
+Predicted Cluster: Ap4 24422101-24423714 directionality: mono:minus
+Predicted Cluster: Ap4 25549401-25551567 directionality: mono:plus
+Predicted Cluster: Ap4 28288220-28291892 directionality: mono:minus
+Predicted Cluster: Ap4 28792034-28796894 directionality: mono:plus
+Predicted Cluster: Ap4 28802423-28804635 directionality: mono:plus
+Predicted Cluster: Ap4 29340005-29345838 directionality: mono:plus
+Predicted Cluster: Ap4 29848336-29853006 directionality: mono:minus
+Total size of 9 predicted piRNA clusters: 36370 bp (0.008%)
+
+## Apoc 4 - proTRAC_other.fq.map.weighted-10000-1000-b-0_2025y10m21d17h5m13s
+Predicted Cluster: Ap7 27892450-27894310 directionality: mono:minus
+Predicted Cluster: Ap2 28611868-28612921 directionality: mono:minus
+Predicted Cluster: Ap4 14677878-14679887 directionality: mono:minus
+Predicted Cluster: Ap4 19821254-19827332 directionality: mono:minus
+Predicted Cluster: Ap4 24422101-24423714 directionality: mono:minus
+Predicted Cluster: Ap4 24809883-24811688 directionality: mono:minus
+Predicted Cluster: Ap4 28288593-28290523 directionality: mono:minus
+Predicted Cluster: Ap4 28311357-28313299 directionality: mono:plus
+Predicted Cluster: Ap4 28796093-28803974 directionality: mono:plus
+Predicted Cluster: Ap4 29851252-29853436 directionality: mono:minus
+Predicted Cluster: Ap4 30061453-30062633 directionality: mono:minus
+Predicted Cluster: Ap4 32416462-32418457 directionality: mono:minus
+Total size of 12 predicted piRNA clusters: 31542 bp (0.007%)
+```
+
+Interesting that there are way more clusters in Apoc 2...what if I ran protrac just on the mapped reads without reallocating? Changed it in the script and reran. Submitted batch job 47077635. Very similar results, slightly more clusters with the reallocated ones. Run ping pong ID on all reads. `nano pingpong_apoc.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=2
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB
+#SBATCH -t 50:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts
+
+module load uri/main
+module load Perl/5.40.0-GCCcore-14.2.0
+
+echo "Starting ping pong for apoc"
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc/sortmerna
+
+for f in apoc_*_L001_R1_001_trim.fastq.collapsed.filt.no-dust
+do
+perl /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts/ngs_toolbox/TBr2_pingpong.pl \
+-i ${f}/out/other.fq.map.weighted-10000-1000-b-0 \
+-o ${f}.pp
+done
+
+echo "Apoc ping pong complete!"
+```
+
+Submitted batch job 47083778
+
+Let's look at the cluster overlap between the 3 replicates. First, create bed files from cluster fasta files.
+
+Apoc 2: 
+
+```
+salloc 
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc/sortmerna/proTRAC_other.fq.map.weighted-10000-1000-b-0_2025y10m21d17h2m44s
+
+input_fasta="clusters.fasta"
+output_bed="clusters_apoc_2.bed"
+
+# Extract relevant info from header and convert to BED
+# BED format: chrom  start(0-based)  end(1-based)  .  0  strand(+/-)
+
+grep "^>" "$input_fasta" | while read -r header; do
+  # Remove leading '>'
+  header=${header#>}
+  
+  # Extract chromosome (first word)
+  chrom=$(echo "$header" | awk '{print $1}')
+  
+  # Extract coordinates (second word), split by '-'
+  coords=$(echo "$header" | awk '{print $2}')
+  start=$(echo "$coords" | cut -d'-' -f1)
+  end=$(echo "$coords" | cut -d'-' -f2)
+  
+  # Convert to 0-based start for BED
+  start=$((start - 1))
+  
+  # Extract strand from "directionality:" field (+ or -)
+  # directionality: mono:plus means '+'
+  # directionality: mono:minus means '-'
+  strand=$(echo "$header" | grep -oP "directionality: mono:\K(plus|minus)")
+  if [ "$strand" = "plus" ]; then
+    strand="+"
+  else
+    strand="-"
+  fi
+  
+  # Print BED line
+  echo -e "${chrom}\t${start}\t${end}\t.\t0\t${strand}"
+done > "$output_bed"
+```
+
+Apoc 3:
+
+```
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc/sortmerna/proTRAC_other.fq.map.weighted-10000-1000-b-0_2025y10m21d17h3m59s
+
+input_fasta="clusters.fasta"
+output_bed="clusters_apoc_3.bed"
+
+# Extract relevant info from header and convert to BED
+# BED format: chrom  start(0-based)  end(1-based)  .  0  strand(+/-)
+
+grep "^>" "$input_fasta" | while read -r header; do
+  # Remove leading '>'
+  header=${header#>}
+  
+  # Extract chromosome (first word)
+  chrom=$(echo "$header" | awk '{print $1}')
+  
+  # Extract coordinates (second word), split by '-'
+  coords=$(echo "$header" | awk '{print $2}')
+  start=$(echo "$coords" | cut -d'-' -f1)
+  end=$(echo "$coords" | cut -d'-' -f2)
+  
+  # Convert to 0-based start for BED
+  start=$((start - 1))
+  
+  # Extract strand from "directionality:" field (+ or -)
+  # directionality: mono:plus means '+'
+  # directionality: mono:minus means '-'
+  strand=$(echo "$header" | grep -oP "directionality: mono:\K(plus|minus)")
+  if [ "$strand" = "plus" ]; then
+    strand="+"
+  else
+    strand="-"
+  fi
+  
+  # Print BED line
+  echo -e "${chrom}\t${start}\t${end}\t.\t0\t${strand}"
+done > "$output_bed"
+```
+
+Apoc 4
+
+```
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc/sortmerna/proTRAC_other.fq.map.weighted-10000-1000-b-0_2025y10m21d17h5m13s
+
+input_fasta="clusters.fasta"
+output_bed="clusters_apoc_4.bed"
+
+# Extract relevant info from header and convert to BED
+# BED format: chrom  start(0-based)  end(1-based)  .  0  strand(+/-)
+
+grep "^>" "$input_fasta" | while read -r header; do
+  # Remove leading '>'
+  header=${header#>}
+  
+  # Extract chromosome (first word)
+  chrom=$(echo "$header" | awk '{print $1}')
+  
+  # Extract coordinates (second word), split by '-'
+  coords=$(echo "$header" | awk '{print $2}')
+  start=$(echo "$coords" | cut -d'-' -f1)
+  end=$(echo "$coords" | cut -d'-' -f2)
+  
+  # Convert to 0-based start for BED
+  start=$((start - 1))
+  
+  # Extract strand from "directionality:" field (+ or -)
+  # directionality: mono:plus means '+'
+  # directionality: mono:minus means '-'
+  strand=$(echo "$header" | grep -oP "directionality: mono:\K(plus|minus)")
+  if [ "$strand" = "plus" ]; then
+    strand="+"
+  else
+    strand="-"
+  fi
+  
+  # Print BED line
+  echo -e "${chrom}\t${start}\t${end}\t.\t0\t${strand}"
+done > "$output_bed"
+```
+
+Move all cluster bed files to same folder 
+
+```
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc/sortmerna
+mkdir proTRAC_bed
+cd proTRAC_bed
+
+mv /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc/sortmerna/proTRAC_other.fq.map.weighted-10000-1000-b-0_2025y10m21d17h2m44s/clusters_apoc_2.bed .
+mv /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc/sortmerna/proTRAC_other.fq.map.weighted-10000-1000-b-0_2025y10m21d17h3m59s/clusters_apoc_3.bed .
+mv /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc/sortmerna/proTRAC_other.fq.map.weighted-10000-1000-b-0_2025y10m21d17h5m13s/clusters_apoc_4.bed .
+```
+
+Merge clusters across samples using bedtools. Following Javi's work, I selected clusters that are present in at least two reps and overlap is at least 50% of the cluster and is reciprocal (ie A overlaps 50% of B and B overlaps 50% of A)
+
+```
+FILES=(*.bed)
+NUM_FILES=${#FILES[@]}
+# Loop over each file
+for (( i=0; i<$NUM_FILES; i++ )); do
+  for (( j=i+1; j<$NUM_FILES; j++ )); do
+    FILE1=${FILES[$i]}
+    FILE2=${FILES[$j]}
+    
+    intersectBed -a $FILE1 -b $FILE2 -f 0.5 -r > ${i}_${j}_merged.bed
+  done
+done
+
+cat *_merged.bed | sort -k1,1 -k2,2n | bedtools merge -i - > apoc.merged.clusters.bed
+```
+
+Here are the merged clusters:
+
+```
+Ap4     24422100        24423714
+Ap4     25549400        25551567
+Ap4     28288592        28290523
+Ap4     28796092        28803974
+Ap4     29340004        29345838
+Ap4     32416461        32418457
+```
+
+Very odd that they are all present in chromosome 4 within a couple million base pairs of each other...
+
+The ping pong analysis completed! Here's an example of the results file: 
+
+```
+Results for apoc_3_S32_L001_R1_001_trim.fastq.collapsed.filt.no-dust/out/other.fq.map.weighted-10000-1000-b-0
+Total scores for 5' overlap:
+overlap [nt]	read pairs
+1	1.5803821756036e-05
+2	
+3	
+4	
+5	
+6	
+7	
+8	
+9	
+10	8.00126787427719
+11	
+12	
+13	
+14	
+15	
+16	
+17	
+18	
+19	1
+20	
+21	
+22	2
+23	
+24	
+25	
+26	
+27	
+28	
+29	
+30	
+31	
+32	
+33	
+34	
+
+Z-score calculation:
+Average background (overlaps 1-9+11-20): 0.0526324107274609
+Variance background: 0.0498614083015296
+Standard deviation: 0.223296682244787
+Ping-Pong Z-Score: 35.5967468197136
+
+Z-score >= 1.6449 (one-tailed hypothesis) -> p < 0.05
+Z-score >= 2.3264 (one-tailed hypothesis) -> p < 0.01
+```
+
+The output is essentially overlap scores between complementary reads -- how often a piRNA 5' end overlaps another piRNA 5' end by a given number of nucleotides. The important value is at 10 nt overlap, as the sign of ping pong amplification is 10 nt overlap where the secondary piRNA starts 10 nt down from the primary piRNA. It's all quite confusing to me. But we see that there is overlap at 10 nt, which is more than any of the other nucleotides and suggests active ping-pong processing. The z score is quantifiying how strong the 10 nt overlap is compared to background overlaps. We see the average background is quite low, while ping pong is quite high, which further supports the ping pong amplification processing here. This provides more evidence that these reads/clusters are bona fide piRNAs.  
+
+
+
+
+
+
+
 
 
 ### tRNA derived RNAs 
 
 Nick and I have been talking about other smRNAs to identify. He studies tRNA derived RNAs (tDRs), which are small RNAs that originate from tRNAs. Based on evidence from [model systems](https://pmc.ncbi.nlm.nih.gov/articles/PMC10766869/), these RNAs can perform selective translation regulation (miRNA-like mechanism and interaction with RNA binding proteins) or global translation regulation (eIF4F sequestration and interaction with ribosomes). However, even in model systems, work is pretty limited and often is more experimental than bioinformatical. Nick has a [paper](https://www.biorxiv.org/content/10.1101/2025.04.14.648817v1#:~:text=Abstract,paternal%20non%2Dgenetic%20inheritance%20mechanistically.) on biorxiv that exakined tDRs as a non-genetic inheritance mechanism via sperm in Celegans, which is super cool. 
 
-The tools that I have found for tDR bioinformatic analysis are [tsRNAsearch](https://academic.oup.com/bioinformatics/article/37/23/4424/6320783#supplementary-data) (github [here](https://github.com/GiantSpaceRobot/tsRNAsearch); published 2021) and [tDRmapper](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-015-0800-0) (github [here](https://github.com/sararselitsky/tDRmapper); published 2015). In the tsRNAsearch paper, it compared the two tools and found "The comparison between tsRNAsearch and tDRmapper using the heavily trimmed data resulted in an average Pearson’s r = 0.70 and a standard deviation of ±0.15." Pretty comparable.  
+The tools that I have found for tDR bioinformatic analysis are [tsRNAsearch](https://academic.oup.com/bioinformatics/article/37/23/4424/6320783) (github [here](https://github.com/GiantSpaceRobot/tsRNAsearch); published 2021) and [tDRmapper](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-015-0800-0) (github [here](https://github.com/sararselitsky/tDRmapper); published 2015). In the tsRNAsearch paper, it compared the two tools and found "The comparison between tsRNAsearch and tDRmapper using the heavily trimmed data resulted in an average Pearson’s r = 0.70 and a standard deviation of ±0.15." Pretty comparable. 
+
+I want to try out tDRmapper first. From the [github](https://github.com/sararselitsky/tDRmapper/tree/master), it looks like there is this primary script `Scripts/TdrMappingScripts.pl`, which references other scripts in the scripts folder. That is kinda confusing. I uploaded the perl and R scripts here: `/work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts/tDRmapper_scripts`. Let's try to run! `nano tDRmapper_apoc_2.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=1
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB
+#SBATCH -t 100:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts
+
+module load uri/main
+module load Perl/5.40.0-GCCcore-14.2.0
+module load R/4.3.2-gfbf-2023a
+
+echo "Starting apoc 2 putative tRNA mapping"
+
+cd /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts
+
+perl tDRmapper_scripts/TdrMappingScripts.pl /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc/Apoc-tRNA.fasta /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc/apoc_2_S31_L001_R1_001_trim.fastq
+
+echo "Apoc 2 putative tRNA mapping complete!"
+```
+
+Submitted batch job 47018721. Failed immediately with the error "no fasta detected"...Changed so that I `cd`ed right into the apoc directory. Submitted batch job 47021871. Still getting the same error...Here are some solutions from perplexity: 
+
+- If the file uses CRLF (\r\n), Perl may interpret > as part of a different string. Fix by: `dos2unix Apoc-tRNA.fasta` - did this. 
+- Make sure its uncompressed plain text with `file Apoc-tRNA.fasta` - did this, printed `Apoc-tRNA.fasta: ASCII text`. 
+
+Let's see if it works. Submitted batch job 47023410. Ran for a little longer but still ended with same error. 
+
+Maybe just pivot to tsRNAsearch...They provide installation code on their github. I'm going to run it as a job since it may take a while. `nano install_tsRNAsearch.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=2
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB
+#SBATCH -t 50:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts
+
+module load uri/main
+module load Miniconda3/4.9.2
+module load R/4.3.2-gfbf-2023a
+module load Nextflow/22.04.0
+
+echo "Installing tsRNAsearch via conda"
+
+cd /work/pi_hputnam_uri_edu/conda/envs
+git clone https://github.com/GiantSpaceRobot/tsRNAsearch.git
+conda env create -f tsRNAsearch/environment.yml
+conda activate tsrnasearch_env
+
+echo "Installing R packages for tsRNAsearch"
+
+Rscript tsRNAsearch/bin/InstallPackages.R
+
+echo "Test run tsRNAsearch"
+nextflow run tsRNAsearch --species mouse --input_dir tsRNAsearch/ExampleData --output_dir Results
+```
+
+Submitted batch job 47067938. Okay this ran, but the environment still had conflicts and failed...maybe message Unity help desk about this. 
+
+
+tsRNAsearch is a nextflow pipeline, and nextflow is already installed on the HPC. 
 
 
 
 
 
-I also found [tRFTarget](http://trftarget.net/online_targets), which can be used to identify the targets of tDRs. 
 
+I also found [tRFTarget](http://trftarget.net/online_targets), which can be used to identify the targets of tDRs. They have an online tool which seems very nifty. 
+
+
+
+
+
+
+
+
+### Other stuff 
+
+Extract chromosome names from fasta files 
+
+```
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc
+sed -n '/^>/p' /work/pi_hputnam_uri_edu/genomes/Apoc/apoculata.genome.fasta > apoc_chroms.txt
+
+cd ../nvec/genome
+sed -n '/^>/p' Nvec200.fasta > nvec_chroms.txt
+
+cd ../../ahya
+sed -n '/^>/p' Ahyacinthus.chrsV1.fasta > ahya_chroms.txt
+```
+
+Apoc has 14 chromosomes, Nvec has 30 chromosomes, and Ahya has 907 chromosomes (more like contigs). 
 
 
  
