@@ -1635,7 +1635,9 @@ perl /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts/ngs_toolbo
 echo "Nvec 4 putative piRNA mapping complete"
 ```
 
-Submitted batch job 47247790. Run ahya 1 as well to see how long it will take to run those samples. `nano sRNAmapper_ahya_1.sh`
+Submitted batch job 47247790. This ran successfully in about 2 days. 
+
+Run ahya 1 as well to see how long it will take to run those samples. `nano sRNAmapper_ahya_1.sh`
 
 ```
 #!/usr/bin/env bash
@@ -1643,7 +1645,7 @@ Submitted batch job 47247790. Run ahya 1 as well to see how long it will take to
 #SBATCH --nodes=1 --ntasks-per-node=5
 #SBATCH --partition=uri-cpu
 #SBATCH --no-requeue
-#SBATCH --mem=100GB
+#SBATCH --mem=200GB
 #SBATCH -t 5-00:00:00
 #SBATCH -q long
 #SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
@@ -1654,35 +1656,120 @@ Submitted batch job 47247790. Run ahya 1 as well to see how long it will take to
 module load uri/main
 module load Perl/5.40.0-GCCcore-14.2.0
 
-cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/sortmerna/ahya_1_S27_L001_R1_001_trim.fastq.collapsed.filt.no-dust
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/sortmerna/ahya_1_S27_L001_R1_001_trim.fastq.collapsed.filt.no-dust/out
 
 echo "Starting ahya 1 putative piRNA mapping"
 
 perl /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts/ngs_toolbox/sRNAmapper.pl \
 -input other.fq \
--genome /work/pi_hputnam_uri_edu/genomes/Nvec/Nvec200.fasta \
+-genome /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/Ahyacinthus.chrsV1.fasta \
 -alignments best 
-done
 
 echo "Ahya 1 putative piRNA mapping complete"
 ```
 
-Submitted batch job 47247858. Both jobs are pending, hopefully they run soon. 
+Submitted batch job 47887852
 
+`nano sRNAmapper_ahya_2.sh`
 
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=5
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=200GB
+#SBATCH -t 5-00:00:00
+#SBATCH -q long
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts
 
+module load uri/main
+module load Perl/5.40.0-GCCcore-14.2.0
 
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/sortmerna/ahya_2_S28_L001_R1_001_trim.fastq.collapsed.filt.no-dust/out
 
+echo "Starting ahya 2 putative piRNA mapping"
 
+perl /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts/ngs_toolbox/sRNAmapper.pl \
+-input other.fq \
+-genome /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/Ahyacinthus.chrsV1.fasta \
+-alignments best 
 
+echo "Ahya 2 putative piRNA mapping complete"
+```
 
+Submitted batch job 47888085
 
+`nano sRNAmapper_ahya_3.sh`
 
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=5
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=200GB
+#SBATCH -t 5-00:00:00
+#SBATCH -q long
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts
 
+module load uri/main
+module load Perl/5.40.0-GCCcore-14.2.0
 
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/sortmerna/ahya_3_S29_L001_R1_001_trim.fastq.collapsed.filt.no-dust/out
 
+echo "Starting ahya 3 putative piRNA mapping"
 
-Okay while I figure out the sRNAmapper stuff, I'm going to move forward with the Apoc piRNA data. After sRNA mapping, I will use the reallocate script for origin assignment for reads with multiple mappings (following Ashey et al. 2025 github [code](https://github.com/urol-e5/deep-dive/blob/main/E-Peve/code/18-PEVE-piRNA-proTRAC.Rmd) from Javi). `nano reallocate_apoc.sh`
+perl /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts/ngs_toolbox/sRNAmapper.pl \
+-input other.fq \
+-genome /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/Ahyacinthus.chrsV1.fasta \
+-alignments best
+
+echo "Ahya 3 putative piRNA mapping complete"
+```
+
+Submitted batch job 47888099
+
+`nano sRNAmapper_ahya_4.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=5
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=200GB
+#SBATCH -t 5-00:00:00
+#SBATCH -q long
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts
+
+module load uri/main
+module load Perl/5.40.0-GCCcore-14.2.0
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/sortmerna/ahya_4_S30_L001_R1_001_trim.fastq.collapsed.filt.no-dust/out
+
+echo "Starting ahya 4 putative piRNA mapping"
+
+perl /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts/ngs_toolbox/sRNAmapper.pl \
+-input other.fq \
+-genome /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/Ahyacinthus.chrsV1.fasta \
+-alignments best
+
+echo "Ahya 4 putative piRNA mapping complete"
+```
+
+Submitted batch job 47888107. 
+
+Move forward with the Apoc piRNA data. After sRNA mapping, I will use the reallocate script for origin assignment for reads with multiple mappings (following Ashey et al. 2025 github [code](https://github.com/urol-e5/deep-dive/blob/main/E-Peve/code/18-PEVE-piRNA-proTRAC.Rmd) from Javi). `nano reallocate_apoc.sh`
 
 ```
 #!/usr/bin/env bash
@@ -2071,6 +2158,205 @@ Z-score >= 2.3264 (one-tailed hypothesis) -> p < 0.01
 ```
 
 The output is essentially overlap scores between complementary reads -- how often a piRNA 5' end overlaps another piRNA 5' end by a given number of nucleotides. The important value is at 10 nt overlap, as the sign of ping pong amplification is 10 nt overlap where the secondary piRNA starts 10 nt down from the primary piRNA. It's all quite confusing to me. But we see that there is overlap at 10 nt, which is more than any of the other nucleotides and suggests active ping-pong processing. The z score is quantifiying how strong the 10 nt overlap is compared to background overlaps. We see the average background is quite low, while ping pong is quite high, which further supports the ping pong amplification processing here. This provides more evidence that these reads/clusters are bona fide piRNAs.  
+
+Extended scratch workspace for 30 more days on 10/25/25. 
+
+```
+ws_extend cnidarian_sperm 30
+Info: could not read email from users config ~/.ws_user.conf.
+Info: reminder email will be sent to local user account
+Info: extending workspace.
+Info: changed mail address to jillashey_uri_edu
+Info: changed reminder setting.
+/scratch3/workspace/jillashey_uri_edu-cnidarian_sperm
+remaining extensions  : 3
+remaining time in days: 30
+```
+
+Hooray everything has finally finshed mapping!! After sRNA mapping, I will use the reallocate script for origin assignment for reads with multiple mappings for both Ahya and Nvec. 
+
+`nano reallocate_nvec.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=2
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=200GB
+#SBATCH -t 100:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts
+
+module load uri/main
+module load Perl/5.40.0-GCCcore-14.2.0
+
+echo "Starting nvec origin assessment for reads with multiple mapping locations"
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/sortmerna
+
+for f in nvec_*_L001_R1_001_trim.fastq.collapsed.filt.no-dust
+do
+perl /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts/ngs_toolbox/reallocate.pl ${f}/out/other.fq.map 10000 1000 b 0
+done
+
+echo "nvec origin assessment complete"
+```
+
+Submitted batch job 48116373
+
+`nano reallocate_ahya.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=2
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=200GB
+#SBATCH -t 100:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts
+
+module load uri/main
+module load Perl/5.40.0-GCCcore-14.2.0
+
+echo "Starting ahya origin assessment for reads with multiple mapping locations"
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/sortmerna
+
+for f in ahya_*_L001_R1_001_trim.fastq.collapsed.filt.no-dust
+do
+perl /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts/ngs_toolbox/reallocate.pl ${f}/out/other.fq.map 10000 1000 b 0
+done
+
+echo "ahya origin assessment complete"
+```
+
+Submitted batch job 48116386. 
+
+These finished running, now time to run protrac! `nano protrac_nvec.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=2
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB
+#SBATCH -t 50:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts
+
+module load uri/main
+module load Perl/5.40.0-GCCcore-14.2.0
+
+echo "Starting protrac for nvec"
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/sortmerna
+
+for f in nvec_*_L001_R1_001_trim.fastq.collapsed.filt.no-dust
+do
+perl /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts/ngs_toolbox/proTRAC_2.4.2.pl \
+-map ${f}/out/other.fq.map.weighted-10000-1000-b-0 \
+-genome /work/pi_hputnam_uri_edu/genomes/Nvec/Nvec200.fasta \
+-repeatmasker /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/Nvec200.fasta.out \
+-geneset /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/genome/NV2g.20240221.gff
+done
+
+echo "Nvec protrac complete!"
+```
+
+Submitted batch job 48117305. Success! Look at slurm output file. 
+
+```
+## Nvec 1 -- proTRAC_other.fq.map.weighted-10000-1000-b-0_2025y10m26d19h5m50s
+Predicted Cluster: chr1 17237284-17238894 directionality: mono:plus
+Predicted Cluster: chr1 20737155-20739413 directionality: mono:plus
+Predicted Cluster: chr2 19149473-19151911 directionality: mono:minus
+Predicted Cluster: chr4 11413352-11417730 directionality: mono:plus
+Predicted Cluster: chr4 12785446-12787930 directionality: mono:minus
+Predicted Cluster: chr7 9542183-9552840 directionality: mono:minus
+Predicted Cluster: chr7 11470990-11472872 directionality: mono:minus
+Predicted Cluster: chr8 13768282-13774843 directionality: mono:plus
+Predicted Cluster: chr9 4104018-4108597 directionality: mono:minus
+Predicted Cluster: chr11 8498144-8508380 directionality: mono:plus
+Predicted Cluster: chr12 1380645-1385812 directionality: mono:plus
+Predicted Cluster: chr12 6761627-6764087 directionality: mono:minus
+Predicted Cluster: chr12 6786479-6789048 directionality: mono:minus
+
+## Nvec 2 -- 	proTRAC_other.fq.map.weighted-10000-1000-b-0_2025y10m26d19h7m6s
+Predicted Cluster: chr4 12291022-12294057 directionality: mono:minus
+Predicted Cluster: chr4 12785446-12787935 directionality: mono:minus
+Predicted Cluster: chr11 6084013-6091893 directionality: mono:minus
+Predicted Cluster: chr11 8499046-8510667 directionality: mono:plus
+Predicted Cluster: chr12 6786480-6789047 directionality: mono:minus
+Predicted Cluster: chr13 7916562-7920742 directionality: mono:plus
+
+## Nvec 3 -- proTRAC_other.fq.map.weighted-10000-1000-b-0_2025y10m26d19h8m22s
+Predicted Cluster: chr1 21551145-21561022 directionality: mono:minus
+Predicted Cluster: chr8 858000-863372 directionality: mono:minus
+Predicted Cluster: chr9 2242772-2251021 directionality: mono:minus
+Predicted Cluster: chr9 9295023-9299988 directionality: mono:plus
+Predicted Cluster: chr11 6080374-6097935 directionality: mono:minus
+Predicted Cluster: chr11 6111102-6119625 directionality: mono:minus
+Predicted Cluster: chr11 8499924-8511124 directionality: mono:plus
+Predicted Cluster: chr12 1364983-1369018 directionality: mono:plus
+Predicted Cluster: chr12 1378283-1386019 directionality: mono:plus
+Predicted Cluster: chr13 7392022-7396886 directionality: mono:minus
+Predicted Cluster: chr13 7423036-7439952 directionality: mono:minus
+Predicted Cluster: chr13 9246461-9247755 directionality: mono:plus
+Predicted Cluster: chr13 11846002-11854946 directionality: mono:plus
+Predicted Cluster: chr13 11879268-11887968 directionality: mono:plus
+Predicted Cluster: chr15 1521213-1535022 directionality: mono:minus
+Predicted Cluster: chr15 1561014-1568949 directionality: mono:minus
+
+## Nvec 4 -- proTRAC_other.fq.map.weighted-10000-1000-b-0_2025y10m26d19h9m37s
+Predicted Cluster: chr2 19148529-19151000 directionality: mono:minus
+Predicted Cluster: chr11 8499926-8508480 directionality: mono:plus
+Predicted Cluster: chr12 1379417-1382857 directionality: mono:plus
+Predicted Cluster: chr12 12443567-12452679 directionality: mono:minus
+```
+
+Similar numbers of clusters to Apoc. Run ping pong ID on all reads. `nano pingpong_nvec.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=2
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB
+#SBATCH -t 50:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts
+
+module load uri/main
+module load Perl/5.40.0-GCCcore-14.2.0
+
+echo "Starting ping pong for nvec"
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/sortmerna
+
+for f in nvec_*_L001_R1_001_trim.fastq.collapsed.filt.no-dust
+do
+perl /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts/ngs_toolbox/TBr2_pingpong.pl \
+-i ${f}/out/other.fq.map.weighted-10000-1000-b-0 \
+-o ${f}.pp
+done
+
+echo "Nvec ping pong complete!"
+```
+
+Submitted batch job 48117451
 
 
 
