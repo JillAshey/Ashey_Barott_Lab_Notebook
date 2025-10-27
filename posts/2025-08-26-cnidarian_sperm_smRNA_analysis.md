@@ -2366,6 +2366,7 @@ Submitted batch job 48117451
 
 
 
+
 ### tRNA derived RNAs 
 
 Nick and I have been talking about other smRNAs to identify. He studies tRNA derived RNAs (tDRs), which are small RNAs that originate from tRNAs. Based on evidence from [model systems](https://pmc.ncbi.nlm.nih.gov/articles/PMC10766869/), these RNAs can perform selective translation regulation (miRNA-like mechanism and interaction with RNA binding proteins) or global translation regulation (eIF4F sequestration and interaction with ribosomes). However, even in model systems, work is pretty limited and often is more experimental than bioinformatical. Nick has a [paper](https://www.biorxiv.org/content/10.1101/2025.04.14.648817v1#:~:text=Abstract,paternal%20non%2Dgenetic%20inheritance%20mechanistically.) on biorxiv that exakined tDRs as a non-genetic inheritance mechanism via sperm in Celegans, which is super cool. 
