@@ -2356,7 +2356,698 @@ done
 echo "Nvec ping pong complete!"
 ```
 
-Submitted batch job 48117451
+Submitted batch job 48117451. Looking at the ping pong output, XXXXX. 
+
+Let's look at the cluster overlap between the 4 reps. Create bed files from cluster fasta files.
+
+Nvec 1:
+
+```
+salloc 
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/sortmerna/proTRAC_other.fq.map.weighted-10000-1000-b-0_2025y10m26d19h5m50s
+
+input_fasta="clusters.fasta"
+output_bed="clusters_nvec_1.bed"
+
+# Extract relevant info from header and convert to BED
+# BED format: chrom  start(0-based)  end(1-based)  .  0  strand(+/-)
+
+grep "^>" "$input_fasta" | while read -r header; do
+  # Remove leading '>'
+  header=${header#>}
+  
+  # Extract chromosome (first word)
+  chrom=$(echo "$header" | awk '{print $1}')
+  
+  # Extract coordinates (second word), split by '-'
+  coords=$(echo "$header" | awk '{print $2}')
+  start=$(echo "$coords" | cut -d'-' -f1)
+  end=$(echo "$coords" | cut -d'-' -f2)
+  
+  # Convert to 0-based start for BED
+  start=$((start - 1))
+  
+  # Extract strand from "directionality:" field (+ or -)
+  # directionality: mono:plus means '+'
+  # directionality: mono:minus means '-'
+  strand=$(echo "$header" | grep -oP "directionality: mono:\K(plus|minus)")
+  if [ "$strand" = "plus" ]; then
+    strand="+"
+  else
+    strand="-"
+  fi
+  
+  # Print BED line
+  echo -e "${chrom}\t${start}\t${end}\t.\t0\t${strand}"
+done > "$output_bed"
+```
+
+Nvec 2:
+
+```
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/sortmerna/proTRAC_other.fq.map.weighted-10000-1000-b-0_2025y10m26d19h7m6s
+
+input_fasta="clusters.fasta"
+output_bed="clusters_nvec_2.bed"
+
+# Extract relevant info from header and convert to BED
+# BED format: chrom  start(0-based)  end(1-based)  .  0  strand(+/-)
+
+grep "^>" "$input_fasta" | while read -r header; do
+  # Remove leading '>'
+  header=${header#>}
+  
+  # Extract chromosome (first word)
+  chrom=$(echo "$header" | awk '{print $1}')
+  
+  # Extract coordinates (second word), split by '-'
+  coords=$(echo "$header" | awk '{print $2}')
+  start=$(echo "$coords" | cut -d'-' -f1)
+  end=$(echo "$coords" | cut -d'-' -f2)
+  
+  # Convert to 0-based start for BED
+  start=$((start - 1))
+  
+  # Extract strand from "directionality:" field (+ or -)
+  # directionality: mono:plus means '+'
+  # directionality: mono:minus means '-'
+  strand=$(echo "$header" | grep -oP "directionality: mono:\K(plus|minus)")
+  if [ "$strand" = "plus" ]; then
+    strand="+"
+  else
+    strand="-"
+  fi
+  
+  # Print BED line
+  echo -e "${chrom}\t${start}\t${end}\t.\t0\t${strand}"
+done > "$output_bed"
+```
+
+Nvec 3:
+
+```
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/sortmerna/proTRAC_other.fq.map.weighted-10000-1000-b-0_2025y10m26d19h8m22s
+
+input_fasta="clusters.fasta"
+output_bed="clusters_nvec_3.bed"
+
+# Extract relevant info from header and convert to BED
+# BED format: chrom  start(0-based)  end(1-based)  .  0  strand(+/-)
+
+grep "^>" "$input_fasta" | while read -r header; do
+  # Remove leading '>'
+  header=${header#>}
+  
+  # Extract chromosome (first word)
+  chrom=$(echo "$header" | awk '{print $1}')
+  
+  # Extract coordinates (second word), split by '-'
+  coords=$(echo "$header" | awk '{print $2}')
+  start=$(echo "$coords" | cut -d'-' -f1)
+  end=$(echo "$coords" | cut -d'-' -f2)
+  
+  # Convert to 0-based start for BED
+  start=$((start - 1))
+  
+  # Extract strand from "directionality:" field (+ or -)
+  # directionality: mono:plus means '+'
+  # directionality: mono:minus means '-'
+  strand=$(echo "$header" | grep -oP "directionality: mono:\K(plus|minus)")
+  if [ "$strand" = "plus" ]; then
+    strand="+"
+  else
+    strand="-"
+  fi
+  
+  # Print BED line
+  echo -e "${chrom}\t${start}\t${end}\t.\t0\t${strand}"
+done > "$output_bed"
+```
+
+Nvec 4:
+
+```
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/sortmerna/proTRAC_other.fq.map.weighted-10000-1000-b-0_2025y10m26d19h9m37s
+
+input_fasta="clusters.fasta"
+output_bed="clusters_nvec_4.bed"
+
+# Extract relevant info from header and convert to BED
+# BED format: chrom  start(0-based)  end(1-based)  .  0  strand(+/-)
+
+grep "^>" "$input_fasta" | while read -r header; do
+  # Remove leading '>'
+  header=${header#>}
+  
+  # Extract chromosome (first word)
+  chrom=$(echo "$header" | awk '{print $1}')
+  
+  # Extract coordinates (second word), split by '-'
+  coords=$(echo "$header" | awk '{print $2}')
+  start=$(echo "$coords" | cut -d'-' -f1)
+  end=$(echo "$coords" | cut -d'-' -f2)
+  
+  # Convert to 0-based start for BED
+  start=$((start - 1))
+  
+  # Extract strand from "directionality:" field (+ or -)
+  # directionality: mono:plus means '+'
+  # directionality: mono:minus means '-'
+  strand=$(echo "$header" | grep -oP "directionality: mono:\K(plus|minus)")
+  if [ "$strand" = "plus" ]; then
+    strand="+"
+  else
+    strand="-"
+  fi
+  
+  # Print BED line
+  echo -e "${chrom}\t${start}\t${end}\t.\t0\t${strand}"
+done > "$output_bed"
+```
+
+Move all cluster bed files to same folder 
+
+```
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/sortmerna
+mkdir proTRAC_bed
+cd proTRAC_bed
+
+mv /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/sortmerna/proTRAC_other.fq.map.weighted-10000-1000-b-0_2025y10m26d19h5m50s/clusters_nvec_1.bed .
+
+mv /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/sortmerna/proTRAC_other.fq.map.weighted-10000-1000-b-0_2025y10m26d19h7m6s/clusters_nvec_2.bed .
+
+mv /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/sortmerna/proTRAC_other.fq.map.weighted-10000-1000-b-0_2025y10m26d19h8m22s/clusters_nvec_3.bed .
+
+mv /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/sortmerna/proTRAC_other.fq.map.weighted-10000-1000-b-0_2025y10m26d19h9m37s/clusters_nvec_4.bed .
+```
+
+Merge clusters across samples using bedtools. Following Javi's work, I selected clusters that are present in at least two reps and overlap is at least 50% of the cluster and is reciprocal (ie A overlaps 50% of B and B overlaps 50% of A)
+
+```
+module load uri/main
+module load bedtools2/2.31.1
+
+FILES=(*.bed)
+NUM_FILES=${#FILES[@]}
+# Loop over each file
+for (( i=0; i<$NUM_FILES; i++ )); do
+  for (( j=i+1; j<$NUM_FILES; j++ )); do
+    FILE1=${FILES[$i]}
+    FILE2=${FILES[$j]}
+    
+    intersectBed -a $FILE1 -b $FILE2 -f 0.5 -r > ${i}_${j}_merged.bed
+  done
+done
+
+cat *_merged.bed | sort -k1,1 -k2,2n | bedtools merge -i - > nvec.merged.clusters.bed
+```
+
+Here are the merged clusters: 
+
+```
+chr11   8499045 8510667
+chr12   1380644 1385812
+chr12   6786479 6789047
+chr2    19149472        19151000
+chr4    12785445        12787930
+```
+
+Run protrac for Ahya. `nano protrac_ahya.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=2
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB
+#SBATCH -t 50:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts
+
+module load uri/main
+module load Perl/5.40.0-GCCcore-14.2.0
+
+echo "Starting protrac for ahya"
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/sortmerna
+
+for f in ahya_*_L001_R1_001_trim.fastq.collapsed.filt.no-dust
+do
+perl /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts/ngs_toolbox/proTRAC_2.4.2.pl \
+-map ${f}/out/other.fq.map.weighted-10000-1000-b-0 \
+-genome /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/Ahyacinthus.chrsV1.fasta \
+-repeatmasker /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/Ahyacinthus.chrsV1.fasta.out \
+-geneset /work/pi_hputnam_uri_edu/refs/Ahyacinthus_genome/Ahyacinthus_genome_V1/Ahyacinthuns.genes.gff
+done
+
+echo "Ahya protrac complete!"
+```
+
+Submitted batch job 48140845. The Ahya V1 genome has a coding GFF (`Ahyacinthus.coding.gff3`) and a gene GFF (`Ahyacinthuns.genes.gff`). I'm going to use the gene GFF. Ran successfully. Looking at slurm output file: 
+
+```
+## Ahya 1 --
+Predicted Cluster: chr1 23805002-23812976 directionality: mono:plus
+Predicted Cluster: chr2 174-5987 directionality: mono:minus
+Predicted Cluster: chr2 11387569-11391448 directionality: mono:plus
+Predicted Cluster: chr2 19927537-19933446 directionality: mono:plus
+Predicted Cluster: chr2 20721045-20728689 directionality: mono:plus
+Predicted Cluster: chr3 5894666-5898237 directionality: mono:plus
+Predicted Cluster: chr3 12591079-12593814 directionality: mono:plus
+Predicted Cluster: chr3 25654405-25659422 directionality: mono:minus
+Predicted Cluster: chr4 10052163-10060993 directionality: mono:minus
+Predicted Cluster: chr4 10805199-10811026 directionality: bi:plus-minus
+Predicted Cluster: chr5 6139145-6146999 directionality: mono:minus
+Predicted Cluster: chr5 6228164-6249992 directionality: mono:minus
+Predicted Cluster: chr5 9867157-9875682 directionality: bi:plus-minus
+Predicted Cluster: chr5 10120447-10128784 directionality: mono:plus
+Predicted Cluster: chr5 15693366-15701818 directionality: bi:plus-minus
+Predicted Cluster: chr6 10853002-10861833 directionality: mono:minus
+Predicted Cluster: chr7 8617006-8622163 directionality: mono:minus
+Predicted Cluster: chr7 26303828-26305916 directionality: bi:minus-plus
+Predicted Cluster: chr8 8099288-8100497 directionality: mono:plus
+Predicted Cluster: chr8 9163997-9165256 directionality: mono:minus
+Predicted Cluster: chr8 16521447-16526985 directionality: mono:minus
+Predicted Cluster: chr8 16543084-16548383 directionality: mono:minus
+Predicted Cluster: chr9 10635273-10641316 directionality: bi:plus-minus
+Predicted Cluster: chr9 20767689-20774996 directionality: bi:plus-minus
+Predicted Cluster: chr9 21206153-21214762 directionality: mono:minus
+Predicted Cluster: chr10 1489825-1496287 directionality: bi:plus-minus
+Predicted Cluster: chr10 3476068-3485921 directionality: mono:minus
+Predicted Cluster: chr10 22459324-22461596 directionality: mono:plus
+Predicted Cluster: chr10 25014073-25022388 directionality: mono:plus
+Predicted Cluster: chr11 5700676-5705543 directionality: mono:plus
+Predicted Cluster: chr11 6497888-6502159 directionality: mono:minus
+Predicted Cluster: chr11 9889042-9894279 directionality: mono:plus
+Predicted Cluster: chr11 12532048-12539891 directionality: mono:minus
+Predicted Cluster: chr11 23481923-23486590 directionality: mono:plus
+Predicted Cluster: chr12 11272332-11273942 directionality: mono:minus
+Predicted Cluster: chr12 16229398-16234946 directionality: mono:minus
+Predicted Cluster: chr13 3333348-3337919 directionality: mono:minus
+Predicted Cluster: chr13 5591097-5597882 directionality: mono:plus
+Predicted Cluster: chr13 23920835-23927662 directionality: mono:minus
+Predicted Cluster: chr14 9854228-9861010 directionality: mono:minus
+Predicted Cluster: chr14 10950061-10955002 directionality: mono:minus
+Predicted Cluster: chr14 11016252-11023023 directionality: mono:minus
+Predicted Cluster: chr14 12238193-12247000 directionality: mono:minus
+Predicted Cluster: chr14 12512046-12520014 directionality: mono:plus
+Predicted Cluster: sc009 116014-118978 directionality: mono:minus
+Predicted Cluster: sc026 288140-299881 directionality: mono:minus
+Predicted Cluster: sc032 3019-12954 directionality: mono:minus
+Predicted Cluster: sc214 39028-45919 directionality: mono:minus
+Predicted Cluster: sc314 19642-27493 directionality: mono:plus
+
+## Ahya 2 --
+Predicted Cluster: chr2 173-7648 directionality: mono:minus
+Predicted Cluster: chr2 19928300-19930266 directionality: mono:plus
+Predicted Cluster: chr2 21342133-21346549 directionality: mono:minus
+Predicted Cluster: chr3 5894847-5898618 directionality: mono:plus
+Predicted Cluster: chr3 15968285-15971277 directionality: mono:plus
+Predicted Cluster: chr3 25655012-25659400 directionality: mono:minus
+Predicted Cluster: chr4 10055285-10060652 directionality: mono:minus
+Predicted Cluster: chr4 10807669-10812134 directionality: mono:minus
+Predicted Cluster: chr4 12717885-12721889 directionality: mono:plus
+Predicted Cluster: chr5 6068277-6074866 directionality: mono:minus
+Predicted Cluster: chr5 6082459-6089699 directionality: mono:minus
+Predicted Cluster: chr5 6228860-6241193 directionality: mono:minus
+Predicted Cluster: chr5 10121158-10125619 directionality: mono:plus
+Predicted Cluster: chr5 32495982-32499420 directionality: mono:plus
+Predicted Cluster: chr8 9163998-9165217 directionality: mono:minus
+Predicted Cluster: chr8 16521490-16527007 directionality: mono:minus
+Predicted Cluster: chr8 16543317-16548005 directionality: mono:minus
+Predicted Cluster: chr9 21210530-21214614 directionality: mono:minus
+Predicted Cluster: chr9 21238079-21244556 directionality: mono:minus
+Predicted Cluster: chr10 2235047-2239488 directionality: mono:plus
+Predicted Cluster: chr10 3478663-3485872 directionality: mono:minus
+Predicted Cluster: chr10 19918786-19921758 directionality: mono:minus
+Predicted Cluster: chr11 24240166-24252506 directionality: mono:plus
+Predicted Cluster: chr14 9855710-9859900 directionality: mono:minus
+Predicted Cluster: chr14 13519167-13524011 directionality: mono:plus
+Predicted Cluster: sc026 290051-298252 directionality: mono:minus
+Predicted Cluster: sc032 4320-10008 directionality: bi:minus-plus
+Predicted Cluster: sc103 970-6936 directionality: mono:minus
+Predicted Cluster: sc314 19630-23740 directionality: mono:plus
+
+## Ahya 3 --
+Predicted Cluster: chr1 2906547-2909858 directionality: mono:minus
+Predicted Cluster: chr1 20388557-20397007 directionality: mono:minus
+Predicted Cluster: chr1 21490363-21498207 directionality: bi:plus-minus
+Predicted Cluster: chr2 19928234-19933515 directionality: mono:plus
+Predicted Cluster: chr3 5892792-5898423 directionality: mono:plus
+Predicted Cluster: chr3 10973176-10977971 directionality: bi:plus-minus
+Predicted Cluster: chr3 15968285-15972928 directionality: mono:plus
+Predicted Cluster: chr4 7489511-7494027 directionality: mono:plus
+Predicted Cluster: chr4 10052358-10060993 directionality: mono:minus
+Predicted Cluster: chr5 6228164-6240022 directionality: mono:minus
+Predicted Cluster: chr5 9861144-9875921 directionality: mono:minus
+Predicted Cluster: chr5 10118137-10129017 directionality: mono:plus
+Predicted Cluster: chr5 32453010-32460018 directionality: mono:plus
+Predicted Cluster: chr6 9234303-9242470 directionality: mono:minus
+Predicted Cluster: chr6 17937341-17946011 directionality: bi:minus-plus
+Predicted Cluster: chr6 21522002-21530816 directionality: mono:plus
+Predicted Cluster: chr6 25092025-25094664 directionality: mono:plus
+Predicted Cluster: chr7 1392023-1398495 directionality: mono:plus
+Predicted Cluster: chr8 9147323-9151516 directionality: bi:plus-minus
+Predicted Cluster: chr8 9162754-9165256 directionality: mono:minus
+Predicted Cluster: chr8 16521488-16527708 directionality: mono:minus
+Predicted Cluster: chr8 16543153-16548377 directionality: mono:minus
+Predicted Cluster: chr8 16775067-16780016 directionality: mono:plus
+Predicted Cluster: chr8 27351514-27354952 directionality: mono:plus
+Predicted Cluster: chr9 20766388-20770995 directionality: mono:plus
+Predicted Cluster: chr9 21206083-21214818 directionality: mono:minus
+Predicted Cluster: chr10 1022091-1029968 directionality: mono:plus
+Predicted Cluster: chr10 3477038-3485921 directionality: mono:minus
+Predicted Cluster: chr10 24614082-24621766 directionality: mono:plus
+Predicted Cluster: chr11 11939045-11943897 directionality: mono:plus
+Predicted Cluster: chr12 1926120-1934885 directionality: mono:plus
+Predicted Cluster: chr12 2284111-2292994 directionality: mono:plus
+Predicted Cluster: chr12 11272333-11273942 directionality: mono:minus
+Predicted Cluster: chr13 13959274-13962228 directionality: mono:minus
+Predicted Cluster: chr14 11014211-11023023 directionality: mono:minus
+Predicted Cluster: sc007 202804-206412 directionality: mono:minus
+Predicted Cluster: sc022 105244-106409 directionality: mono:minus
+Predicted Cluster: sc032 1217-12953 directionality: mono:minus
+Predicted Cluster: sc115 37093-41903 directionality: mono:minus
+Predicted Cluster: sc214 37064-45919 directionality: bi:plus-minus
+Predicted Cluster: sc469 12041-18833 directionality: mono:plus
+
+## Ahya 4 --
+Predicted Cluster: chr1 21492132-21498143 directionality: bi:minus-plus
+Predicted Cluster: chr2 108-5943 directionality: mono:minus
+Predicted Cluster: chr2 21043016-21052016 directionality: mono:minus
+Predicted Cluster: chr3 5894624-5897787 directionality: mono:plus
+Predicted Cluster: chr3 11539554-11547283 directionality: mono:minus
+Predicted Cluster: chr3 15968285-15972928 directionality: mono:plus
+Predicted Cluster: chr4 9312314-9316951 directionality: mono:minus
+Predicted Cluster: chr5 6068139-6076904 directionality: mono:minus
+Predicted Cluster: chr5 6241127-6249985 directionality: mono:minus
+Predicted Cluster: chr5 9868243-9876990 directionality: mono:minus
+Predicted Cluster: chr6 10805163-10813996 directionality: mono:minus
+Predicted Cluster: chr8 9146963-9150640 directionality: bi:plus-minus
+Predicted Cluster: chr8 16521490-16527634 directionality: mono:minus
+Predicted Cluster: chr8 16626153-16632031 directionality: mono:minus
+Predicted Cluster: chr8 16775065-16780646 directionality: mono:plus
+Predicted Cluster: chr9 20769502-20773911 directionality: mono:plus
+Predicted Cluster: chr9 21206097-21212016 directionality: mono:minus
+Predicted Cluster: chr9 21238107-21246779 directionality: mono:minus
+Predicted Cluster: chr10 3477110-3485774 directionality: mono:minus
+Predicted Cluster: chr11 12582678-12588013 directionality: mono:minus
+Predicted Cluster: chr11 24245099-24251987 directionality: mono:plus
+Predicted Cluster: chr13 5667030-5673887 directionality: mono:plus
+Predicted Cluster: chr14 12567517-12574222 directionality: mono:plus
+Predicted Cluster: chr14 14424200-14432903 directionality: bi:minus-plus
+Predicted Cluster: sc026 293015-297872 directionality: mono:minus
+Predicted Cluster: sc032 4061-10008 directionality: mono:minus
+Predicted Cluster: sc178 5793-10354 directionality: mono:plus
+```
+
+Run ping pong ID on all reads. `nano pingpong_ahya.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=2
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB
+#SBATCH -t 50:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts
+
+module load uri/main
+module load Perl/5.40.0-GCCcore-14.2.0
+
+echo "Starting ping pong for ahya"
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/sortmerna
+
+for f in ahya_*_L001_R1_001_trim.fastq.collapsed.filt.no-dust
+do
+perl /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts/ngs_toolbox/TBr2_pingpong.pl \
+-i ${f}/out/other.fq.map.weighted-10000-1000-b-0 \
+-o ${f}.pp
+done
+
+echo "Ahya ping pong complete!"
+```
+
+Submitted batch job 48141938
+
+Look at cluster overlap between the 4 reps. Create bed files from cluster fasta files.
+
+Ahya 1:
+
+```
+salloc 
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/sortmerna/proTRAC_other.fq.map.weighted-10000-1000-b-0_2025y10m27d14h18m54s
+
+input_fasta="clusters.fasta"
+output_bed="clusters_ahya_1.bed"
+
+# Extract relevant info from header and convert to BED
+# BED format: chrom  start(0-based)  end(1-based)  .  0  strand(+/-)
+
+grep "^>" "$input_fasta" | while read -r header; do
+  # Remove leading '>'
+  header=${header#>}
+  
+  # Extract chromosome (first word)
+  chrom=$(echo "$header" | awk '{print $1}')
+  
+  # Extract coordinates (second word), split by '-'
+  coords=$(echo "$header" | awk '{print $2}')
+  start=$(echo "$coords" | cut -d'-' -f1)
+  end=$(echo "$coords" | cut -d'-' -f2)
+  
+  # Convert to 0-based start for BED
+  start=$((start - 1))
+  
+  # Extract strand from "directionality:" field (+ or -)
+  # directionality: mono:plus means '+'
+  # directionality: mono:minus means '-'
+  strand=$(echo "$header" | grep -oP "directionality: mono:\K(plus|minus)")
+  if [ "$strand" = "plus" ]; then
+    strand="+"
+  else
+    strand="-"
+  fi
+  
+  # Print BED line
+  echo -e "${chrom}\t${start}\t${end}\t.\t0\t${strand}"
+done > "$output_bed"
+```
+
+Ahya 2:
+
+```
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/sortmerna/proTRAC_other.fq.map.weighted-10000-1000-b-0_2025y10m27d14h20m26s
+
+input_fasta="clusters.fasta"
+output_bed="clusters_ahya_2.bed"
+
+# Extract relevant info from header and convert to BED
+# BED format: chrom  start(0-based)  end(1-based)  .  0  strand(+/-)
+
+grep "^>" "$input_fasta" | while read -r header; do
+  # Remove leading '>'
+  header=${header#>}
+  
+  # Extract chromosome (first word)
+  chrom=$(echo "$header" | awk '{print $1}')
+  
+  # Extract coordinates (second word), split by '-'
+  coords=$(echo "$header" | awk '{print $2}')
+  start=$(echo "$coords" | cut -d'-' -f1)
+  end=$(echo "$coords" | cut -d'-' -f2)
+  
+  # Convert to 0-based start for BED
+  start=$((start - 1))
+  
+  # Extract strand from "directionality:" field (+ or -)
+  # directionality: mono:plus means '+'
+  # directionality: mono:minus means '-'
+  strand=$(echo "$header" | grep -oP "directionality: mono:\K(plus|minus)")
+  if [ "$strand" = "plus" ]; then
+    strand="+"
+  else
+    strand="-"
+  fi
+  
+  # Print BED line
+  echo -e "${chrom}\t${start}\t${end}\t.\t0\t${strand}"
+done > "$output_bed"
+```
+
+Ahya 3:
+
+```
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/sortmerna/proTRAC_other.fq.map.weighted-10000-1000-b-0_2025y10m27d14h21m36s
+
+input_fasta="clusters.fasta"
+output_bed="clusters_ahya_3.bed"
+
+# Extract relevant info from header and convert to BED
+# BED format: chrom  start(0-based)  end(1-based)  .  0  strand(+/-)
+
+grep "^>" "$input_fasta" | while read -r header; do
+  # Remove leading '>'
+  header=${header#>}
+  
+  # Extract chromosome (first word)
+  chrom=$(echo "$header" | awk '{print $1}')
+  
+  # Extract coordinates (second word), split by '-'
+  coords=$(echo "$header" | awk '{print $2}')
+  start=$(echo "$coords" | cut -d'-' -f1)
+  end=$(echo "$coords" | cut -d'-' -f2)
+  
+  # Convert to 0-based start for BED
+  start=$((start - 1))
+  
+  # Extract strand from "directionality:" field (+ or -)
+  # directionality: mono:plus means '+'
+  # directionality: mono:minus means '-'
+  strand=$(echo "$header" | grep -oP "directionality: mono:\K(plus|minus)")
+  if [ "$strand" = "plus" ]; then
+    strand="+"
+  else
+    strand="-"
+  fi
+  
+  # Print BED line
+  echo -e "${chrom}\t${start}\t${end}\t.\t0\t${strand}"
+done > "$output_bed"
+```
+
+Ahya 4:
+
+```
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/sortmerna/proTRAC_other.fq.map.weighted-10000-1000-b-0_2025y10m27d14h23m12s
+
+input_fasta="clusters.fasta"
+output_bed="clusters_ahya_4.bed"
+
+# Extract relevant info from header and convert to BED
+# BED format: chrom  start(0-based)  end(1-based)  .  0  strand(+/-)
+
+grep "^>" "$input_fasta" | while read -r header; do
+  # Remove leading '>'
+  header=${header#>}
+  
+  # Extract chromosome (first word)
+  chrom=$(echo "$header" | awk '{print $1}')
+  
+  # Extract coordinates (second word), split by '-'
+  coords=$(echo "$header" | awk '{print $2}')
+  start=$(echo "$coords" | cut -d'-' -f1)
+  end=$(echo "$coords" | cut -d'-' -f2)
+  
+  # Convert to 0-based start for BED
+  start=$((start - 1))
+  
+  # Extract strand from "directionality:" field (+ or -)
+  # directionality: mono:plus means '+'
+  # directionality: mono:minus means '-'
+  strand=$(echo "$header" | grep -oP "directionality: mono:\K(plus|minus)")
+  if [ "$strand" = "plus" ]; then
+    strand="+"
+  else
+    strand="-"
+  fi
+  
+  # Print BED line
+  echo -e "${chrom}\t${start}\t${end}\t.\t0\t${strand}"
+done > "$output_bed"
+```
+
+Move all cluster bed files to same folder 
+
+```
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/sortmerna
+mkdir proTRAC_bed
+cd proTRAC_bed
+
+mv /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/sortmerna/proTRAC_other.fq.map.weighted-10000-1000-b-0_2025y10m27d14h18m54s/clusters_ahya_1.bed .
+
+mv /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/sortmerna/proTRAC_other.fq.map.weighted-10000-1000-b-0_2025y10m27d14h20m26s/clusters_ahya_2.bed .
+
+mv /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/sortmerna/proTRAC_other.fq.map.weighted-10000-1000-b-0_2025y10m27d14h21m36s/clusters_ahya_3.bed .
+
+mv /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/sortmerna/proTRAC_other.fq.map.weighted-10000-1000-b-0_2025y10m27d14h23m12s/clusters_ahya_4.bed .
+```
+
+Merge clusters across samples using bedtools. Following Javi's work, I selected clusters that are present in at least two reps and overlap is at least 50% of the cluster and is reciprocal (ie A overlaps 50% of B and B overlaps 50% of A)
+
+```
+module load uri/main
+module load bedtools2/2.31.1
+
+FILES=(*.bed)
+NUM_FILES=${#FILES[@]}
+# Loop over each file
+for (( i=0; i<$NUM_FILES; i++ )); do
+  for (( j=i+1; j<$NUM_FILES; j++ )); do
+    FILE1=${FILES[$i]}
+    FILE2=${FILES[$j]}
+    
+    intersectBed -a $FILE1 -b $FILE2 -f 0.5 -r > ${i}_${j}_merged.bed
+  done
+done
+
+cat *_merged.bed | sort -k1,1 -k2,2n | bedtools merge -i - > ahya.merged.clusters.bed
+```
+
+Here are the merged clusters: 
+
+```
+
+chr1    21492131        21498143
+chr10   3477037 3485921
+chr11   24245098        24251987
+chr12   11272332        11273942
+chr14   9855709 9859900
+chr14   11016251        11023023
+chr2    172     5987
+chr2    19928233        19933446
+chr3    5894623 5898423
+chr3    15968284        15972928
+chr3    25655011        25659400
+chr4    10052357        10060993
+chr4    10807668        10811026
+chr5    6068276 6074866
+chr5    6228163 6241193
+chr5    9867156 9875921
+chr5    10120446        10128784
+chr8    9147322 9150640
+chr8    9163996 9165256
+chr8    16521487        16527634
+chr8    16543152        16548377
+chr8    16775066        16780016
+chr9    20769501        20773911
+chr9    21206096        21214762
+chr9    21238106        21244556
+sc026   290050  298252
+sc032   3018    12953
+sc214   39027   45919
+sc314   19641   23740
+```
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2449,12 +3140,19 @@ Submitted batch job 47067938. Okay this ran, but the environment still had confl
 tsRNAsearch is a nextflow pipeline, and nextflow is already installed on the HPC. 
 
 
+http://rna.sysu.edu.cn/tsRFun/analysisResults/JC8G8OKDOQ_FUNC/index_FUNC.php
 
+https://rna.sysu.edu.cn/tsRFun/analysisResults/0/index.php
 
 
 
 I also found [tRFTarget](http://trftarget.net/online_targets), which can be used to identify the targets of tDRs. They have an online tool which seems very nifty. 
 
+
+
+Maybe try [tsRFinder](https://github.com/zhlingl/tsRFun/tree/main/tsRFinder)
+
+or mintMAP
 
 
 
