@@ -1124,8 +1124,155 @@ echo "Mirdeep2 complete for ahya 4"
 conda deactivate
 ```
 
-Submitted batch job 47248281
+Submitted batch job 47248281.
 
+Based on the miRNA ID step, I can now make a fasta with the expressed miRNAs for target prediction. For Apoc, only 7 miRNAs were expressed. `nano expressed_miRNAs_apoc.fasta`
+
+```
+>Cluster_598
+UGGCUUGGAGUUCUAGUGAUUGA
+>Cluster_597
+ACUGAACUCCAAACAUGAUU
+>Cluster_595
+UGGCUUGGAGUUCUAGUGAUUGA
+>Cluster_2651
+CGUUCGCGCUCGCCCCCGA
+>Cluster_2637
+UCAGAAAGAGAAUGAACACCAGA
+>Cluster_2306
+ACUUUGAAUCCAGCGAUCCG
+>Cluster_1200
+ACCCGUAGAUCCGAACUUGUGG
+```
+
+Install miranda via conda. 
+
+```
+cd /work/pi_hputnam_uri_edu/conda/envs
+module load conda/latest # need to load before making any conda envs
+conda config --add channels bioconda
+conda config --add channels conda-forge
+conda config --set channel_priority strict
+conda create --prefix /work/pi_hputnam_uri_edu/conda/envs/miranda miranda
+conda activate /work/pi_hputnam_uri_edu/conda/envs/miranda 
+```
+
+Okay now I ran run miranda for Apoc! `nano miranda_strict_mRNA_apoc.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=2
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB
+#SBATCH -t 100:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts
+
+echo "Apoc target prediction with miranda - targeting mRNA seqs"$(date)
+
+module load conda/latest # need to load before making any conda envs
+conda activate /work/pi_hputnam_uri_edu/conda/envs/miranda 
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc
+
+miranda expressed_miRNAs_apoc.fasta /work/pi_hputnam_uri_edu/genomes/Apoc/apoculata_mrna.fasta -en -20 -strict -out miranda_strict_mRNA_apoc.tab
+
+conda deactivate
+
+echo "miranda run finished!"$(date)
+echo "counting number of putative interactions predicted" $(date)
+
+zgrep -c "Performing Scan" miranda_strict_mRNA_apoc.tab
+
+echo "Parsing output" $(date)
+grep -A 1 "Scores for this hit:" miranda_strict_mRNA_apoc.tab | sort | grep '>' > miranda_strict_mRNA_parsed_apoc.txt
+
+echo "counting number of putative interactions predicted" $(date)
+wc -l miranda_strict_mRNA_parsed_apoc.txt
+
+echo "Apoc miranda script complete" $(date)
+```
+
+Submitted batch job 48591145. 4174 putative interactions predicted. 
+
+For Nvec, 14 miRNAs were expressed. `nano expressed_miRNAs_nvec.fasta`
+
+```
+>Cluster_739
+UUCGUCUCGUAACUGCCCUGA
+>Cluster_1073
+UAAUGUUCCUGCUUGUUCCU
+>Cluster_1341
+UUGCACAUUACCAAUAUUCUG
+>Cluster_1343
+UUGCACAUCACCAAUGUUCUGAU
+>Cluster_1376
+CGAGGUAACUGUUGCAGCA
+>Cluster_1430
+ACCCGUAGAUCCGAACUUGUGG
+>Cluster_1640
+UAAAAGUGAUCAGUGGUAAGGU
+>Cluster_1954
+AACUGAUUUUUGGAAACUGGCU
+>Cluster_1959
+AACUGAUUUUUGGAAACUGGCU
+>Cluster_1961
+AACUGAUUUUUGGAAACUGGCU
+>Cluster_2470
+UGACAGAAGAUAGAAGCGCUG
+>Cluster_2518
+UCUGACAGAUAAUGAUCCACCGCCU
+>Cluster_2678
+GAAUUCCUCGUUACUGAAGCUC
+>Cluster_2764
+AAUAUCAGGAGGACGCAUUCG
+```
+
+Run miranda for Nvec! `nano miranda_strict_mRNA_nvec.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=2
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB
+#SBATCH -t 100:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts
+
+echo "Nvec target prediction with miranda - targeting mRNA seqs"$(date)
+
+module load conda/latest # need to load before making any conda envs
+conda activate /work/pi_hputnam_uri_edu/conda/envs/miranda 
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec
+
+miranda expressed_miRNAs_nvec.fasta /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/genome/NV2g.20240221.transcripts.fa -en -20 -strict -out miranda_strict_mRNA_nvec.tab
+
+conda deactivate
+
+echo "miranda run finished!"$(date)
+echo "counting number of putative interactions predicted" $(date)
+
+zgrep -c "Performing Scan" miranda_strict_mRNA_nvec.tab
+
+echo "Parsing output" $(date)
+grep -A 1 "Scores for this hit:" miranda_strict_mRNA_nvec.tab | sort | grep '>' > miranda_strict_mRNA_parsed_nvec.txt
+
+echo "counting number of putative interactions predicted" $(date)
+wc -l miranda_strict_mRNA_parsed_nvec.txt
+
+echo "Nvec miranda script complete" $(date)
+```
+
+Submitted batch job 48591620
 
 
 
@@ -3039,6 +3186,173 @@ sc214   39027   45919
 sc314   19641   23740
 ```
 
+Trying to determine exactly how many piRNA reads were identified. 
+
+```
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/sortmerna/ahya_1_S27_L001_R1_001_trim.fastq.collapsed.filt.no-dust/out
+
+# Input file: other.fq.map.weighted-10000-1000-b-0 (example name)
+input="other.fq.map.weighted-10000-1000-b-0"
+
+# Extract sequences (field 3)
+cut -f3 $input > seqs.txt
+
+# Compute counts of 1U (1st base U) and 10A (10th base A) relative to total reads
+total_reads=$(wc -l < seqs.txt)
+
+# Count 1U reads
+count_1U=$(awk 'substr($0,1,1)=="T" || substr($0,1,1)=="U" {count++} END {print count+0}' seqs.txt)
+
+# Count 10A reads (check length >= 10 to avoid short seqs)
+count_10A=$(awk 'length($0)>=10 && substr($0,10,1)=="A" {count++} END {print count+0}' seqs.txt)
+
+echo "Total reads (25-35 nt): $total_reads"
+echo "Reads with 1U at position 1: $count_1U ($(awk "BEGIN {printf \"%.2f\", ($count_1U/$total_reads)*100}"))%"
+echo "Reads with A at position 10: $count_10A ($(awk "BEGIN {printf \"%.2f\", ($count_10A/$total_reads)*100}"))%"
+
+Total reads (25-35 nt): 1,388,856
+Reads with 1U at position 1: 1130221 (81.38)%
+Reads with A at position 10: 642051 (46.23)%
+```
+
+I don't know...I think I just need to make a decision and go from there. 
+
+Look at the intersection of piRNA clusters and TE. In R, I did the following: 
+
+Read in repeatmasker out file 
+```{r}
+out_file <- read.table("~/Desktop/GFFs/ahya/Ahyacinthus.chrsV1.fasta.out", comment.char = "", header = F, fill = T, skip = 2)
+```
+
+Retain only chromosome, start, stop, TE name, Family Name and percent divergence
+```{r}
+bed_file <- out_file[,c(5:7,11,2)]
+
+#remove empty lines 
+bed_file <- bed_file %>%
+  drop_na(.)
+```
+
+Write out bed file
+```{r}
+write.table(bed_file, file = "~/Desktop/GFFs/ahya/Ahya_repeatmasker.bed", sep = "\t", col.names = F, row.names = F, quote = F)
+```
+
+Upload bed file to `/scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya`. Then intersect the TE file with the piRNA cluster bed file. 
+
+```
+module load bedtools2/2.31.1
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/sortmerna/proTRAC_bed
+
+bedtools intersect -wo -a ahya.merged.clusters.bed -b /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/Ahya_repeatmasker.bed > Ahya_piRNA_cluster_TEs_intersect.txt
+```
+
+I need to make bed files for each piRNA reads per rep and then merge them and then intersect them with the other piRNA bed files AND repeat masker. Make bed file for piRNAs first. 
+
+```
+## Ahya 1
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/sortmerna/ahya_1_S27_L001_R1_001_trim.fastq.collapsed.filt.no-dust/out
+
+awk '{
+  chr = $1;
+  start = $2 - 1;                  # convert 1-based to 0-based start for BED
+  end = start + length($3);       # end is start + length of sequence in field 3
+  print chr"\t"start"\t"end;
+}' other.fq.map.weighted-10000-1000-b-0 > other.fq.map.weighted-10000-1000-b-0.ahya_1.bed
+
+## Ahya 2
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/sortmerna/ahya_2_S28_L001_R1_001_trim.fastq.collapsed.filt.no-dust/out
+
+awk '{
+  chr = $1;
+  start = $2 - 1;                  # convert 1-based to 0-based start for BED
+  end = start + length($3);       # end is start + length of sequence in field 3
+  print chr"\t"start"\t"end;
+}' other.fq.map.weighted-10000-1000-b-0 > other.fq.map.weighted-10000-1000-b-0.ahya_2.bed
+
+## Ahya 3
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/sortmerna/ahya_3_S29_L001_R1_001_trim.fastq.collapsed.filt.no-dust/out
+
+awk '{
+  chr = $1;
+  start = $2 - 1;                  # convert 1-based to 0-based start for BED
+  end = start + length($3);       # end is start + length of sequence in field 3
+  print chr"\t"start"\t"end;
+}' other.fq.map.weighted-10000-1000-b-0 > other.fq.map.weighted-10000-1000-b-0.ahya_3.bed
+
+## Ahya 4
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/sortmerna/ahya_4_S30_L001_R1_001_trim.fastq.collapsed.filt.no-dust/out
+
+awk '{
+  chr = $1;
+  start = $2 - 1;                  # convert 1-based to 0-based start for BED
+  end = start + length($3);       # end is start + length of sequence in field 3
+  print chr"\t"start"\t"end;
+}' other.fq.map.weighted-10000-1000-b-0 > other.fq.map.weighted-10000-1000-b-0.ahya_4.bed
+```
+
+Move new bed files into their own folder and assess overlap across reps
+
+```
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/sortmerna
+mkdir piRNA_bed
+cd piRNA_bed
+mv /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/sortmerna/ahya_1_S27_L001_R1_001_trim.fastq.collapsed.filt.no-dust/out/other.fq.map.weighted-10000-1000-b-0.ahya_1.bed .
+mv /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/sortmerna/ahya_2_S28_L001_R1_001_trim.fastq.collapsed.filt.no-dust/out/other.fq.map.weighted-10000-1000-b-0.ahya_2.bed .
+mv /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/sortmerna/ahya_3_S29_L001_R1_001_trim.fastq.collapsed.filt.no-dust/out/other.fq.map.weighted-10000-1000-b-0.ahya_3.bed .
+mv /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/sortmerna/ahya_4_S30_L001_R1_001_trim.fastq.collapsed.filt.no-dust/out/other.fq.map.weighted-10000-1000-b-0.ahya_4.bed .
+
+module load bedtools2/2.31.1
+
+FILES=(*.bed)
+NUM_FILES=${#FILES[@]}
+# Loop over each file
+for (( i=0; i<$NUM_FILES; i++ )); do
+  for (( j=i+1; j<$NUM_FILES; j++ )); do
+    FILE1=${FILES[$i]}
+    FILE2=${FILES[$j]}
+    
+    intersectBed -a $FILE1 -b $FILE2 -f 0.5 -r > ${i}_${j}_merged.bed
+  done
+done
+
+cat *_merged.bed | sort -k1,1 -k2,2n | bedtools merge -i - > ahya.merged.piRNA.bed
+wc -l ahya.merged.piRNA.bed 
+364493 ahya.merged.piRNA.bed
+```
+
+Intersect piRNA bed file with the repeatmasker bed file 
+
+```
+bedtools intersect -wo -a ahya.merged.piRNA.bed -b /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/Ahya_repeatmasker.bed > Ahya_piRNAs_TEs_intersect.txt
+```
+
+Intersect piRNA bed file and piRNA cluster bed file with the gene and coding gffs. 
+
+```
+## piRNAs 
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/sortmerna/piRNA_bed
+
+bedtools intersect -wo -a ahya.merged.piRNA.bed -b /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/Ahyacinthuns.genes.gff > Ahya_piRNAs_genes_intersect.txt
+
+bedtools intersect -wo -a ahya.merged.piRNA.bed -b /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/Ahyacinthus.coding.gff3 > Ahya_piRNAs_coding_intersect.txt
+
+## Clusters 
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/sortmerna/proTRAC_bed
+
+bedtools intersect -wo -a ahya.merged.clusters.bed -b /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/Ahyacinthuns.genes.gff > Ahya_piRNA_cluster_genes_intersect.txt
+
+bedtools intersect -wo -a ahya.merged.clusters.bed -b /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/Ahyacinthus.coding.gff3 > Ahya_piRNA_cluster_coding_intersect.txt
+```
+
+
+
+
+
+
+
+
 
 
 
@@ -3145,14 +3459,14 @@ http://rna.sysu.edu.cn/tsRFun/analysisResults/JC8G8OKDOQ_FUNC/index_FUNC.php
 https://rna.sysu.edu.cn/tsRFun/analysisResults/0/index.php
 
 
-
 I also found [tRFTarget](http://trftarget.net/online_targets), which can be used to identify the targets of tDRs. They have an online tool which seems very nifty. 
-
-
 
 Maybe try [tsRFinder](https://github.com/zhlingl/tsRFun/tree/main/tsRFinder)
 
 or mintMAP
+
+How about I just try to map the reads to the tRNA fasta??
+
 
 
 
