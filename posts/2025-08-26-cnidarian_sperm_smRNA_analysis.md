@@ -1274,6 +1274,224 @@ echo "Nvec miranda script complete" $(date)
 
 Submitted batch job 48591620
 
+I also want to predict miRNA interactions with the 3'UTR but these gffs do not have these annotated. Since these are not annotated in my genomes, I will have to predict them myself. Like previous analyses, I will say that 3'UTR is 1000bp to the right of the genes. Look at features:
+
+```
+cd /work/pi_hputnam_uri_edu/genomes/Apoc
+zgrep -v '^#' apoculata.gff3.gz | cut -s -f 3 | sort | uniq -c | sort -rn > all_features.txt
+
+239708 exon
+ 236997 CDS
+  47156 gene
+  45867 mRNA
+  44823 stop_codon
+  44312 start_codon
+   2889 five_prime_UTR
+   2317 tRNA
+    687 three_prime_UTR
+```
+
+Make gff for genes only 
+
+```
+zgrep $'\tgene\t' apoculata.gff3.gz > apoc_GFFannotation.gene.gff
+```
+
+Extract scaffold names and lengths
+
+```
+cat is apoculata.genome.fasta | awk '$0 ~ ">" {if (NR > 1) {print c;} c=0;printf substr($0,2,100) "\t"; } $0 !~ ">" {c+=length($0);} END { print c; }' > apoc.Chromosome_lengths.txt
+
+# Sort so that chromosomes are in order 
+sort -k1,1 -V apoc.Chromosome_lengths.txt > apoc.Chromosome_lengths_sorted.txt
+```
+
+Extract scaffold names 
+
+```
+awk -F" " '{print $1}' apoc.Chromosome_lengths_sorted.txt > apoc.Chromosome_names.txt
+```
+
+Sort gene GFF by chromosome names 
+
+```
+module load bedtools2/2.31.1
+sortBed -faidx apoc.Chromosome_names.txt -i apoc_GFFannotation.gene.gff > apoc_GFFannotation.gene_sorted.gff
+```
+
+Extract 1000bp flank around genes and subtract any gene overlap
+
+```
+# Flank
+flankBed -i apoc_GFFannotation.gene_sorted.gff -g apoc.Chromosome_lengths_sorted.txt -l 0 -r 1000 -s | awk '{gsub("gene","3prime_UTR",$3); print $0 }' | awk '{if($5-$4 > 3)print $1"\t"$2"\t"$3"\t"$4"\t"$5"\t"$6"\t"$7"\t"$8"\t"$9}' | tr ' ' '\t' > apoc.GFFannotation.3UTR_1kb.gff
+
+# Subtract 
+subtractBed -a apoc.GFFannotation.3UTR_1kb.gff -b apoc_GFFannotation.gene_sorted.gff > apoc.GFFannotation.3UTR_1kb_corrected.gff 
+
+# Sort 
+sortBed -faidx apoc.Chromosome_names.txt -i apoc.GFFannotation.3UTR_1kb_corrected.gff > apoc.GFFannotation.3UTR_1kb_corrected.sorted.gff 
+```
+
+Look for closest 3UTR to each gene
+
+```
+bedtools closest -a apoc_GFFannotation.gene_sorted.gff \
+                   -b apoc.GFFannotation.3UTR_1kb_corrected.sorted.gff \
+                   -s -D a \
+                   -t first > apoc_closest_UTRs.txt
+```
+
+Make 3UTR gff 
+
+```
+awk '{OFS="\t"; print $10, $11, $12, $13, $14, $15, $16, $17, $18 }' apoc_closest_UTRs.txt > apoc_3UTRs_closest.gff
+```
+
+Make fasta of 3UTRs
+
+```
+bedtools getfasta -fi apoculata.genome.fasta -bed apoc_3UTRs_closest.gff -fo apoc_3UTRs_closest.fasta -name -s
+```
+
+Hooray! Now run miranda with 3UTRs. `nano miranda_strict_3UTR_apoc.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=2
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB
+#SBATCH -t 100:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts
+
+echo "Apoc target prediction with miranda - targeting 3UTR seqs"$(date)
+
+module load conda/latest # need to load before making any conda envs
+conda activate /work/pi_hputnam_uri_edu/conda/envs/miranda 
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc
+
+miranda expressed_miRNAs_apoc.fasta /work/pi_hputnam_uri_edu/genomes/Apoc/apoc_3UTRs_closest.fasta -en -20 -strict -out miranda_strict_3UTR_apoc.tab
+
+conda deactivate
+
+echo "miranda run finished!"$(date)
+echo "counting number of putative interactions predicted" $(date)
+
+zgrep -c "Performing Scan" miranda_strict_3UTR_apoc.tab
+
+echo "Parsing output" $(date)
+grep -A 1 "Scores for this hit:" miranda_strict_3UTR_apoc.tab | sort | grep '>' > miranda_strict_3UTR_parsed_apoc.txt
+
+echo "counting number of putative interactions predicted" $(date)
+wc -l miranda_strict_3UTR_parsed_apoc.txt
+
+echo "Apoc miranda script complete" $(date)
+```
+
+Submitted batch job 48632520
+
+Do the same 3UTR identification with Nvec. 
+
+```
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/genome
+grep -v '^#' NV2g.20240221.gff | cut -s -f 3 | sort | uniq -c | sort -rn > all_features.txt
+
+287079 exon
+ 241911 CDS
+  35881 mRNA
+  24526 gene
+```
+
+Make gff for mRNA only 
+
+```
+grep $'\tmRNA\t' NV2g.20240221.gff > nvec_GFFannotation.mRNA.gff
+```
+
+Extract scaffold names and lengths
+
+```
+cat is Nvec200.fasta | awk '$0 ~ ">" {if (NR > 1) {print c;} c=0;printf substr($0,2,100) "\t"; } $0 !~ ">" {c+=length($0);} END { print c; }' > nvec.Chromosome_lengths.txt
+```
+
+Extract scaffold names 
+
+```
+awk -F" " '{print $1}' nvec.Chromosome_lengths.txt > nvec.Chromosome_names.txt
+```
+
+Sort mRNA GFF by chromosome names 
+
+```
+module load bedtools2/2.31.1
+sortBed -faidx nvec.Chromosome_names.txt -i nvec_GFFannotation.mRNA.gff > nvec_GFFannotation.mRNA_sorted.gff
+```
+
+Extract 1000bp flank around genes and subtract any mRNA overlap
+
+```
+# Flank
+flankBed -i nvec_GFFannotation.mRNA_sorted.gff -g nvec.Chromosome_lengths.txt -l 0 -r 1000 -s | awk '{gsub("mRNA","3prime_UTR",$3); print $0 }' | awk '{if($5-$4 > 3)print $1"\t"$2"\t"$3"\t"$4"\t"$5"\t"$6"\t"$7"\t"$8"\t"$9}' | tr ' ' '\t' > nvec.GFFannotation.3UTR_1kb.gff
+
+# Subtract 
+subtractBed -a nvec.GFFannotation.3UTR_1kb.gff -b nvec_GFFannotation.mRNA_sorted.gff > nvec.GFFannotation.3UTR_1kb_corrected.gff 
+
+# Sort 
+sortBed -faidx nvec.Chromosome_names.txt -i nvec.GFFannotation.3UTR_1kb_corrected.gff > nvec.GFFannotation.3UTR_1kb_corrected.sorted.gff 
+```
+
+Make fasta of 3UTRs
+
+```
+bedtools getfasta -fi Nvec200.fasta -bed nvec.GFFannotation.3UTR_1kb_corrected.sorted.gff -s -name > nvec_3UTRs.fasta
+```
+
+Run miranda with 3UTRs. `nano miranda_strict_3UTR_nvec.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=2
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB
+#SBATCH -t 100:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts
+
+echo "NVec target prediction with miranda - targeting 3UTR seqs"$(date)
+
+module load conda/latest # need to load before making any conda envs
+conda activate /work/pi_hputnam_uri_edu/conda/envs/miranda 
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec
+
+miranda expressed_miRNAs_nvec.fasta /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/genome/nvec_3UTRs.fasta -en -20 -strict -out miranda_strict_3UTR_nvec.tab
+
+conda deactivate
+
+echo "miranda run finished!"$(date)
+echo "counting number of putative interactions predicted" $(date)
+
+zgrep -c "Performing Scan" miranda_strict_3UTR_nvec.tab
+
+echo "Parsing output" $(date)
+grep -A 1 "Scores for this hit:" miranda_strict_3UTR_nvec.tab | sort | grep '>' > miranda_strict_3UTR_parsed_nvec.txt
+
+echo "counting number of putative interactions predicted" $(date)
+wc -l miranda_strict_3UTR_parsed_nvec.txt
+
+echo "Apoc miranda script complete" $(date)
+```
+
+Submitted batch job 48634665
 
 
 ### piRNAs
