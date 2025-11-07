@@ -1493,6 +1493,106 @@ echo "Apoc miranda script complete" $(date)
 
 Submitted batch job 48634665
 
+For Ahya, 27 miRNAs were expressed. `nano expressed_miRNAs_ahya.fasta`
+
+```
+>Cluster_1332
+AUUGAUUGUAGACAAGCCU
+>Cluster_1356
+UCCCGUAGAUCCGAACUUGUGG
+>Cluster_1518
+UCUGCGUUAUCGGUGAAAUUGU
+>Cluster_1641
+CAAGUGAGAGAAGGUUAGUGUGG
+>Cluster_1975
+UAUGGGUUGACAGUCGACGGUC
+>Cluster_3756
+AGUGCACUUUUCUCAGGAUG
+>Cluster_3818
+UAAUGUUCGCAACUGCCUUGU
+>Cluster_7759
+UAUGAGACCGUUUGCCAAUGUU
+>Cluster_7774
+UCUGGCAGUAUGUUAUUUUUCC
+>Cluster_8901
+UUAACGAGUAGAUAAAUGAAGAGU
+>Cluster_9540
+UAGGCGUAUUUCCGAUUGUCCU
+>Cluster_10318
+ACUGCAGCUAAAUACUCCGCUG
+>Cluster_10319
+AAAAAUGUCGGUUGCUUAAGCU
+>Cluster_10493
+CAAUGUUUCGGCUUGUUCCCG
+>Cluster_11616
+AAGAACACCCAAAAUAGCUGAGGA
+>Cluster_11958
+UUGGUAGAGAGAAAUGACAAAAU
+>Cluster_12579
+UCUGCCAAUCGUCAGACAAACU
+>Cluster_12617
+UUUUUGUGAUGUUCGUCAAUA
+>Cluster_13735
+CAAGGAGGAAGCAUGAUACGUA
+>Cluster_16517
+UUCAAUGCAAAACAAGUCAGGUAU
+>Cluster_16534
+UCAUAACAGUGAGGACCAUUCU
+>Cluster_16886
+AUUCGUCUCUUGUAUUUUCCUGG
+>Cluster_18389
+ACUUGAAUGCGAGGCUCAUUAGU
+>Cluster_18872
+UCUCUUACAUUGUUGUGCUGCC
+>Cluster_21323
+AAAAAUUUCGUUUCAGGGCCA
+```
+
+Run miranda with mRNA prediction. `nano miranda_strict_mRNA_ahya.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=2
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB
+#SBATCH -t 100:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts
+
+echo "Ahya target prediction with miranda - targeting mRNA seqs"$(date)
+
+module load conda/latest # need to load before making any conda envs
+conda activate /work/pi_hputnam_uri_edu/conda/envs/miranda 
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya
+
+miranda expressed_miRNAs_ahya.fasta Ahyacinthus.transcripts.fasta -en -20 -strict -out miranda_strict_mRNA_ahya.tab
+
+conda deactivate
+
+echo "miranda run finished!"$(date)
+echo "counting number of putative interactions predicted" $(date)
+
+zgrep -c "Performing Scan" miranda_strict_mRNA_ahya.tab
+
+echo "Parsing output" $(date)
+grep -A 1 "Scores for this hit:" miranda_strict_mRNA_ahya.tab | sort | grep '>' > miranda_strict_mRNA_parsed_ahya.txt
+
+echo "counting number of putative interactions predicted" $(date)
+wc -l miranda_strict_mRNA_parsed_ahya.txt
+
+echo "Ahya miranda script complete" $(date)
+```
+
+Submitted batch job 48680891
+
+
+
+
 
 ### piRNAs
 
@@ -3564,6 +3664,123 @@ bedtools intersect -wo -a ahya.merged.clusters.bed -b /scratch3/workspace/jillas
 bedtools intersect -wo -a ahya.merged.clusters.bed -b /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/Ahyacinthus.coding.gff3 > Ahya_piRNA_cluster_coding_intersect.txt
 ```
 
+Do the same for Apoc. Look at the intersection of piRNA clusters and TE. In R, I did the following:
+
+Read in repeatmasker out file. 
+
+```
+out_file <- read.table("~/Desktop/GFFs/apoc/apoculata.genome.fasta.out", comment.char = "", header = F, fill = T, skip = 2)
+```
+
+Retain only chromosome, start, stop, TE name, Family Name and percent divergence
+
+```
+bed_file <- out_file[,c(5:7,11,2)]
+
+#remove empty lines 
+bed_file <- bed_file %>%
+  drop_na(.)
+```
+
+Write out bed file
+
+```
+write.table(bed_file, file = "~/Desktop/GFFs/apoc/Apoc_repeatmasker.bed", sep = "\t", col.names = F, row.names = F, quote = F)
+```
+
+Upload bed file to `/scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya`. Then intersect the TE file with the piRNA cluster bed file.
+
+```
+module load bedtools2/2.31.1
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc/sortmerna/proTRAC_bed
+
+bedtools intersect -wo -a apoc.merged.clusters.bed -b /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc/Apoc_repeatmasker.bed > Apoc_piRNA_cluster_TEs_intersect.txt
+```
+
+I need to make bed files for each piRNA reads per rep and then merge them and then intersect them with the other piRNA bed files AND repeat masker. Make bed file for piRNAs first.
+
+```
+## Apoc 2
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc/sortmerna/apoc_2_S31_L001_R1_001_trim.fastq.collapsed.filt.no-dust/out
+
+awk '{
+  chr = $1;
+  start = $2 - 1;                  # convert 1-based to 0-based start for BED
+  end = start + length($3);       # end is start + length of sequence in field 3
+  print chr"\t"start"\t"end;
+}' other.fq.map.weighted-10000-1000-b-0 > other.fq.map.weighted-10000-1000-b-0.apoc_2.bed
+
+## Apoc 3
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc/sortmerna/apoc_3_S32_L001_R1_001_trim.fastq.collapsed.filt.no-dust/out
+
+awk '{
+  chr = $1;
+  start = $2 - 1;                  # convert 1-based to 0-based start for BED
+  end = start + length($3);       # end is start + length of sequence in field 3
+  print chr"\t"start"\t"end;
+}' other.fq.map.weighted-10000-1000-b-0 > other.fq.map.weighted-10000-1000-b-0.apoc_3.bed
+
+## Apoc 4
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc/sortmerna/apoc_4_S33_L001_R1_001_trim.fastq.collapsed.filt.no-dust/out
+
+awk '{
+  chr = $1;
+  start = $2 - 1;                  # convert 1-based to 0-based start for BED
+  end = start + length($3);       # end is start + length of sequence in field 3
+  print chr"\t"start"\t"end;
+}' other.fq.map.weighted-10000-1000-b-0 > other.fq.map.weighted-10000-1000-b-0.apoc_4.bed
+```
+
+Move new bed files into their own folder and assess overlap across reps
+
+```
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc/sortmerna
+mkdir piRNA_bed
+cd piRNA_bed
+mv /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc/sortmerna/apoc_2_S31_L001_R1_001_trim.fastq.collapsed.filt.no-dust/out/other.fq.map.weighted-10000-1000-b-0.apoc_2.bed .
+mv /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc/sortmerna/apoc_3_S32_L001_R1_001_trim.fastq.collapsed.filt.no-dust/out/other.fq.map.weighted-10000-1000-b-0.apoc_3.bed .
+mv /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc/sortmerna/apoc_4_S33_L001_R1_001_trim.fastq.collapsed.filt.no-dust/out/other.fq.map.weighted-10000-1000-b-0.apoc_4.bed .
+
+FILES=(*.bed)
+NUM_FILES=${#FILES[@]}
+# Loop over each file
+for (( i=0; i<$NUM_FILES; i++ )); do
+  for (( j=i+1; j<$NUM_FILES; j++ )); do
+    FILE1=${FILES[$i]}
+    FILE2=${FILES[$j]}
+    
+    intersectBed -a $FILE1 -b $FILE2 -f 0.5 -r > ${i}_${j}_merged.bed
+  done
+done
+
+cat *_merged.bed | sort -k1,1 -k2,2n | bedtools merge -i - > apoc.merged.piRNA.bed
+wc -l apoc.merged.piRNA.bed 
+5537 apoc.merged.piRNA.bed
+```
+
+Much less piRNAs than the Ahya...
+
+Intersect piRNA bed file with the repeatmasker bed file
+
+```
+bedtools intersect -wo -a apoc.merged.piRNA.bed -b /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc/Apoc_repeatmasker.bed > Apoc_piRNAs_TEs_intersect.txt
+```
+
+Intersect piRNA bed file and piRNA cluster bed file with the gene gff.
+
+```
+## piRNAs
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc/sortmerna/piRNA_bed
+
+bedtools intersect -wo -a apoc.merged.piRNA.bed -b /work/pi_hputnam_uri_edu/genomes/Apoc/apoc_GFFannotation.gene.gff > Apoc_piRNAs_genes_intersect.txt
+
+## piRNA clusters
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc/sortmerna/proTRAC_bed
+
+bedtools intersect -wo -a apoc.merged.clusters.bed -b /work/pi_hputnam_uri_edu/genomes/Apoc/apoc_GFFannotation.gene.gff > Apoc_piRNA_cluster_genes_intersect.txt
+```
+
 
 
 
@@ -3708,6 +3925,46 @@ sed -n '/^>/p' Ahyacinthus.chrsV1.fasta > ahya_chroms.txt
 ```
 
 Apoc has 14 chromosomes, Nvec has 30 chromosomes, and Ahya has 907 chromosomes (more like contigs). 
+
+### Orthologous genes 
+
+Use [Broccoli](https://github.com/rderelle/Broccoli) to identify orthologous groups to see if there are any similar proteins being targeted by miRNAs and/or being overlapped by piRNAs. Using Zoe's [code](https://github.com/zdellaert/multi-sp-snRNA/blob/main/reference_genes/Marker-Genes.md) as a reference. I downloaded all protein fasta files here: `/scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/protein_fastas`. Rename all the protein fasta files so they are named `spp_proteins.faa`
+
+In the scripts folder: `nano broccoli_max_likelihood.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=2
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB
+#SBATCH -t 72:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts
+
+#load conda and activate conda environment
+module load conda/latest
+conda activate /work/pi_hputnam_uri_edu/conda/envs/env-broccoli
+
+#load additional programs needed to run broccoli
+module load uri/main
+module load diamond/2.1.7
+module load all/FastTree/2.1.11-GCCcore-12.3.0
+
+mkdir -p /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/broccoli_max_likelihood
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/broccoli_max_likelihood
+
+python /work/pi_hputnam_uri_edu/conda/envs/env-broccoli/Broccoli/broccoli.py -dir /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/protein_fastas -phylogenies 'ml' -ext '.faa' -path_fasttree FastTree
+
+conda deactivate
+```
+
+Submitted batch job 48680375
+
+
 
 
  
