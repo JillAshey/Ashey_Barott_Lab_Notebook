@@ -98,19 +98,19 @@ It's important to note that the lab is NOT at 25°C - it fluctuates between ~20-
 
 ### Timing
 
-Daniella and I are planning to spawn around 2pm on Friday (11/7/25). Let's assume ~1 hour for dejellying and fertilization, which puts us at 3pm. Based on the stages above at 25°C, collections times will be: 
+Daniella and I did spawning around 11:15am on Tuesday (11/11/25). It took me about an hour to dejelly the eggs and put them in the petri dish with the sperm water for fertilization. I put the eggs in the sperm water at 12:30pm. Fertilization usually takes about 30 mins so I put them in the 25°C incubator at 1pm. Based on the stages above at 25°C, collections times will be: 
 
-- Blastula: ~7-9pm on 11/7/25
-- Gastrula: ~8-9am on 11/8/25
-- Planula: ~2-3pm on 11/9/25
-- Early juvenile: ~2-3pm on 11/12/25
-
-These times may change, depending on when we start fertilization. 
+- Blastula: 5-7pm on 11/11/25
+- Gastrula: 7am on 11/12/25
+- Planula: 1pm on 11/13/25
+- Early juvenile: 1pm on 11/16/25
 
 ### Helpful papers 
 
 - [Collecting, rearing, spawning and inducing regeneration of the starlet sea anemone, Nematostella vectensis](https://www.nature.com/articles/nprot.2013.044)
 - [Early development and axis specification in the sea anemone Nematostella vectensis](https://www.sciencedirect.com/science/article/pii/S0012160607012171)
+- [A comparative gene expression database for invertebrates](https://evodevojournal.biomedcentral.com/articles/10.1186/2041-9139-2-17)
+
 
 
 

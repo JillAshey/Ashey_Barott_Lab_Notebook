@@ -3640,6 +3640,22 @@ wc -l ahya.merged.piRNA.bed
 364493 ahya.merged.piRNA.bed
 ```
 
+Make fasta for piRNAs 
+```
+bedtools getfasta -fi /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/Ahyacinthus.chrsV1.fasta -bed ahya.merged.piRNA.bed -fo ahya.merged.piRNA.fasta
+```
+
+See % of seqs that start with U/T and that have A at position 10. 
+
+```
+awk '/^>/ {getline seq; if(substr(seq,1,1)=="U" || substr(seq,1,1)=="T") ustart++; if(substr(seq,10,1)=="A") apos10++; total++} END {print "Total seqs:", total; print "Start with U/T:", ustart; print "A at pos 10:", apos10; print "% U/T start:", 100*ustart/total; print "% A pos 10:", 100*apos10/total}' ahya.merged.piRNA.fasta
+Total seqs: 364493
+Start with U/T: 182922
+A at pos 10: 130219
+% U/T start: 50.1853
+% A pos 10: 35.7261
+```
+
 Intersect piRNA bed file with the repeatmasker bed file 
 
 ```
@@ -3760,6 +3776,22 @@ wc -l apoc.merged.piRNA.bed
 ```
 
 Much less piRNAs than the Ahya...
+
+Make fasta for piRNAs 
+```
+bedtools getfasta -fi /work/pi_hputnam_uri_edu/genomes/Apoc/apoculata.genome.fasta -bed apoc.merged.piRNA.bed -fo apoc.merged.piRNA.fasta
+```
+
+See % of seqs that start with U/T and that have A at position 10. 
+
+```
+awk '/^>/ {getline seq; if(substr(seq,1,1)=="U" || substr(seq,1,1)=="T") ustart++; if(substr(seq,10,1)=="A") apos10++; total++} END {print "Total seqs:", total; print "Start with U/T:", ustart; print "A at pos 10:", apos10; print "% U/T start:", 100*ustart/total; print "% A pos 10:", 100*apos10/total}' apoc.merged.piRNA.fasta
+Total seqs: 5537
+Start with U/T: 2233
+A at pos 10: 1742
+% U/T start: 40.3287
+% A pos 10: 31.4611
+```
 
 Intersect piRNA bed file with the repeatmasker bed file
 
@@ -3925,6 +3957,109 @@ sed -n '/^>/p' Ahyacinthus.chrsV1.fasta > ahya_chroms.txt
 ```
 
 Apoc has 14 chromosomes, Nvec has 30 chromosomes, and Ahya has 907 chromosomes (more like contigs). 
+
+Extract data for length/nucleotide plotting from each spp. 
+
+```
+## Apoc 
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc
+awk 'NR%4==2 {len=length($0); 
+              A=gsub(/A/,"",$0);
+              C=gsub(/C/,"",$0);
+              G=gsub(/G/,"",$0);
+              U=gsub(/T/,"",$0);
+              print len, A, C, G, U}' apoc_2_S31_L001_R1_001_trim.fastq > apoc_2_base_counts.txt
+              
+awk 'NR%4==2 {len=length($0); 
+              A=gsub(/A/,"",$0);
+              C=gsub(/C/,"",$0);
+              G=gsub(/G/,"",$0);
+              U=gsub(/T/,"",$0);
+              print len, A, C, G, U}' apoc_3_S32_L001_R1_001_trim.fastq > apoc_3_base_counts.txt
+
+awk 'NR%4==2 {len=length($0); 
+              A=gsub(/A/,"",$0);
+              C=gsub(/C/,"",$0);
+              G=gsub(/G/,"",$0);
+              U=gsub(/T/,"",$0);
+              print len, A, C, G, U}' apoc_4_S33_L001_R1_001_trim.fastq > apoc_4_base_counts.txt
+
+## Nvec 
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec
+awk 'NR%4==2 {len=length($0); 
+              A=gsub(/A/,"",$0);
+              C=gsub(/C/,"",$0);
+              G=gsub(/G/,"",$0);
+              U=gsub(/T/,"",$0);
+              print len, A, C, G, U}' nvec_1_S25_L001_R1_001_trim.fastq > nvec_1_base_counts.txt
+
+awk 'NR%4==2 {len=length($0); 
+              A=gsub(/A/,"",$0);
+              C=gsub(/C/,"",$0);
+              G=gsub(/G/,"",$0);
+              U=gsub(/T/,"",$0);
+              print len, A, C, G, U}' nvec_2_S26_L001_R1_001_trim.fastq > nvec_2_base_counts.txt
+
+awk 'NR%4==2 {len=length($0); 
+              A=gsub(/A/,"",$0);
+              C=gsub(/C/,"",$0);
+              G=gsub(/G/,"",$0);
+              U=gsub(/T/,"",$0);
+              print len, A, C, G, U}' nvec_3_S34_L001_R1_001_trim.fastq > nvec_3_base_counts.txt
+
+awk 'NR%4==2 {len=length($0); 
+              A=gsub(/A/,"",$0);
+              C=gsub(/C/,"",$0);
+              G=gsub(/G/,"",$0);
+              U=gsub(/T/,"",$0);
+              print len, A, C, G, U}' nvec_4_S35_L001_R1_001_trim.fastq > nvec_4_base_counts.txt
+```
+
+5' end 
+
+```
+## Apoc 
+awk 'NR%4==2 {print length($1), substr($1,1,1)}' apoc_2_S31_L001_R1_001_trim.fastq > apoc_2_first_base_by_length.txt
+
+awk 'NR%4==2 {print length($1), substr($1,1,1)}' apoc_3_S32_L001_R1_001_trim.fastq > apoc_3_first_base_by_length.txt
+
+awk 'NR%4==2 {print length($1), substr($1,1,1)}' apoc_4_S33_L001_R1_001_trim.fastq > apoc_4_first_base_by_length.txt
+
+cat *_first_base_by_length.txt > apoc_combined_first_base.txt
+
+sort apoc_combined_first_base.txt | uniq -c | awk '{print $2, $3, $1}' > apoc_first_base_counts.txt
+
+## Nvec 
+awk 'NR%4==2 {print length($1), substr($1,1,1)}' nvec_1_S25_L001_R1_001_trim.fastq > nvec_1_first_base_by_length.txt
+
+awk 'NR%4==2 {print length($1), substr($1,1,1)}' nvec_2_S26_L001_R1_001_trim.fastq > nvec_2_first_base_by_length.txt
+
+awk 'NR%4==2 {print length($1), substr($1,1,1)}' nvec_3_S34_L001_R1_001_trim.fastq > nvec_3_first_base_by_length.txt
+
+awk 'NR%4==2 {print length($1), substr($1,1,1)}' nvec_4_S35_L001_R1_001_trim.fastq > nvec_4_first_base_by_length.txt
+
+cat *_first_base_by_length.txt > nvec_combined_first_base.txt
+
+sort nvec_combined_first_base.txt | uniq -c | awk '{print $2, $3, $1}' > nvec_first_base_counts.txt
+```
+
+Lengths
+
+```
+## Apoc 
+awk 'NR%4==2 {print length($1)}' apoc_2_S31_L001_R1_001_trim.fastq > apoc_2_lengths.txt
+awk 'NR%4==2 {print length($1)}' apoc_3_S32_L001_R1_001_trim.fastq > apoc_3_lengths.txt
+awk 'NR%4==2 {print length($1)}' apoc_4_S33_L001_R1_001_trim.fastq > apoc_4_lengths.txt
+cat *_lengths.txt > apoc_combined_lengths.txt
+
+## Nvec
+awk 'NR%4==2 {print length($1)}' nvec_1_S25_L001_R1_001_trim.fastq > nvec_1_lengths.txt
+awk 'NR%4==2 {print length($1)}' nvec_2_S26_L001_R1_001_trim.fastq > nvec_2_lengths.txt
+awk 'NR%4==2 {print length($1)}' nvec_3_S34_L001_R1_001_trim.fastq > nvec_3_lengths.txt
+awk 'NR%4==2 {print length($1)}' nvec_4_S35_L001_R1_001_trim.fastq > nvec_4_lengths.txt
+cat *_lengths.txt > nvec_combined_lengths.txt
+
+```
 
 ### Orthologous genes 
 

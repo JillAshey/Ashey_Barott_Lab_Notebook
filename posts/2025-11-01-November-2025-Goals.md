@@ -14,12 +14,13 @@ November  2025 goals and daily notebook entries.
 
 1. Results for cnidarian sperm smRNA
 2. Connect w/ Chloe re AST histology paper 
-3. ICRS abstracts
+3. Submit ICRS abstracts
 4. Update results for PI TPC paper 
 
 ### Sample processing
 
 1. Start processing NSF CAREER phys samples - airbrushing, guava, etc 
+2. Fix and send Nvec developmental stages to Pitt collaborators 
 
 ### Data analysis
 
@@ -57,13 +58,41 @@ Nothing! Spooky.
 - Cnidarian sperm smRNA coding 
 - Katie meeting 
 
+### 20251107
 
-to do 11/7
+- Anemone prep 
+- Lab meeting 
+- Resubmitted expense report 
 
-- make NaOH
-- Make cysteine solution 
-- Make ethanol solns 
-- Redo expense report 
+### 20251108
+
+Nothing 
+
+### 20251109
+
+Nothing 
+
+### 20251110 
+
+- Spawning prep 
+- Cnidarian sperm smRNA coding + writing 
+
+### 20251111
+
+- Cnidarian sperm smRNA coding 
+- Anemone spawning 
+
+
+
+
+
+
+
+to do 11/12
+
+- Email cnidarian smRNA ppl for meeting second week of Dec 
+- piRNA analysis for nvec 
+- 3'UTR analysis for ahya 
 
 
 
@@ -87,3 +116,4 @@ look into / make calender reminders for:
 - https://www.gwis.org/page/fellowship_program 
 - NSF!! come back pls 
 - Lizard island postdoc 
+- https://upenn-provost.smapply.io/prog/penn_global_research_and_engagement_grants/ 
