@@ -101,6 +101,7 @@ It's important to note that the lab is NOT at 25°C - it fluctuates between ~20-
 Daniella and I did spawning around 11:15am on Tuesday (11/11/25). It took me about an hour to dejelly the eggs and put them in the petri dish with the sperm water for fertilization. I put the eggs in the sperm water at 12:30pm. Fertilization usually takes about 30 mins so I put them in the 25°C incubator at 1pm. Based on the stages above at 25°C, collections times will be: 
 
 - Blastula: 5-7pm on 11/11/25
+	- Collection notes: I have two petri dishes in the incubator - one looks like it was fertilized well, the other looks like low fertilization overall. Keeping them both in the incubator for now. Fixed ~50-100 embryos in 3 tubes (labelled 1, 2, 3) at 5:54pm. 
 - Gastrula: 7am on 11/12/25
 - Planula: 1pm on 11/13/25
 - Early juvenile: 1pm on 11/16/25
