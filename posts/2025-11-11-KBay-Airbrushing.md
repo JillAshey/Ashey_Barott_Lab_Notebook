@@ -17,6 +17,7 @@ These protocols were primarily developed by Kristin Brown, Marcelina Martynek, a
 - Small ziplock bags 
 - Ice + ice bucket 
 - 1x PBS
+- 0.1% SDS in FSW
 - Small and large benchtop centrifuges 
 - Flat-bottom 96-well plate 
 - 3x 1.5 mL tubes (AFDW, protein/MAAs, sym counts)
@@ -30,10 +31,13 @@ These protocols were primarily developed by Kristin Brown, Marcelina Martynek, a
 
 - Label sample tubes with sample info 
 	- For the KBay samples, I'm going to label them with the sample number, the time point (May '24, etc), KBAY, my initials, and date of airbrushing.
-	- This can be done the day before or days before.
+	- This can be done the day before.
 - Prep 1x PBS 
 	- We have 10x PBS as a liquid. Calculate how much PBS is needed and how much needs to be made. This can be done the day before.  
 	- For example, if a liter of 1x PBS is needed, mix 900 mL DI water and 100 mL of 10x PBS for 1 liter of 1x PBS. 
+- Prep 0.1% SDS in FSW
+	- We have dry SDS micropellets. To make a 1 L solution of 0.1% SDS in FSW, weigh out 1 gram of SDS pellets and add to 1 L of FSW. Put a stir bar in the container and put container on stir plate to mix until pellets have dissolved. 
+	- This can be done the day before. 
 - Take out samples and put on ice to defrost a little before airbrushing. 
 - Turn centrifuges on and set to 4°C. 
 - Fill one set of 50 mL tubes with 50 mL of 1x PBS. 
@@ -72,10 +76,10 @@ These protocols were primarily developed by Kristin Brown, Marcelina Martynek, a
 ### Guava sample prep 
 
 - Centrifuge the 1.5 mL tube with the symbiont fraction at 4°C, 7000 rpm, 5 min. 
-- Prep SDS XXXXXXXX
 - Remove supernatent from symbiont tube, leaving the pellet. 
 - Add 900 uL of SDS to the pellet - this is our 1:1 dilution. 
-- Resuspend with pipette tip, vortex if needed to break up chunks. 
+- Resuspend with pipette tip, vortex or homogenize if needed to break up chunks. 
+	- It may get 'soapy'. 
 - In a new 1.5 mL tube, add 300 uL of the 1:1 dilution and 600 uL of SDS - this is our 1:3 dilution. 
 - In a new 1.5 mL tube, add 300 uL of the 1:3 dilution and 600 uL of SDS - this is our 1:9 dilution. 
 - Pipette 150 uL triplicates of the 1:3 and 1:9 dilution into a 96-well flat bottom plate. 

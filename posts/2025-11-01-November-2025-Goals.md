@@ -80,7 +80,12 @@ Nothing
 ### 20251111
 
 - Cnidarian sperm smRNA coding 
-- Anemone spawning 
+- Anemone spawning + sampling 
+
+### 20251112
+
+- Anemone sampling 
+
 
 
 
@@ -93,6 +98,7 @@ to do 11/12
 - Email cnidarian smRNA ppl for meeting second week of Dec 
 - piRNA analysis for nvec 
 - 3'UTR analysis for ahya 
+- post translator reef bite articles 
 
 
 
