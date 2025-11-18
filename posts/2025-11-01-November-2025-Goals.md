@@ -85,19 +85,53 @@ Nothing
 ### 20251112
 
 - Anemone sampling 
+- Airbrushing + Guava 
+- Reviewed manuscript for microbial ecology 
+
+### 20251113
+
+- Anemone sampling 
+- Seminar 
+- Katie meeting 
+- Cnidarian sperm smRNA coding 
+
+### 20251114
+
+- Lab meeting 
+- Cnidarian sperm smRNA coding 
+- Conine lab meeting 
+- E5 meeting 
+- Biomin blast 
+
+### 20251115
+
+- Nothing 
+
+### 20251116
+
+- Some writing 
+
+### 20251117
+
+- Anemone sampling 
+- Tube labelling 
+- ICRS meeting review 
+- Danielle meeting 
+- Zoe LCM paper reading 
 
 
 
 
 
 
+to do 11/17
 
-
-to do 11/12
-
-- Email cnidarian smRNA ppl for meeting second week of Dec 
-- piRNA analysis for nvec 
+- read zoe LCM paper discussion 
+- send peggy materials
+- BLAST stuff for Ptua genome 
+- email ford 
 - 3'UTR analysis for ahya 
+- homology stuff for sperm -- functional 
 - post translator reef bite articles 
 
 

@@ -3704,7 +3704,7 @@ Write out bed file
 write.table(bed_file, file = "~/Desktop/GFFs/apoc/Apoc_repeatmasker.bed", sep = "\t", col.names = F, row.names = F, quote = F)
 ```
 
-Upload bed file to `/scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya`. Then intersect the TE file with the piRNA cluster bed file.
+Upload bed file to `/scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc`. Then intersect the TE file with the piRNA cluster bed file.
 
 ```
 module load bedtools2/2.31.1
@@ -3812,6 +3812,153 @@ cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc/sortmerna/proTRAC_
 
 bedtools intersect -wo -a apoc.merged.clusters.bed -b /work/pi_hputnam_uri_edu/genomes/Apoc/apoc_GFFannotation.gene.gff > Apoc_piRNA_cluster_genes_intersect.txt
 ```
+
+Do the same for Nvec. Look at the intersection of piRNA clusters and TE. In R, I did the following:
+
+Read in repeatmasker out file
+
+```
+out_file <- read.table("~/Desktop/GFFs/nvec/Nvec200.fasta.out", comment.char = "", header = F, fill = T, skip = 2)
+```
+
+Retain only chromosome, start, stop, TE name, Family Name and percent divergence
+
+```
+bed_file <- out_file[,c(5:7,11,2)]
+
+#remove empty lines 
+bed_file <- bed_file %>%
+  drop_na(.)
+```
+
+Write out bed file
+
+```
+write.table(bed_file, file = "~/Desktop/GFFs/nvec/nvec_repeatmasker.bed", sep = "\t", col.names = F, row.names = F, quote = F)
+```
+
+Upload bed file to `/scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec`. Then intersect the TE file with the piRNA cluster bed file.
+
+```
+module load bedtools2/2.31.1
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/sortmerna/proTRAC_bed
+
+bedtools intersect -wo -a nvec.merged.clusters.bed -b /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/Nvec_repeatmasker.bed > Nvec_piRNA_cluster_TEs_intersect.txt
+```
+
+Only 3 piRNAs overlap with TE and they are all simple repeats or low complexity reads.  
+
+I need to make bed files for each piRNA reads per rep and then merge them and then intersect them with the other piRNA bed files AND repeat masker. Make bed file for piRNAs first.
+
+```
+## Nvec 1
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/sortmerna/nvec_1_S25_L001_R1_001_trim.fastq.collapsed.filt.no-dust/out
+
+awk '{
+  chr = $1;
+  start = $2 - 1;                  # convert 1-based to 0-based start for BED
+  end = start + length($3);       # end is start + length of sequence in field 3
+  print chr"\t"start"\t"end;
+}' other.fq.map.weighted-10000-1000-b-0 > other.fq.map.weighted-10000-1000-b-0.nvec_1.bed
+
+## Nvec 2
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/sortmerna/nvec_2_S26_L001_R1_001_trim.fastq.collapsed.filt.no-dust/out
+
+awk '{
+  chr = $1;
+  start = $2 - 1;                  # convert 1-based to 0-based start for BED
+  end = start + length($3);       # end is start + length of sequence in field 3
+  print chr"\t"start"\t"end;
+}' other.fq.map.weighted-10000-1000-b-0 > other.fq.map.weighted-10000-1000-b-0.nvec_2.bed
+
+## Nvec 3
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/sortmerna/nvec_3_S34_L001_R1_001_trim.fastq.collapsed.filt.no-dust/out
+
+awk '{
+  chr = $1;
+  start = $2 - 1;                  # convert 1-based to 0-based start for BED
+  end = start + length($3);       # end is start + length of sequence in field 3
+  print chr"\t"start"\t"end;
+}' other.fq.map.weighted-10000-1000-b-0 > other.fq.map.weighted-10000-1000-b-0.nvec_3.bed
+
+## Nvec 4
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/sortmerna/nvec_4_S35_L001_R1_001_trim.fastq.collapsed.filt.no-dust/out
+
+awk '{
+  chr = $1;
+  start = $2 - 1;                  # convert 1-based to 0-based start for BED
+  end = start + length($3);       # end is start + length of sequence in field 3
+  print chr"\t"start"\t"end;
+}' other.fq.map.weighted-10000-1000-b-0 > other.fq.map.weighted-10000-1000-b-0.nvec_4.bed
+```
+
+Move new bed files into their own folder and assess overlap across reps
+
+```
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/sortmerna
+mkdir piRNA_bed
+cd piRNA_bed
+mv /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/sortmerna/nvec_1_S25_L001_R1_001_trim.fastq.collapsed.filt.no-dust/out/other.fq.map.weighted-10000-1000-b-0.nvec_1.bed .
+mv /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/sortmerna/nvec_2_S26_L001_R1_001_trim.fastq.collapsed.filt.no-dust/out/other.fq.map.weighted-10000-1000-b-0.nvec_2.bed .
+mv /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/sortmerna/nvec_3_S34_L001_R1_001_trim.fastq.collapsed.filt.no-dust/out/other.fq.map.weighted-10000-1000-b-0.nvec_3.bed .
+mv /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/sortmerna/nvec_4_S35_L001_R1_001_trim.fastq.collapsed.filt.no-dust/out/other.fq.map.weighted-10000-1000-b-0.nvec_4.bed .
+
+FILES=(*.bed)
+NUM_FILES=${#FILES[@]}
+# Loop over each file
+for (( i=0; i<$NUM_FILES; i++ )); do
+  for (( j=i+1; j<$NUM_FILES; j++ )); do
+    FILE1=${FILES[$i]}
+    FILE2=${FILES[$j]}
+    
+    intersectBed -a $FILE1 -b $FILE2 -f 0.5 -r > ${i}_${j}_merged.bed
+  done
+done
+
+cat *_merged.bed | sort -k1,1 -k2,2n | bedtools merge -i - > nvec.merged.piRNA.bed
+wc -l nvec.merged.piRNA.bed 
+30471 nvec.merged.piRNA.bed
+```
+
+Make fasta for piRNAs 
+```
+bedtools getfasta -fi /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/genome/Nvec200.fasta -bed nvec.merged.piRNA.bed -fo nvec.merged.piRNA.fasta
+```
+
+See % of seqs that start with U/T and that have A at position 10. 
+
+```
+awk '/^>/ {getline seq; if(substr(seq,1,1)=="U" || substr(seq,1,1)=="T") ustart++; if(substr(seq,10,1)=="A") apos10++; total++} END {print "Total seqs:", total; print "Start with U/T:", ustart; print "A at pos 10:", apos10; print "% U/T start:", 100*ustart/total; print "% A pos 10:", 100*apos10/total}' nvec.merged.piRNA.fasta
+Total seqs: 30471
+Start with U/T: 8648
+A at pos 10: 9607
+% U/T start: 28.3811
+% A pos 10: 31.5283
+```
+
+Intersect piRNA bed file with the repeatmasker bed file
+
+```
+bedtools intersect -wo -a nvec.merged.piRNA.bed -b /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/nvec_repeatmasker.bed > nvec_piRNAs_TEs_intersect.txt
+```
+
+Intersect piRNA bed file and piRNA cluster bed file with the gene gff.
+
+```
+## piRNAs
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/sortmerna/piRNA_bed
+
+bedtools intersect -wo -a nvec.merged.piRNA.bed -b /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/genome/nvec_GFFannotation.mRNA.gff > nvec_piRNAs_genes_intersect.txt
+
+## piRNA clusters
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/sortmerna/proTRAC_bed
+
+bedtools intersect -wo -a nvec.merged.clusters.bed -b /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/genome/nvec_GFFannotation.mRNA.gff > nvec_piRNA_cluster_genes_intersect.txt
+```
+
+
+
 
 
 
