@@ -119,6 +119,9 @@ Nothing
 - Danielle meeting 
 - Zoe LCM paper reading 
 
+### 20251118 
+
+- Airbrushing 6 samples 
 
 
 

@@ -78,11 +78,11 @@ These protocols were primarily developed by Kristin Brown, Marcelina Martynek, a
 - Centrifuge the 1.5 mL tube with the symbiont fraction at 4°C, 7000 rpm, 5 min. 
 - Remove supernatent from symbiont tube, leaving the pellet. 
 - Add 900 uL of SDS to the pellet - this is our 1:1 dilution. 
-- Resuspend with pipette tip, vortex or homogenize if needed to break up chunks. 
-	- It may get 'soapy'. 
+- Homogenize to break up chunks. 
+	- It may get 'soapy' or spill over the tube when homogenizing. 
 - In a new 1.5 mL tube, add 300 uL of the 1:1 dilution and 600 uL of SDS - this is our 1:3 dilution. 
 - In a new 1.5 mL tube, add 300 uL of the 1:3 dilution and 600 uL of SDS - this is our 1:9 dilution. 
 - Pipette 150 uL triplicates of the 1:3 and 1:9 dilution into a 96-well flat bottom plate. 
+	- Briefly vortex tubes before pipetting samples into plate. 
 - Take to Guava for counting!  
-
 
