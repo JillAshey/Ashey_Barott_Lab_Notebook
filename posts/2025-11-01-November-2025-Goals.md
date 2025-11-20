@@ -121,18 +121,23 @@ Nothing
 
 ### 20251118 
 
-- Airbrushing 6 samples 
+- Airbrushing 6 samples + Guava w/ Julia 
+- BLAST contam seqs against Ptua raw reads 
+- Emails 
+
+### 20251119
+
+- ICRS panel moderating 
+- Airbrushing 6 samples with Julia 
 
 
 
 
-
-to do 11/17
+to do 11/18
 
 - read zoe LCM paper discussion 
-- send peggy materials
-- BLAST stuff for Ptua genome 
-- email ford 
+- Remove BLAST stuff from Ptua genome -- blast currently running 
+- remind hollie to read AST 2021 
 - 3'UTR analysis for ahya 
 - homology stuff for sperm -- functional 
 - post translator reef bite articles 
@@ -160,3 +165,4 @@ look into / make calender reminders for:
 - NSF!! come back pls 
 - Lizard island postdoc 
 - https://upenn-provost.smapply.io/prog/penn_global_research_and_engagement_grants/ 
+- https://reviverestore.org/projects/wild-genomes/ 
