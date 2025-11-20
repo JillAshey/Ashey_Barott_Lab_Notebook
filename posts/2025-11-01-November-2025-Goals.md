@@ -130,16 +130,22 @@ Nothing
 - ICRS panel moderating 
 - Airbrushing 6 samples with Julia 
 
+### 20251120
+
+- Meeting with Nick and Colin 
+- Phys datasheets organization 
 
 
 
-to do 11/18
 
-- read zoe LCM paper discussion 
+to do
+
 - Remove BLAST stuff from Ptua genome -- blast currently running 
 - remind hollie to read AST 2021 
 - 3'UTR analysis for ahya 
 - homology stuff for sperm -- functional 
+- tRNA analysis for sperm -- email nick for scripts 
+- make metadata sheets for phys data 
 - post translator reef bite articles 
 
 
