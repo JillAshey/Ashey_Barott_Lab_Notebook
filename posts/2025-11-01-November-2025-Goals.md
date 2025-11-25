@@ -134,6 +134,29 @@ Nothing
 
 - Meeting with Nick and Colin 
 - Phys datasheets organization 
+- Updating CV
+
+### 20251121
+
+- Lab meeting 
+- Picking up jetty meds 
+- e5 molecular timeseries meeting 
+- e5 deep dive expression meeting 
+
+### 20251122
+
+Nothing 
+
+### 20251123
+
+Nothing 
+
+### 20251124
+
+- Airbrushing + Guava for 10 samples 
+- Submitted ICRS abstracts 
+- Sym data organization and plotting 
+
 
 
 
@@ -147,6 +170,7 @@ to do
 - tRNA analysis for sperm -- email nick for scripts 
 - make metadata sheets for phys data 
 - post translator reef bite articles 
+- email ford 
 
 
 
