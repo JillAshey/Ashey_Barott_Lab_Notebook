@@ -157,42 +157,47 @@ Nothing
 - Submitted ICRS abstracts 
 - Sym data organization and plotting 
 
+### 20251125
 
+- Airbrushing + Guava for 10 samples 
+- Sym plotting 
+- Chl data organization 
+- Ptua genome blast and contam removal
 
+### 20251126
 
+- Airbrushing + Guava for 10 samples 
 
-to do
+### 20251127 - 20251129
 
-- Remove BLAST stuff from Ptua genome -- blast currently running 
-- remind hollie to read AST 2021 
-- 3'UTR analysis for ahya 
-- homology stuff for sperm -- functional 
-- tRNA analysis for sperm -- email nick for scripts 
-- make metadata sheets for phys data 
-- post translator reef bite articles 
-- email ford 
+Thanksgiving 
 
+### 20251130 
 
+- Talked with Zoe re timeseries RNAseq results 
+- Reran mitohifi and mito blast 
 
+## How did I do on my goals this month?
 
+### Writing and manuscripts 
 
+1. Results for cnidarian sperm smRNA - yes, making progress! Writing up methods and results 
+2. Connect w/ Chloe re AST histology paper - no, need to do 
+3. Submit ICRS abstracts - yes
+4. Update results for PI TPC paper - no 
 
+### Sample processing
 
+1. Start processing NSF CAREER phys samples - airbrushing, guava, etc - yes
+2. Fix and send Nvec developmental stages to Pitt collaborators - samples are fixed, need to ship 
 
-to do 
+### Data analysis
 
-- sign up for BIO-WHP speaking slot 
-- pay women's and infant health charge 
-- ask marissa about postdoc travel $$
+1. Cnidarian sperm miRNA enrichment + homology of targets - almost done 
+2. Cnidarian sperm piRNA enrichment + homology of targets - yes 
+3. Trim Mcap 2023 smRNA data and run shortstack - no
+4. TPC analysis with rTPC from Oct 2025 trip - no
 
-look into / make calender reminders for: 
+### Field work / travel 
 
-- look into Human Frontier Science Programme Longterm Postdoctoral fellowship for postdoc fellowships
-- https://www.wdhof.org/
-- https://www.bwfund.org/funding-opportunities/postdoctoral-fellows/ 
-- https://postdocs.upenn.edu/provosts-fellowship/provosts-postdoctoral-fellowship/ 
-- https://www.gwis.org/page/fellowship_program 
-- NSF!! come back pls 
-- Lizard island postdoc 
-- https://upenn-provost.smapply.io/prog/penn_global_research_and_engagement_grants/ 
-- https://reviverestore.org/projects/wild-genomes/ 
+1. Tentative plans for HI winter trip -- email Ford, Conall, etc - yes, currently planning now 
