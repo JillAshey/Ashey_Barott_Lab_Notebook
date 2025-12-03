@@ -38,6 +38,20 @@ December 2025 goals and daily notebook entries.
 - Writing methods for cnidarian sperm paper 
 - piRNA homology enrichment for sperm
 
+### 20251202
+
+- Ptua genome assembly QC + assembly iterations 
+- Labelling tubes for airbrushing 
+- Retrimming sperm data 
+
+### 20251203
+
+- Rerunning shortstack on sperm samples (newly trimmed w/ trimmomatic)
+- Airbrushing + guava 12 samples 
+- Sent Nvec samples 
+- Started hifiasm iterations 
+
+
 
 
 to do
@@ -49,7 +63,6 @@ to do
 - make metadata sheets for phys data 
 - post translator reef bite articles 
 - email ford 
-- ship Nvec embryos to Pitt 
 
 
 

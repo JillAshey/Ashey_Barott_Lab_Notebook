@@ -4246,6 +4246,165 @@ conda deactivate
 
 Submitted batch job 48680375
 
+## Trying different trimming 
+
+Create new scratch workspace
+
+```
+ws_allocate cnidarian-sperm-trimmomatic 30
+Info: could not read email from users config ~/.ws_user.conf.
+Info: reminder email will be sent to local user account
+Info: creating workspace.
+/scratch4/workspace/jillashey_uri_edu-cnidarian-sperm-trimmomatic
+remaining extensions  : 5
+remaining time in days: 30
+```
+
+Trim w/ Trimmomatic. Raw files must be unzipped for trimmomatic to run. Try test first. `nano trimmomatic_test_ahya1.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=1
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB
+#SBATCH -t 50:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /scratch4/workspace/jillashey_uri_edu-cnidarian-sperm-trimmomatic/scripts
+
+module load trimmomatic/0.39
+module load uri/main
+module load fastqc/0.12.1
+module load all/MultiQC/1.12-foss-2021b
+
+cd /project/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA
+
+echo "Starting SE trimming with trimmomatic for one sample - Ahya 1" $(date)
+
+trimmomatic SE -phred33 ahya_1_S27_L001_R1_001.fastq ahya_1.trim.fastq ILLUMINACLIP:/scratch4/workspace/jillashey_uri_edu-cnidarian-sperm-trimmomatic/adapters.fa:2:30:10 LEADING:30 TRAILING:30 SLIDINGWINDOW:4:30 MINLEN:18 MAXLEN:40 AVGQUAL:30
+
+echo "Trimming complete, start QC" $(date)
+
+fastqc ahya_1.trim.fastq
+
+echo "QC complete" $(date)
+```
+
+Submitted batch job 49475280. okay this worked. 
+
+`nano trimmomatic.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=1
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB
+#SBATCH -t 50:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /scratch4/workspace/jillashey_uri_edu-cnidarian-sperm-trimmomatic/scripts
+
+module load trimmomatic/0.39
+module load uri/main
+module load fastqc/0.12.1
+module load all/MultiQC/1.12-foss-2021b
+
+cd /project/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA
+
+echo "Starting SE trimming for all samples" $(date)
+
+for file in *R1_001.fastq; do
+    base=${file%_L001_R1_001.fastq}  # Gets 'ahya_1_S27' from 'ahya_1_S27_L001_R1_001.fastq'
+    echo "Processing $base"
+    
+    trimmomatic SE -phred33 \
+        "$file" \
+        "${base}.trim.fastq" \
+        ILLUMINACLIP:/scratch4/workspace/jillashey_uri_edu-cnidarian-sperm-trimmomatic/adapters.fa:2:30:10 \
+        LEADING:30 TRAILING:30 SLIDINGWINDOW:4:30 MINLEN:18 MAXLEN:40 AVGQUAL:30
+    
+    fastqc "${base}.trim.fastq"
+done
+
+echo "All trimming and QC complete" $(date)
+```
+
+Submitted batch job 49478315. Way more reads trimmed with this than with fastp. 
+
+Run shortstack on all spp. `nano shortstack.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=2
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=200GB
+#SBATCH -t 100:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts
+
+module load uri/main
+module load conda/latest # need to load before making any conda envs
+
+conda activate /work/pi_hputnam_uri_edu/conda/envs/ShortStack4 
+
+echo "Running short stack on trimmed reads for apoc"
+
+cd /scratch4/workspace/jillashey_uri_edu-cnidarian-sperm-trimmomatic/trim/apoc
+
+ShortStack \
+--genomefile /work/pi_hputnam_uri_edu/genomes/Apoc/apoculata.assembly.scaffolds_chromosome_level.fasta \
+--readfile apoc_2_S31.trim.fastq \
+apoc_3_S32.trim.fastq \
+apoc_4_S33.trim.fastq \
+--known_miRNAs /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/data/miRNA_reference.fasta \
+--outdir /scratch4/workspace/jillashey_uri_edu-cnidarian-sperm-trimmomatic/apoc_shortstack \
+--dn_mirna
+
+echo "Apoc shortstack complete, running short stack on trimmed reads for nvec"
+
+cd /scratch4/workspace/jillashey_uri_edu-cnidarian-sperm-trimmomatic/trim/nvec
+
+ShortStack \
+--genomefile /work/pi_hputnam_uri_edu/genomes/Nvec/Nvec_genome.fa \
+--readfile nvec_1_S25.trim.fastq \
+nvec_2_S26.trim.fastq \
+nvec_3_S34.trim.fastq \
+nvec_4_S35.trim.fastq \
+--known_miRNAs /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/data/miRNA_reference.fasta \
+--outdir /scratch4/workspace/jillashey_uri_edu-cnidarian-sperm-trimmomatic/nvec_shortstack \
+--dn_mirna
+
+echo "Nvec shortstack complete, running short stack on trimmed reads for ahya"
+
+cd /scratch4/workspace/jillashey_uri_edu-cnidarian-sperm-trimmomatic/trim/ahya
+
+ShortStack \
+--genomefile /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/Ahyacinthus.chrsV1.fasta \
+--readfile ahya_1_S27.trim.fastq \
+ahya_2_S28.trim.fastq \
+ahya_3_S29.trim.fastq \
+ahya_4_S30.trim.fastq \
+--known_miRNAs /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/data/miRNA_reference.fasta \
+--outdir /scratch4/workspace/jillashey_uri_edu-cnidarian-sperm-trimmomatic/ahya_shortstack \
+--dn_mirna
+
+echo "Ahya shortstack complete"
+
+conda deactivate
+```
+
+Submitted batch job 49487634. Rerunning for Apoc and Nvec, didn't have the correct genome paths. Submitted batch job 49488188
+
 
 
 
