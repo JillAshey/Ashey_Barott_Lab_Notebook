@@ -50,19 +50,27 @@ December 2025 goals and daily notebook entries.
 - Airbrushing + guava 12 samples 
 - Sent Nvec samples 
 - Started hifiasm iterations 
+- Enrichment of shared piRNA gene overlaps + species specific 
+
+### 20251204
+
+- Airbrushing + guava 12 samples 
+- Ahya 3UTR target analysis 
+- Homology for miRNAs 
+- Ptua assembly QC 
+
 
 
 
 
 to do
 
+- move ptua stuff to scratch workspace 
 - remind hollie to read AST 2021 
-- 3'UTR analysis for ahya 
 - homology stuff for sperm -- functional 
 - tRNA analysis for sperm -- email nick for scripts 
 - make metadata sheets for phys data 
 - post translator reef bite articles 
-- email ford 
 
 
 

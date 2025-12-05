@@ -1588,11 +1588,109 @@ wc -l miranda_strict_mRNA_parsed_ahya.txt
 echo "Ahya miranda script complete" $(date)
 ```
 
-Submitted batch job 48680891
+Submitted batch job 48680891. 
 
+Do the 3UTR identification with Ahya. 
 
+```
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/
+grep -v '^#' Ahyacinthus.coding.gff3 | cut -s -f 3 | sort | uniq -c | sort -rn > all_features.txt
 
+173851 exon
+ 172180 CDS
+  27110 mRNA
+  27110 gene
+   8345 five_prime_UTR
+   4831 three_prime_UTR
+```
 
+Interesting that some of the 3UTRs are already annotated...Still going to use my method to keep it consistent across spp. 
+
+Make gff for mRNA only. 
+
+```
+grep $'\tmRNA\t' Ahyacinthus.coding.gff3 > ahya_GFFannotation.mRNA.gff
+```
+
+Extract scaffold names and lengths
+
+```
+cat is Ahyacinthus.chrsV1.fasta | awk '$0 ~ ">" {if (NR > 1) {print c;} c=0;printf substr($0,2,100) "\t"; } $0 !~ ">" {c+=length($0);} END { print c; }' > ahya.Chromosome_lengths.txt
+```
+
+Extract scaffold names 
+
+```
+awk -F" " '{print $1}' ahya.Chromosome_lengths.txt > ahya.Chromosome_names.txt
+```
+
+Sort mRNA GFF by chromosome name
+
+```
+module load bedtools2/2.31.1
+sortBed -faidx ahya.Chromosome_names.txt -i ahya_GFFannotation.mRNA.gff > ahya_GFFannotation.mRNA_sorted.gff
+```
+
+Extract 1000bp flank around genes and subtract any mRNA overlap 
+
+```
+# Flank
+flankBed -i ahya_GFFannotation.mRNA_sorted.gff -g ahya.Chromosome_lengths.txt -l 0 -r 1000 -s | awk '{gsub("mRNA","3prime_UTR",$3); print $0 }' | awk '{if($5-$4 > 3)print $1"\t"$2"\t"$3"\t"$4"\t"$5"\t"$6"\t"$7"\t"$8"\t"$9}' | tr ' ' '\t' > ahya.GFFannotation.3UTR_1kb.gff
+
+# Subtract 
+subtractBed -a ahya.GFFannotation.3UTR_1kb.gff -b ahya_GFFannotation.mRNA_sorted.gff > ahya.GFFannotation.3UTR_1kb_corrected.gff 
+
+# Sort 
+sortBed -faidx ahya.Chromosome_names.txt -i ahya.GFFannotation.3UTR_1kb_corrected.gff > ahya.GFFannotation.3UTR_1kb_corrected.sorted.gff 
+```
+
+Make fasta of 3UTRs
+
+```
+bedtools getfasta -fi Ahyacinthus.chrsV1.fasta -bed ahya.GFFannotation.3UTR_1kb_corrected.sorted.gff -s -name > ahya_3UTRs.fasta
+```
+
+Run miranda with 3UTRs. `nano miranda_strict_3UTR_ahya.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=2
+#SBATCH --partition=cpu, uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB
+#SBATCH -t 100:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts
+
+echo "Ahya target prediction with miranda - targeting 3UTR seqs"$(date)
+
+module load conda/latest # need to load before making any conda envs
+conda activate /work/pi_hputnam_uri_edu/conda/envs/miranda 
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya
+
+miranda expressed_miRNAs_ahya.fasta ahya_3UTRs.fasta -en -20 -strict -out miranda_strict_3UTR_ahya.tab
+
+conda deactivate
+
+echo "miranda run finished!"$(date)
+echo "counting number of putative interactions predicted" $(date)
+
+zgrep -c "Performing Scan" miranda_strict_3UTR_ahya.tab
+
+echo "Parsing output" $(date)
+grep -A 1 "Scores for this hit:" miranda_strict_3UTR_ahya.tab | sort | grep '>' > miranda_strict_3UTR_parsed_ahya.txt
+
+echo "counting number of putative interactions predicted" $(date)
+wc -l miranda_strict_3UTR_parsed_ahya.txt
+
+echo "Ahya miranda script complete" $(date)
+```
+
+Submitted batch job 49520434
 
 ### piRNAs
 
