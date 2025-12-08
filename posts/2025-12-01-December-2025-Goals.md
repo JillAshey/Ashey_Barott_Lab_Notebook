@@ -59,13 +59,32 @@ December 2025 goals and daily notebook entries.
 - Homology for miRNAs 
 - Ptua assembly QC 
 
+### 20251205
+
+- Lab meeting 
+- Cnidarian sperm smRNA coding - miRNA target homology 
+- Ptua assembly QC 
+
+### 20251206
+
+Nothing 
+
+### 20251207
+
+Nothing 
+
+### 20251208 
+
+- Prelim discussion writing for cnidarian sperm paper 
+
+
 
 
 
 
 to do
 
-- move ptua stuff to scratch workspace 
+- send info to angela and marcelina re SNP code and HPC 
 - remind hollie to read AST 2021 
 - homology stuff for sperm -- functional 
 - tRNA analysis for sperm -- email nick for scripts 

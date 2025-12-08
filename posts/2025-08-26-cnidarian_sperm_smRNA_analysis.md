@@ -4179,6 +4179,188 @@ or mintMAP
 
 How about I just try to map the reads to the tRNA fasta??
 
+Try [mintmap](https://cm.jefferson.edu/MINTmap/).
+
+```
+cd /work/pi_hputnam_uri_edu/conda/envs
+module load conda/latest # need to load before making any conda envs
+conda config --add channels bioconda
+conda config --add channels conda-forge
+conda config --set channel_priority strict
+conda create --prefix /work/pi_hputnam_uri_edu/conda/envs/mintmap mintmap
+conda activate /work/pi_hputnam_uri_edu/conda/envs/mintmap 
+```
+
+Test on one ahya sample first. Prep the tRNA file (remove possible psuedogenes and get rid of white space in header). 
+
+```
+awk '
+BEGIN { in_seq = 0 }
+{
+  if ($0 ~ /^>/) {
+    # If we were in a sequence, end it
+    if (in_seq && seq != "") print seq
+    seq = ""
+    
+    header = $0
+    has_pseudo = (header ~ /Possible pseudogene/)
+    
+    # Clean header: keep >, remove disallowed chars from rest
+    clean_header = substr(header, 1, 1)  # Keep the >
+    temp = substr(header, 2)             # Extract rest as variable for gsub
+    gsub(/[^-.\|+_A-Za-z0-9]/, "", temp) # Clean it
+    clean_header = clean_header temp
+    
+    if (!has_pseudo) {
+      print clean_header
+      in_seq = 1
+    } else {
+      in_seq = 0
+    }
+  } else if (in_seq) {
+    # Collect sequence characters
+    seq = seq $0
+  }
+}
+END { if (in_seq && seq != "") print seq }
+' Ahya-tRNA.fasta > Ahya-tRNA_cleaned.fasta
+```
+
+`nano mintmap_test.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=1
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB
+#SBATCH -t 24:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts
+
+module load uri/main
+module load conda/latest # need to load before making any conda envs
+conda activate /work/pi_hputnam_uri_edu/conda/envs/mintmap 
+
+echo "testing mintmap on one sample" $(date)
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya
+
+/work/pi_hputnam_uri_edu/conda/envs/mintmap/bin/MINTmap.pl -f ahya_1_S27_L001_R1_001_trim.fastq -p ahya_1_test -l /work/pi_hputnam_uri_edu/pgrams/MINTmap-release-v1.0/LookupTable.tRFs.MINTmap_v1.txt -s Ahya-tRNA_cleaned.fasta -o /work/pi_hputnam_uri_edu/pgrams/MINTmap-release-v1.0/OtherAnnotations.MINTmap_v1.txt -j /work/pi_hputnam_uri_edu/pgrams/MINTmap-release-v1.0/MINTplates/
+
+echo "mintmap test complete" $(date)
+conda deactivate 
+``` 
+
+Submitted batch job 50045654
+
+Not working...maybe issue with me trying to use coral genomic info with a tool for model systems/humans. Try to make my own files: 
+
+```
+# 1. Compute MD5 of your tRNA FASTA
+md5sum Ahya-tRNA_cleaned.fasta  # Save this: 307443d17f74e8ed3e226cc56fff7f38
+
+# 2. Generate all possible tRFs (16-50nt) from your tRNA sequences
+perl -e '
+open IN, "Ahya-tRNA_cleaned.fasta";
+while(<IN>){
+  if(/^>([^>]+)/){ $name=$1; $seq="" }
+  else{ chomp; $seq .= uc($_) }
+  if($seq && eof(IN)){ $seq=uc($seq) }
+  for($i=16; $i<=50; $i++){
+    for($j=0; $j<=length($seq)-$i; $j++){
+      $trf=substr($seq,$j,$i);
+      $lookup{$trf}="Y";  # Mark as exclusive to tRNA space
+    }
+  }
+}
+close IN;
+
+# 3. Create lookup table with MD5 headers
+open OUT, ">Ahya_lookup.txt";
+print OUT "#MD5SUM:307443d17f74e8ed3e226cc56fff7f38\n";
+print OUT "#OTHERANNOTATIONS MD5SUM:na\n";
+foreach(sort keys %lookup){ print OUT "$_\t$lookup{$_}\n" }
+close OUT;
+'
+
+# 4. Create dummy OtherAnnotations file
+echo "na" > Ahya_OtherAnnotations.txt
+```
+
+Rerun mintmap with updated files. 
+
+```
+/work/pi_hputnam_uri_edu/conda/envs/mintmap/bin/MINTmap.pl \
+  -f ahya_1_S27_L001_R1_001_trim.fastq \
+  -p ahya_1_coral \
+  -l Ahya_lookup.txt \
+  -s Ahya-tRNA_cleaned.fasta \
+  -o Ahya_OtherAnnotations.txt \
+  -j /work/pi_hputnam_uri_edu/pgrams/MINTmap-release-v1.0/MINTplates/
+```
+
+Submitted batch job 50049146. still getting errors: `Error, exiting: md5sum defined in lookup table Ahya_lookup.txt (na) does not match that of the tRF types Ahya_OtherAnnotations.txt (51bb9b62d9be48ac08dfb0ec931632e2)`. Try again. 
+
+```
+# 1. Compute BOTH MD5 checksums first
+TRNA_MD5=$(md5sum Ahya-tRNA_cleaned.fasta | cut -d' ' -f1)
+ANNO_MD5=$(md5sum Ahya_annotations.txt 2>/dev/null | cut -d' ' -f1 || echo "d41d8cd98f00b204e9800998ecf8427e")
+
+echo "tRNA MD5: $TRNA_MD5"
+echo "Annotations MD5: $ANNO_MD5"
+
+# 2. Generate CORRECT lookup table with proper MD5 headers
+perl -e "
+open IN, 'Ahya-tRNA_cleaned.fasta';
+my (%trnas, \$name, \$seq);
+while(<IN>){
+  chomp;
+  if(/^>([^>]+)/){ \$name=\$1; \$seq='' } 
+  else { \$seq .= uc(\$_) }
+}
+close IN;
+\$trnas{\$name} = \$seq;
+
+my %lookup;
+foreach (keys %trnas) {
+  my \$s = \$trnas{\$_};
+  for(my \$len=16; \$len<=50; \$len++) {
+    for(my \$start=0; \$start <= length(\$s)-\$len; \$start++) {
+      my \$trf = substr(\$s, \$start, \$len);
+      \$lookup{\$trf} = 'Y';
+    }
+  }
+}
+
+open OUT, '>Ahya_lookup_fixed.txt';
+print OUT \"#MD5SUM:$TRNA_MD5\n\";
+print OUT \"#OTHERANNOTATIONS MD5SUM:\$ANNO_MD5\n\";
+foreach(sort keys %lookup){ print OUT \"\$_\t\$lookup{\$_}\n\" }
+close OUT;
+print \"Fixed lookup table created: Ahya_lookup_fixed.txt\n\";
+"
+```
+
+Try just mapping with bowtie. 
+
+```
+# Create combined index
+cat Ahya-tRNA_cleaned.fasta expressed_miRNAs_ahya.fasta Ahya-rRNA.fasta ahy*.piRNA.fasta > Ahya_smallRNA_refs.fasta
+bowtie2-build Ahya_smallRNA_refs.fasta Ahya_smallRNA_idx
+
+# Map reads (report first alignment only)
+bowtie2 -p 16 -U ahya_1_S27_L001_R1_001_trim.fastq \
+  -x Ahya_smallRNA_idx --no-unal -k 1 | samtools view -Sb - | samtools sort -o ahya_smallRNA.bam
+
+# Generate counts
+samtools idxstats ahya_smallRNA.bam > ahya_smallRNA_counts.txt
+```
+
+
 
 
 
