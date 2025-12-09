@@ -4345,20 +4345,467 @@ print \"Fixed lookup table created: Ahya_lookup_fixed.txt\n\";
 "
 ```
 
-Try just mapping with bowtie. 
+Try just mapping with bowtie. Change U to T in expressed miRNAs: 
 
 ```
-# Create combined index
-cat Ahya-tRNA_cleaned.fasta expressed_miRNAs_ahya.fasta Ahya-rRNA.fasta ahy*.piRNA.fasta > Ahya_smallRNA_refs.fasta
-bowtie2-build Ahya_smallRNA_refs.fasta Ahya_smallRNA_idx
-
-# Map reads (report first alignment only)
-bowtie2 -p 16 -U ahya_1_S27_L001_R1_001_trim.fastq \
-  -x Ahya_smallRNA_idx --no-unal -k 1 | samtools view -Sb - | samtools sort -o ahya_smallRNA.bam
-
-# Generate counts
-samtools idxstats ahya_smallRNA.bam > ahya_smallRNA_counts.txt
+sed 's/U/T/g' expressed_miRNAs_ahya.fasta > expressed_miRNAs_ahya_T.fasta
 ```
+
+`nano bowtie2_test.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=1
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB
+#SBATCH -t 24:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts
+
+module load uri/main 
+module load all/Bowtie2/2.4.5-GCC-11.3.0
+module load samtools/1.19.2
+echo "testing bowtie2 smrna mapping on one sample" $(date)
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya
+
+echo "Create small RNA indices from fastas" $(date)
+#bowtie2-build Ahya-tRNA_cleaned.fasta Ahya_tRNA
+#bowtie2-build expressed_miRNAs_ahya_T.fasta Ahya_miRNA_T  
+#bowtie2-build Ahya-rRNA.fasta Ahya_rRNA
+#bowtie2-build /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/sortmerna/piRNA_bed/ahya.merged.piRNA.fasta Ahya_piRNA
+
+echo "Map reads to smRNA index" $(date)
+echo "Mapping to tRNA..."
+bowtie2 -p 16 -U ahya_1_S27_L001_R1_001_trim.fastq -x Ahya_tRNA --no-unal -k 1 | samtools view -c -F 4 > tRNA_mapped.txt
+
+echo "Mapping to miRNA..."
+bowtie2 -p 16 -U ahya_1_S27_L001_R1_001_trim.fastq -x Ahya_miRNA_T --no-unal -N 2 -L 12 --score-min L,0,-2 --end-to-end --very-sensitive-local | samtools view -c -F 4 > miRNA_mapped.txt
+#bowtie2 -p 16 -U ahya_1_S27_L001_R1_001_trim.fastq -x Ahya_miRNA --no-unal -k 1 | samtools view -c -F 4 > miRNA_mapped.txt
+
+echo "Mapping to rRNA..."
+bowtie2 -p 16 -U ahya_1_S27_L001_R1_001_trim.fastq -x Ahya_rRNA --no-unal -k 1 | samtools view -c -F 4 > rRNA_mapped.txt
+
+echo "Mapping to piRNA..."
+bowtie2 -p 16 -U ahya_1_S27_L001_R1_001_trim.fastq -x Ahya_piRNA --no-unal -k 1 | samtools view -c -F 4 > piRNA_mapped.txt
+
+# Total input reads
+TOTAL_READS=$(grep -c "^@" ahya_1_S27_L001_R1_001_trim.fastq | awk '{print int($1/4)}')
+echo "Total reads: $TOTAL_READS"
+```
+
+Submitted batch job 50095103, 50097781, 50105133, 50106360. Hooray this worked. Let's try running for all Ahya samples. `nano bowtie2_ahya.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=1
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB
+#SBATCH -t 24:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts
+
+module load uri/main 
+module load all/Bowtie2/2.4.5-GCC-11.3.0
+module load samtools/1.19.2
+echo "testing bowtie2 smrna mapping on Ahya samples" $(date)
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya
+
+echo "Create small RNA indices from fastas" $(date)
+#bowtie2-build Ahya-tRNA_cleaned.fasta Ahya_tRNA
+#bowtie2-build expressed_miRNAs_ahya_T.fasta Ahya_miRNA_T  
+#bowtie2-build Ahya-rRNA.fasta Ahya_rRNA
+#bowtie2-build /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/sortmerna/piRNA_bed/ahya.merged.piRNA.fasta Ahya_piRNA
+
+# Define samples
+SAMPLES=(ahya_1_S27_L001_R1_001_trim.fastq ahya_2_S28_L001_R1_001_trim.fastq \
+         ahya_3_S29_L001_R1_001_trim.fastq ahya_4_S30_L001_R1_001_trim.fastq)
+
+echo "Processing $(date)"
+echo "Samples: ${SAMPLES[*]}"
+
+# Create output directory
+mkdir -p smallRNA_mapping_results
+
+# ========== STEP 1: Map all samples to each category ==========
+for SAMPLE in "${SAMPLES[@]}"; do
+  BASE=$(basename "$SAMPLE" _trim.fastq)
+  echo "=== Processing $BASE ==="
+  
+  # tRNA (strict)
+  echo "  tRNA..." $(date)
+  bowtie2 -p 16 -U "$SAMPLE" -x Ahya_tRNA --no-unal -N 1 -L 12 \
+    --end-to-end --very-sensitive-local | \
+    samtools view -c -F 4 > smallRNA_mapping_results/${BASE}_tRNA_mapped.txt
+  
+  # miRNA (loose, your `expressed_miRNAs_ahya_T.fasta` is already U→T converted)
+  echo "  miRNA..." $(date)
+  bowtie2 -p 16 -U "$SAMPLE" -x Ahya_miRNA_T --no-unal -N 1 -L 12 \
+    --end-to-end --very-sensitive-local | \
+    samtools view -c -F 4 > smallRNA_mapping_results/${BASE}_miRNA_mapped.txt
+  
+  # rRNA (strict)
+  echo "  rRNA..." $(date)
+  bowtie2 -p 16 -U "$SAMPLE" -x Ahya_rRNA --no-unal -N 1 -L 12 \
+    --end-to-end --very-sensitive-local | \
+    samtools view -c -F 4 > smallRNA_mapping_results/${BASE}_rRNA_mapped.txt
+  
+  # piRNA (strict)
+  echo "  piRNA..." $(date)
+  bowtie2 -p 16 -U "$SAMPLE" -x Ahya_piRNA --no-unal -N 1 -L 12 \
+    --end-to-end --very-sensitive-local | \
+    samtools view -c -F 4 > smallRNA_mapping_results/${BASE}_piRNA_mapped.txt
+  
+  # Total reads per sample
+  TOTAL_READS=$(grep -c "^@" "$SAMPLE" | awk '{print int($1/4)}')
+  echo "  $BASE total reads: $TOTAL_READS" $(date)
+done
+
+# ========== STEP 2: Summarize all samples ==========
+echo "Generating summary..." $(date)
+> all_samples_mapping_stats.txt
+
+for SAMPLE in "${SAMPLES[@]}"; do
+  BASE=$(basename "$SAMPLE" _trim.fastq)
+  
+  TRNA=$(cat smallRNA_mapping_results/${BASE}_tRNA_mapped.txt)
+  MIRNA=$(cat smallRNA_mapping_results/${BASE}_miRNA_mapped.txt)
+  RRNA=$(cat smallRNA_mapping_results/${BASE}_rRNA_mapped.txt)
+  PIRNA=$(cat smallRNA_mapping_results/${BASE}_piRNA_mapped.txt)
+  TOTAL_READS=$(grep -c "^@" "$SAMPLE" | awk '{print int($1/4)}')
+  UNMAPPED=$((TOTAL_READS - TRNA - MIRNA - RRNA - PIRNA))
+  
+  echo "$BASE,$TRNA,$MIRNA,$RRNA,$PIRNA,$UNMAPPED,$TOTAL_READS" >> all_samples_mapping_stats.txt
+done
+
+echo "Header" > mapping_stats_summary.txt
+echo "Sample,tRNA,miRNA,rRNA,piRNA,Unmapped,Total,Pct_tRNA,Pct_miRNA,Pct_rRNA,Pct_piRNA,Pct_Unmapped" >> mapping_stats_summary.txt
+
+awk -F, 'NR>1{
+  total=$7
+  pct_tRNA=sprintf("%.1f", $2/total*100)
+  pct_miRNA=sprintf("%.1f", $3/total*100)
+  pct_rRNA=sprintf("%.1f", $4/total*100)
+  pct_piRNA=sprintf("%.1f", $5/total*100)
+  pct_unmap=sprintf("%.1f", $6/total*100)
+  print $1","$2","$3","$4","$5","$6","$7","$pct_tRNA","$pct_miRNA","$pct_rRNA","$pct_piRNA","$pct_unmap
+}' all_samples_mapping_stats.txt >> mapping_stats_summary.txt
+
+cat mapping_stats_summary.txt
+```
+
+Submitted batch job 50109978, 50112034
+
+Run for Apoc. First, clean up tRNA fasta file. 
+
+```
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc
+
+awk '
+BEGIN { in_seq = 0 }
+{
+  if ($0 ~ /^>/) {
+    # If we were in a sequence, end it
+    if (in_seq && seq != "") print seq
+    seq = ""
+    
+    header = $0
+    has_pseudo = (header ~ /Possible pseudogene/)
+    
+    # Clean header: keep >, remove disallowed chars from rest
+    clean_header = substr(header, 1, 1)  # Keep the >
+    temp = substr(header, 2)             # Extract rest as variable for gsub
+    gsub(/[^-.\|+_A-Za-z0-9]/, "", temp) # Clean it
+    clean_header = clean_header temp
+    
+    if (!has_pseudo) {
+      print clean_header
+      in_seq = 1
+    } else {
+      in_seq = 0
+    }
+  } else if (in_seq) {
+    # Collect sequence characters
+    seq = seq $0
+  }
+}
+END { if (in_seq && seq != "") print seq }
+' Apoc-tRNA.fasta > Apoc-tRNA_cleaned.fasta
+```
+
+Change U to T in expressed miRNA fasta. 
+
+```
+sed 's/U/T/g' expressed_miRNAs_apoc.fasta > expressed_miRNAs_apoc_T.fasta
+```
+
+`nano bowtie_apoc.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=1
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB
+#SBATCH -t 24:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts
+
+module load uri/main
+module load all/Bowtie2/2.4.5-GCC-11.3.0
+module load samtools/1.19.2
+echo "testing bowtie2 smrna mapping on Apoc samples" $(date)
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc
+
+echo "Create small RNA indices from fastas" $(date)
+bowtie2-build Apoc-tRNA_cleaned.fasta Apoc_tRNA
+bowtie2-build expressed_miRNAs_apoc_T.fasta Apoc_miRNA_T  
+bowtie2-build Apoc-rRNA.fasta Apoc_rRNA
+bowtie2-build /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc/sortmerna/piRNA_bed/apoc.merged.piRNA.fasta Apoc_piRNA
+
+# Define samples
+SAMPLES=(apoc_2_S31_L001_R1_001_trim.fastq apoc_3_S32_L001_R1_001_trim.fastq apoc_4_S33_L001_R1_001_trim.fastq)
+
+echo "Processing $(date)"
+echo "Samples: ${SAMPLES[*]}"
+
+# Create output directory
+mkdir -p smallRNA_mapping_results
+
+# ========== STEP 1: Map all samples to each category ==========
+for SAMPLE in "${SAMPLES[@]}"; do
+  BASE=$(basename "$SAMPLE" _trim.fastq)
+  echo "=== Processing $BASE ==="
+  
+  # tRNA (strict)
+  echo "  tRNA..." $(date)
+  bowtie2 -p 16 -U "$SAMPLE" -x Apoc_tRNA --no-unal -N 1 -L 12 \
+    --end-to-end --very-sensitive-local | \
+    samtools view -c -F 4 > smallRNA_mapping_results/${BASE}_tRNA_mapped.txt
+  
+  # miRNA (loose, your `expressed_miRNAs_ahya_T.fasta` is already U→T converted)
+  echo "  miRNA..." $(date)
+  bowtie2 -p 16 -U "$SAMPLE" -x Apoc_miRNA_T --no-unal -N 1 -L 12 \
+    --end-to-end --very-sensitive-local | \
+    samtools view -c -F 4 > smallRNA_mapping_results/${BASE}_miRNA_mapped.txt
+  
+  # rRNA (strict)
+  echo "  rRNA..." $(date)
+  bowtie2 -p 16 -U "$SAMPLE" -x Apoc_rRNA --no-unal -N 1 -L 12 \
+    --end-to-end --very-sensitive-local | \
+    samtools view -c -F 4 > smallRNA_mapping_results/${BASE}_rRNA_mapped.txt
+  
+  # piRNA (strict)
+  echo "  piRNA..." $(date)
+  bowtie2 -p 16 -U "$SAMPLE" -x Apoc_piRNA --no-unal -N 1 -L 12 \
+    --end-to-end --very-sensitive-local | \
+    samtools view -c -F 4 > smallRNA_mapping_results/${BASE}_piRNA_mapped.txt
+  
+  # Total reads per sample
+  TOTAL_READS=$(grep -c "^@" "$SAMPLE" | awk '{print int($1/4)}')
+  echo "  $BASE total reads: $TOTAL_READS" $(date)
+done
+
+# ========== STEP 2: Summarize all samples ==========
+echo "Generating summary..." $(date)
+> all_samples_mapping_stats.txt
+
+for SAMPLE in "${SAMPLES[@]}"; do
+  BASE=$(basename "$SAMPLE" _trim.fastq)
+  
+  TRNA=$(cat smallRNA_mapping_results/${BASE}_tRNA_mapped.txt)
+  MIRNA=$(cat smallRNA_mapping_results/${BASE}_miRNA_mapped.txt)
+  RRNA=$(cat smallRNA_mapping_results/${BASE}_rRNA_mapped.txt)
+  PIRNA=$(cat smallRNA_mapping_results/${BASE}_piRNA_mapped.txt)
+  TOTAL_READS=$(grep -c "^@" "$SAMPLE" | awk '{print int($1/4)}')
+  UNMAPPED=$((TOTAL_READS - TRNA - MIRNA - RRNA - PIRNA))
+  
+  echo "$BASE,$TRNA,$MIRNA,$RRNA,$PIRNA,$UNMAPPED,$TOTAL_READS" >> all_samples_mapping_stats.txt
+done
+
+echo "Header" > mapping_stats_summary.txt
+echo "Sample,tRNA,miRNA,rRNA,piRNA,Unmapped,Total,Pct_tRNA,Pct_miRNA,Pct_rRNA,Pct_piRNA,Pct_Unmapped" >> mapping_stats_summary.txt
+
+awk -F, 'NR>1{
+  total=$7
+  pct_tRNA=sprintf("%.1f", $2/total*100)
+  pct_miRNA=sprintf("%.1f", $3/total*100)
+  pct_rRNA=sprintf("%.1f", $4/total*100)
+  pct_piRNA=sprintf("%.1f", $5/total*100)
+  pct_unmap=sprintf("%.1f", $6/total*100)
+  print $1","$2","$3","$4","$5","$6","$7","$pct_tRNA","$pct_miRNA","$pct_rRNA","$pct_piRNA","$pct_unmap
+}' all_samples_mapping_stats.txt >> mapping_stats_summary.txt
+
+cat mapping_stats_summary.txt
+```
+
+Submitted batch job 50154586
+
+Run for Nvec. First, clean up tRNA fasta file. 
+
+```
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec
+
+awk '
+BEGIN { in_seq = 0 }
+{
+  if ($0 ~ /^>/) {
+    # If we were in a sequence, end it
+    if (in_seq && seq != "") print seq
+    seq = ""
+    
+    header = $0
+    has_pseudo = (header ~ /Possible pseudogene/)
+    
+    # Clean header: keep >, remove disallowed chars from rest
+    clean_header = substr(header, 1, 1)  # Keep the >
+    temp = substr(header, 2)             # Extract rest as variable for gsub
+    gsub(/[^-.\|+_A-Za-z0-9]/, "", temp) # Clean it
+    clean_header = clean_header temp
+    
+    if (!has_pseudo) {
+      print clean_header
+      in_seq = 1
+    } else {
+      in_seq = 0
+    }
+  } else if (in_seq) {
+    # Collect sequence characters
+    seq = seq $0
+  }
+}
+END { if (in_seq && seq != "") print seq }
+' Nvec-tRNA.fasta > Nvec-tRNA_cleaned.fasta
+```
+
+Change U to T in expressed miRNA fasta. 
+
+```
+sed 's/U/T/g' expressed_miRNAs_nvec.fasta > expressed_miRNAs_nvec_T.fasta
+```
+
+`nano bowtie_nvec.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=1
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB
+#SBATCH -t 24:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts
+
+module load uri/main
+module load all/Bowtie2/2.4.5-GCC-11.3.0
+module load samtools/1.19.2
+echo "testing bowtie2 smrna mapping on Nvec samples" $(date)
+
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec
+
+echo "Create small RNA indices from fastas" $(date)
+bowtie2-build Nvec-tRNA_cleaned.fasta Nvec_tRNA
+bowtie2-build expressed_miRNAs_nvec_T.fasta Nvec_miRNA_T  
+bowtie2-build Nvec-rRNA.fasta Nvec_rRNA
+bowtie2-build /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec/sortmerna/piRNA_bed/nvec.merged.piRNA.fasta Nvec_piRNA
+
+# Define samples
+SAMPLES=(nvec_1_S25_L001_R1_001_trim.fastq nvec_2_S26_L001_R1_001_trim.fastq 	nvec_3_S34_L001_R1_001_trim.fastq nvec_4_S35_L001_R1_001_trim.fastq)
+
+echo "Processing $(date)"
+echo "Samples: ${SAMPLES[*]}"
+
+# Create output directory
+mkdir -p smallRNA_mapping_results
+
+# ========== STEP 1: Map all samples to each category ==========
+for SAMPLE in "${SAMPLES[@]}"; do
+  BASE=$(basename "$SAMPLE" _trim.fastq)
+  echo "=== Processing $BASE ==="
+  
+  # tRNA (strict)
+  echo "  tRNA..." $(date)
+  bowtie2 -p 16 -U "$SAMPLE" -x Nvec_tRNA --no-unal -N 1 -L 12 \
+    --end-to-end --very-sensitive-local | \
+    samtools view -c -F 4 > smallRNA_mapping_results/${BASE}_tRNA_mapped.txt
+  
+  # miRNA (loose, your `expressed_miRNAs_ahya_T.fasta` is already U→T converted)
+  echo "  miRNA..." $(date)
+  bowtie2 -p 16 -U "$SAMPLE" -x Nvec_miRNA_T --no-unal -N 1 -L 12 \
+    --end-to-end --very-sensitive-local | \
+    samtools view -c -F 4 > smallRNA_mapping_results/${BASE}_miRNA_mapped.txt
+  
+  # rRNA (strict)
+  echo "  rRNA..." $(date)
+  bowtie2 -p 16 -U "$SAMPLE" -x Nvec_rRNA --no-unal -N 1 -L 12 \
+    --end-to-end --very-sensitive-local | \
+    samtools view -c -F 4 > smallRNA_mapping_results/${BASE}_rRNA_mapped.txt
+  
+  # piRNA (strict)
+  echo "  piRNA..." $(date)
+  bowtie2 -p 16 -U "$SAMPLE" -x Nvec_piRNA --no-unal -N 1 -L 12 \
+    --end-to-end --very-sensitive-local | \
+    samtools view -c -F 4 > smallRNA_mapping_results/${BASE}_piRNA_mapped.txt
+  
+  # Total reads per sample
+  TOTAL_READS=$(grep -c "^@" "$SAMPLE" | awk '{print int($1/4)}')
+  echo "  $BASE total reads: $TOTAL_READS" $(date)
+done
+
+# ========== STEP 2: Summarize all samples ==========
+echo "Generating summary..." $(date)
+> all_samples_mapping_stats.txt
+
+for SAMPLE in "${SAMPLES[@]}"; do
+  BASE=$(basename "$SAMPLE" _trim.fastq)
+  
+  TRNA=$(cat smallRNA_mapping_results/${BASE}_tRNA_mapped.txt)
+  MIRNA=$(cat smallRNA_mapping_results/${BASE}_miRNA_mapped.txt)
+  RRNA=$(cat smallRNA_mapping_results/${BASE}_rRNA_mapped.txt)
+  PIRNA=$(cat smallRNA_mapping_results/${BASE}_piRNA_mapped.txt)
+  TOTAL_READS=$(grep -c "^@" "$SAMPLE" | awk '{print int($1/4)}')
+  UNMAPPED=$((TOTAL_READS - TRNA - MIRNA - RRNA - PIRNA))
+  
+  echo "$BASE,$TRNA,$MIRNA,$RRNA,$PIRNA,$UNMAPPED,$TOTAL_READS" >> all_samples_mapping_stats.txt
+done
+
+echo "Header" > mapping_stats_summary.txt
+echo "Sample,tRNA,miRNA,rRNA,piRNA,Unmapped,Total,Pct_tRNA,Pct_miRNA,Pct_rRNA,Pct_piRNA,Pct_Unmapped" >> mapping_stats_summary.txt
+
+awk -F, 'NR>1{
+  total=$7
+  pct_tRNA=sprintf("%.1f", $2/total*100)
+  pct_miRNA=sprintf("%.1f", $3/total*100)
+  pct_rRNA=sprintf("%.1f", $4/total*100)
+  pct_piRNA=sprintf("%.1f", $5/total*100)
+  pct_unmap=sprintf("%.1f", $6/total*100)
+  print $1","$2","$3","$4","$5","$6","$7","$pct_tRNA","$pct_miRNA","$pct_rRNA","$pct_piRNA","$pct_unmap
+}' all_samples_mapping_stats.txt >> mapping_stats_summary.txt
+
+cat mapping_stats_summary.txt
+```
+
+Submitted batch job 50155509
+
+
+
+
 
 
 
@@ -4642,7 +5089,7 @@ echo "Running short stack on trimmed reads for apoc"
 cd /scratch4/workspace/jillashey_uri_edu-cnidarian-sperm-trimmomatic/trim/apoc
 
 ShortStack \
---genomefile /work/pi_hputnam_uri_edu/genomes/Apoc/apoculata.assembly.scaffolds_chromosome_level.fasta \
+--genomefile /work/pi_hputnam_uri_edu/genomes/Apoc/apoculata.genome.fasta \
 --readfile apoc_2_S31.trim.fastq \
 apoc_3_S32.trim.fastq \
 apoc_4_S33.trim.fastq \
@@ -4683,9 +5130,156 @@ echo "Ahya shortstack complete"
 conda deactivate
 ```
 
-Submitted batch job 49487634. Rerunning for Apoc and Nvec, didn't have the correct genome paths. Submitted batch job 49488188
+Submitted batch job 49487634. Rerunning for Apoc and Nvec, didn't have the correct genome paths. Submitted batch job 49488188. Results look pretty similar to fastp trimming. 
+
+Try trimming again with the code Nick gave me. `nano trimmomatic.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=1
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB
+#SBATCH -t 50:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /scratch4/workspace/jillashey_uri_edu-cnidarian-sperm-trimmomatic/scripts
+
+module load trimmomatic/0.39
+module load uri/main
+module load fastqc/0.12.1
+module load all/MultiQC/1.12-foss-2021b
+
+cd /project/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA
+
+echo "Starting SE trimming for all samples" $(date)
+
+for file in *R1_001.fastq; do
+    base=${file%_L001_R1_001.fastq}  # Gets 'ahya_1_S27' from 'ahya_1_S27_L001_R1_001.fastq'
+    echo "Processing $base"
+    
+    trimmomatic SE -phred33 \
+        "$file" \
+        "${base}.trim.fastq" \
+        ILLUMINACLIP:/scratch4/workspace/jillashey_uri_edu-cnidarian-sperm-trimmomatic/adapters.fa:2:30:5 \
+        MINLEN:18
+
+    fastqc "${base}.trim.fastq"
+done
+
+echo "All trimming and QC complete" $(date)
+
+echo "Move files to scratch and multiQC" $(date)
+mv *trim* /scratch4/workspace/jillashey_uri_edu-cnidarian-sperm-trimmomatic/trim
+cd /scratch4/workspace/jillashey_uri_edu-cnidarian-sperm-trimmomatic/trim
+
+multiqc *
+
+echo "MultiQC complete" $(date)
+```
+
+Submitted batch job 50277513. Rerun shortstack. Submitted batch job 50283898
+
+Maybe try trimming with both the 3' and 5' adapter...I have just been using the 3'
 
 
 
 
- 
+## Length and starting nucleotide 
+
+Ahya 
+
+```
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya
+
+awk '
+NR%4==2 {  # Sequence lines (2nd line of each 4-line FASTQ record)
+    len = length($0)
+    start_nt = substr($0, 1, 1)
+    print len, start_nt
+}' ahya_1_S27_L001_R1_001_trim.fastq > ahya_1_length_start.txt
+
+awk '
+NR%4==2 {  # Sequence lines (2nd line of each 4-line FASTQ record)
+    len = length($0)
+    start_nt = substr($0, 1, 1)
+    print len, start_nt
+}' ahya_2_S28_L001_R1_001_trim.fastq > ahya_2_length_start.txt
+
+awk '
+NR%4==2 {  # Sequence lines (2nd line of each 4-line FASTQ record)
+    len = length($0)
+    start_nt = substr($0, 1, 1)
+    print len, start_nt
+}' ahya_3_S29_L001_R1_001_trim.fastq > ahya_3_length_start.txt
+
+awk '
+NR%4==2 {  # Sequence lines (2nd line of each 4-line FASTQ record)
+    len = length($0)
+    start_nt = substr($0, 1, 1)
+    print len, start_nt
+}' ahya_4_S30_L001_R1_001_trim.fastq > ahya_4_length_start.txt
+```
+
+Nvec 
+
+```
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/nvec
+
+awk '
+NR%4==2 {  # Sequence lines (2nd line of each 4-line FASTQ record)
+    len = length($0)
+    start_nt = substr($0, 1, 1)
+    print len, start_nt
+}' nvec_1_S25_L001_R1_001_trim.fastq > nvec_1_length_start.txt
+
+awk '
+NR%4==2 {  # Sequence lines (2nd line of each 4-line FASTQ record)
+    len = length($0)
+    start_nt = substr($0, 1, 1)
+    print len, start_nt
+}' nvec_2_S26_L001_R1_001_trim.fastq > nvec_2_length_start.txt
+
+awk '
+NR%4==2 {  # Sequence lines (2nd line of each 4-line FASTQ record)
+    len = length($0)
+    start_nt = substr($0, 1, 1)
+    print len, start_nt
+}' nvec_3_S34_L001_R1_001_trim.fastq > nvec_3_length_start.txt
+
+awk '
+NR%4==2 {  # Sequence lines (2nd line of each 4-line FASTQ record)
+    len = length($0)
+    start_nt = substr($0, 1, 1)
+    print len, start_nt
+}' nvec_4_S35_L001_R1_001_trim.fastq > nvec_4_length_start.txt
+```
+
+Apoc 
+
+```
+cd /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/apoc
+
+awk '
+NR%4==2 {  # Sequence lines (2nd line of each 4-line FASTQ record)
+    len = length($0)
+    start_nt = substr($0, 1, 1)
+    print len, start_nt
+}' apoc_2_S31_L001_R1_001_trim.fastq > apoc_2_length_start.txt
+
+awk '
+NR%4==2 {  # Sequence lines (2nd line of each 4-line FASTQ record)
+    len = length($0)
+    start_nt = substr($0, 1, 1)
+    print len, start_nt
+}' apoc_3_S32_L001_R1_001_trim.fastq > apoc_3_length_start.txt
+
+awk '
+NR%4==2 {  # Sequence lines (2nd line of each 4-line FASTQ record)
+    len = length($0)
+    start_nt = substr($0, 1, 1)
+    print len, start_nt
+}' apoc_4_S33_L001_R1_001_trim.fastq > apoc_4_length_start.txt
+```

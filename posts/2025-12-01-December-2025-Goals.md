@@ -75,7 +75,18 @@ Nothing
 
 ### 20251208 
 
-- Prelim discussion writing for cnidarian sperm paper 
+- Methods + results + discussion writing for cnidarian sperm paper 
+- Trying to get mintmap to work
+- Wrote up AFDW protocol 
+- Plotting % mapping 
+
+### 20251209
+
+- Putnam lab meeting 
+- Sperm smRNA meeting 
+- Put pans in muffle furnance to burn + weighed pans
+- Coding for smRNA
+- Labeling for airbrushing 
 
 
 
@@ -84,12 +95,12 @@ Nothing
 
 to do
 
+- get trimming info from Nick
+- prep for presenting in lab meeting 
 - send info to angela and marcelina re SNP code and HPC 
-- remind hollie to read AST 2021 
-- homology stuff for sperm -- functional 
-- tRNA analysis for sperm -- email nick for scripts 
 - make metadata sheets for phys data 
 - post translator reef bite articles 
+- send nick tRNA bam files 
 
 
 
