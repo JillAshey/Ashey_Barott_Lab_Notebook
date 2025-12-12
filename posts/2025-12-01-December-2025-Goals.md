@@ -108,6 +108,7 @@ Nothing
 - Lab meeting 
 - Labeled pans and started burning them in muffle furnance 
 - Figured out seq stuff and started BWA 
+- e5 meeting 
 
 
 
@@ -115,7 +116,6 @@ Nothing
 
 to do
 
-- run stuff for Marcelina on Unity 
 - get trimming info from Nick
 - post translator reef bite articles 
 - send nick tRNA bam files 
