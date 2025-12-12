@@ -88,19 +88,30 @@ Nothing
 - Coding for smRNA
 - Labeling for airbrushing 
 
+### 20251210
 
+- Airbrushing + guava 12 samples 
+- Organizing phys data 
+- Rerunning some trimming stuff on sperm smRNA
+- Put pans in drying oven
+
+### 20251211
+
+- Airbrushing + guava 9 samples - done with October 2024! 
+- Meeting w/ Sarah 
+- Put pans in muffle furnance and weighed
+- Made presentation for lab meeting 
 
 
 
 
 to do
 
+- run stuff for Marcelina on Unity 
 - get trimming info from Nick
-- prep for presenting in lab meeting 
-- send info to angela and marcelina re SNP code and HPC 
-- make metadata sheets for phys data 
 - post translator reef bite articles 
 - send nick tRNA bam files 
+- hawaii paperwork
 
 
 

@@ -5182,7 +5182,10 @@ echo "MultiQC complete" $(date)
 
 Submitted batch job 50277513. Rerun shortstack. Submitted batch job 50283898
 
-Maybe try trimming with both the 3' and 5' adapter...I have just been using the 3'
+Maybe try trimming with both the 3' and 5' adapter...I have just been using the 3'. Trying with both adapters (3' and 5'). Submitted batch job 50323325
+
+
+
 
 
 
