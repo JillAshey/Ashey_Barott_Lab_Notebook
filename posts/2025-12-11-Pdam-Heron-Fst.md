@@ -9,7 +9,7 @@ projects: Pdam Heron
 
 ## Pdam Heron population connectivity 
 
-Running fst bioinformatics for Angela/Marcelina on Unity using Pdam samples from [Brown et al. 2025](https://onlinelibrary.wiley.com/doi/10.1111/mec.17603). Make scratch directory to work in. 
+Running fst bioinformatics for Angela/Marcelina on Unity using Pdam samples from [Brown et al. 2025](https://onlinelibrary.wiley.com/doi/10.1111/mec.17603) (github repo [here](https://github.com/imkristenbrown/Heron-Pdam-gene-expression/tree/master)). Make scratch directory to work in. 
 
 ```
 ws_allocate pdam_tagseq_analysis 30
@@ -104,12 +104,47 @@ realSFS fst print ${OUT_DIR}/pop1_pop2.fst.idx > ${OUT_DIR}/pop1_pop2.fst.txt
 
 I'm going to run it in several steps, as I anticipate that each step will be pretty RAM/time intensive. 
 
-Samples notes:
+### Sample information
 
-- 48 samples total 
-- Library prep and sequencing done at UT Austin
-- Fastq files are single end, not paired end
-	- “Sequencing was completed targeting standard coverage of 3–5 million 100-bp single-end reads per sample (Illumina NovaSeq 600 SR100).” (Brown et al., 2025)
+There are 48 samples total from [Brown et al. 2025](https://onlinelibrary.wiley.com/doi/10.1111/mec.17603). Samples were stored in RNAlater and stored at -80C until extraction. RNA was extracted using the Zymo Quick-RNA/RNA Miniprep Plus kit (Zymo Research #D7003). Samples were bead-beat with 0.5mm glass beads at max speed for 1-2 min. Extractions were performed according to Zymo protocol, with a proteinase K digestion step for 15 mins at room temperature and a DNAse I treatment for 15 mins at room temperature. See [here](https://github.com/imkristenbrown/Heron-Pdam-gene-expression/blob/master/Project-Summary-Barott-and-Brown-Pdam-RNA-DNA-Extractions.md) for more information about RNA extractions. 
+
+Library prep and sequencing was completed at UT Austin (see [here](https://github.com/imkristenbrown/Heron-Pdam-gene-expression/tree/master/TagSeq_Submission) for TagSeq submission information). Libraries were sequenced with targeting coverage of 3-5 million reads. Generated reads were 100-bp single-end. See the [QC report](https://github.com/imkristenbrown/Heron-Pdam-gene-expression/tree/master/BioInf/data/raw_qc) of the raw samples for more information about the raw reads. 
+
+Important to note: for each sample, there are two files: one includes the prefix "L001" and the other "L002". I'm not sure what the difference is between these or if the samples were just sequenced over multiple lanes. However, before proceeding with analysis, files for the same sample must be concatenated together (see Zoe [TagSeq pipeline](https://github.com/imkristenbrown/Heron-Pdam-gene-expression/blob/master/BioInf/Heron-Pdam-gene-expression.md) for the same samples). 
+
+### Concatenate L001 and L002 files for each sample 
+
+`nano cat_files.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=1
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=50GB
+#SBATCH -t 24:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /scratch4/workspace/jillashey_uri_edu-pdam_tagseq_analysis
+
+module load samtools/1.19.2
+
+cd /project/pi_hputnam_uri_edu/raw_sequencing_data/20230125_Barott_Pdam
+
+echo "Concatenate files" $(date)
+
+\ls *R1_001.fastq.gz | awk -F '[_]' '{print $1"_"$2}' | sort | uniq > /scratch4/workspace/jillashey_uri_edu-pdam_tagseq_analysis/ID
+
+while read i; do
+    cat ${i}_L001_R1_001.fastq.gz ${i}_L002_R1_001.fastq.gz > /scratch4/workspace/jillashey_uri_edu-pdam_tagseq_analysis/${i}_ALL.fastq.gz
+done < /scratch4/workspace/jillashey_uri_edu-pdam_tagseq_analysis/ID
+
+echo "Mission complete." $(date)
+```
+
+Submitted batch job 50497324
 
 ### Align files with BWA
 
@@ -127,7 +162,7 @@ Align untrimmed files with bwa. `nano align_bwa.sh`
 #SBATCH --partition=uri-cpu
 #SBATCH --no-requeue
 #SBATCH --mem=100GB
-#SBATCH -t 50:00:00
+#SBATCH -t 60:00:00
 #SBATCH --mail-type=BEGIN,END,FAIL
 #SBATCH -o slurm-%j.out
 #SBATCH -e slurm-%j.error
@@ -143,7 +178,7 @@ bwa index Pocillopora_acuta_HIv2.assembly.fasta -p Pacuta_bwa
 
 echo "Index complete, aligning sequences" $(date)
 
-READDIR="/project/pi_hputnam_uri_edu/raw_sequencing_data/20230125_Barott_Pdam"
+READDIR="/scratch4/workspace/jillashey_uri_edu-pdam_tagseq_analysis/"
 OUTDIR="/scratch4/workspace/jillashey_uri_edu-pdam_tagseq_analysis/bwa_alignments"
 REFDIR="/work/pi_hputnam_uri_edu/HI_Genomes/PacutaV2/"
 
@@ -151,31 +186,34 @@ mkdir -p "$OUTDIR"
 
 cd "$READDIR"
 
-for R1 in *"_R1_001.fastq.gz"; do
-    sample=${R1%%_R1_001.fastq.gz}
+for FASTQ in *"_ALL.fastq.gz"; do
+    sample=${FASTQ%%_ALL.fastq.gz}
     echo "Processing $sample"    
-    bwa mem "$REFDIR/Pacuta_bwa" "$R1" \
-      | samtools sort -@ 8 -O BAM -o "$OUTDIR/${sample}.sorted.bam" -
+    bwa mem "$REFDIR/Pacuta_bwa" "$FASTQ" \
+      | samtools sort -O BAM -o "$OUTDIR/${sample}.sorted.bam" -
     samtools index "$OUTDIR/${sample}.sorted.bam"
 done
 
 echo "Sequence alignment complete" $(date)
 ```
 
-Submitted batch job 50461201
+Submitted batch job 50502094
 
 See [bwa manual](https://bio-bwa.sourceforge.net/bwa.shtml) and [samtools manual](https://www.htslib.org/doc/samtools.html) for more info about these programs. 
 
 ### Organize bam files by population 
 
-There are two Pdam populations of interest - Reef Slope (RS) and Reef Flat (RF). The bam files have this information in the sample name. Make lists of the bam files for these two populations.
+There are two Pdam populations of interest - Reef Slope (RS) and Reef Flat (RF). The bam files have this information in the file name. Make lists of the bam files for these two populations.
 
 ```
 cd /scratch4/workspace/jillashey_uri_edu-pdam_tagseq_analysis/bwa_alignments
 
 # RS population only
-ls RS*.bam > pop_RS.bamlist
+ls RS*sorted.bam > pop_RS.bamlist
 
 # RF population only  
-ls RF*.bam > pop_RF.bamlist
+ls RF*sorted.bam > pop_RF.bamlist
 ```
+
+### Run ANGSD to calculate SAF
+

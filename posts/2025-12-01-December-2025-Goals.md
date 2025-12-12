@@ -101,6 +101,14 @@ Nothing
 - Meeting w/ Sarah 
 - Put pans in muffle furnance and weighed
 - Made presentation for lab meeting 
+- Troubleshooting with BWA 
+
+### 20251212
+
+- Lab meeting 
+- Labeled pans and started burning them in muffle furnance 
+- Figured out seq stuff and started BWA 
+
 
 
 
