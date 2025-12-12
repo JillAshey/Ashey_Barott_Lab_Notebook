@@ -108,7 +108,7 @@ I'm going to run it in several steps, as I anticipate that each step will be pre
 
 There are 48 samples total from [Brown et al. 2025](https://onlinelibrary.wiley.com/doi/10.1111/mec.17603). Samples were stored in RNAlater and stored at -80C until extraction. RNA was extracted using the Zymo Quick-RNA/RNA Miniprep Plus kit (Zymo Research #D7003). Samples were bead-beat with 0.5mm glass beads at max speed for 1-2 min. Extractions were performed according to Zymo protocol, with a proteinase K digestion step for 15 mins at room temperature and a DNAse I treatment for 15 mins at room temperature. See [here](https://github.com/imkristenbrown/Heron-Pdam-gene-expression/blob/master/Project-Summary-Barott-and-Brown-Pdam-RNA-DNA-Extractions.md) for more information about RNA extractions. 
 
-Library prep and sequencing was completed at UT Austin (see [here](https://github.com/imkristenbrown/Heron-Pdam-gene-expression/tree/master/TagSeq_Submission) for TagSeq submission information). Libraries were sequenced with targeting coverage of 3-5 million reads. Generated reads were 100-bp single-end. See the [QC report](https://github.com/imkristenbrown/Heron-Pdam-gene-expression/tree/master/BioInf/data/raw_qc) of the raw samples for more information about the raw reads. 
+Library prep and sequencing was completed at UT Austin (see [here](https://github.com/imkristenbrown/Heron-Pdam-gene-expression/tree/master/TagSeq_Submission) for TagSeq submission information). Libraries were sequenced with targeting coverage of 3-5 million reads (pretty low coverage but typical for TagSeq data). Generated reads were 100-bp single-end. See the [QC report](https://github.com/imkristenbrown/Heron-Pdam-gene-expression/tree/master/BioInf/data/raw_qc) of the raw samples for more information about the raw reads. 
 
 Important to note: for each sample, there are two files: one includes the prefix "L001" and the other "L002". I'm not sure what the difference is between these or if the samples were just sequenced over multiple lanes. However, before proceeding with analysis, files for the same sample must be concatenated together (see Zoe [TagSeq pipeline](https://github.com/imkristenbrown/Heron-Pdam-gene-expression/blob/master/BioInf/Heron-Pdam-gene-expression.md) for the same samples). 
 
@@ -217,3 +217,20 @@ ls RF*sorted.bam > pop_RF.bamlist
 
 ### Run ANGSD to calculate SAF
 
+GL 1 or 2? 1 is Samtools, 2 is GATK. Leaning towards samtools since it is better with low coverage
+
+
+Data not high overage
+
+- https://academic.oup.com/g3journal/article/15/10/jkaf172/8219480
+
+
+Other coral papers 
+
+- https://onlinelibrary.wiley.com/doi/full/10.1111/eva.70115 -- they trimmed data before aligning 
+- https://onlinelibrary.wiley.com/doi/full/10.1002/ece3.70771 -- this used GL 1 (https://github.com/sanna2110/SYMBIO_WA/tree/main)
+- https://onlinelibrary.wiley.com/doi/full/10.1111/1755-0998.12593?casa_token=Pw3tbUZWAD0AAAAA%3A0P6eZeCZRV6wo3G7VJ6rYB6aLZTsgWnDM3oeHPYVW2Jf03YpWelzOjb9fSQCNuOs-M5MrroWGuLIJzfu -- used GL 1 (https://datadryad.org/dataset/doi:10.5061/dryad.ft596)
+- https://www.sciencedirect.com/science/article/pii/S004896972107501X?via%3Dihub#s0125 - used GL 1 )https://github.com/jamesfifer/JapanRE/blob/650f342abcc518f059771e20075c502e7c9f8e84/JapanRE_Temperate_Walkthrough.txt#L9)
+- https://onlinelibrary.wiley.com/doi/full/10.1111/rec.70234?casa_token=hHNzHcmUgUEAAAAA%3AHmtnIcLNyQtNn5kzWY4Vd4kSInMu7LAXGy-QhhCeho-SJfX6AhfkAD-F47zo9b1_NbeBLedHz5E-sjyM - used GL 1 (https://github.com/Sydney-Bell/RTTproject.SCTLD)
+
+ASK Jacob, Megan, Amy 
