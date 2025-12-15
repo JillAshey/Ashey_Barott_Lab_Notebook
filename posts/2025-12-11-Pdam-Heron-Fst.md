@@ -465,9 +465,30 @@ echo "1D SFS estimation for RS samples complete" $(date)
 
 Submitted batch job 50552649. Plot output in R. 
 
+Global SFS (all samples):
+
+```{r}
+sfs <- scan("pop_all.sfs")
+barplot(sfs[-c(1,length(sfs))]/sum(sfs[-c(1,length(sfs))]), 
+        xlab="Derived allele frequency", ylab="Proportion of polymorphic sites",
+        main="Global SFS (all samples)")
 ```
 
+![](https://github.com/JillAshey/Ashey_Barott_Lab_Notebook/blob/main/images/global_SFS.png?raw=true)
+
+The x-axis is showing derived allele frequency classes across all samples, while the y-axis is showing the proportion of polymorphic sites in each allele class. Derived allele frequency is the fraction of chromosomes in your sample that carry the new (mutated) version of a site, assuming the reference/ancestral state is the “old” allele. A polymorphic site is a position in the genome where more than one allele is present in the population at non‑trivial frequency. In the global plot, we are seeing very tall bars at low derived allele frequencies, which means most polymorphic sites have a low derived allele frequency. So there are more sites where the allele is rate. 
+
+RF population: 
+
+```{r}
+sfs_RF <- scan("popRF.sfs")
+barplot(sfs_RF[-c(1,length(sfs_RF))]/sum(sfs_RF[-c(1,length(sfs_RF))]), 
+        xlab="Derived allele frequency", ylab="Proportion of polymorphic sites",
+        main="Global SFS (RF samples)")
 ```
+
+![](https://github.com/JillAshey/Ashey_Barott_Lab_Notebook/blob/main/images/global_SFS.png?raw=true)
+
 
 ### Calculate 2D SFS
 
