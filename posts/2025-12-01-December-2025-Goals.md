@@ -121,6 +121,7 @@ Nothing
 ### 20251215
 
 - Put pans in drying oven
+- Popgen ANGSD on Pdam data 
 
 
 

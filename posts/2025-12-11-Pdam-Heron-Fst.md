@@ -151,7 +151,9 @@ Submitted batch job 50497324
 Software used and versions:
 
 - BWA (v0.7.17)
+	- Cite Li and Durbin [2010](https://academic.oup.com/bioinformatics/article/26/5/589/211735?login=true)
 - samtools (v1.19.2)
+	- Cite Li et al. [2009](https://academic.oup.com/bioinformatics/article/25/16/2078/204688)
 
 Align untrimmed files with bwa. `nano align_bwa.sh`
 
@@ -221,11 +223,12 @@ Make list of all bam files as well.
 ls *sorted.bam > pop_all.bamlist
 ```
 
-### Run ANGSD to determine depth
+### Determine depth with ANGSD
 
 Software used and versions:
 
 - ANGSD (v0.935)
+	- Cite Nielsen et al. [2012](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0037558) and Korneliussen et al. [2014](https://link.springer.com/article/10.1186/s12859-014-0356-4)
 
 Because our data is TagSeq (3-5M reads per sample, 3' bias), coverage will be relatively sparse and 3' biased (given the library prep methods). To choose depth filters, I'm going to run ANGSD's `-doDepth 1 -doCounts 1` before proceeding with the other analyses. This will generate depth histograms from the BAM files: `.depthGlobal` (total reads across all samples per site) and `.depthSample` (per-individual depths). These distributions will help us choose suitable depth parameters. 
 
@@ -260,7 +263,7 @@ echo "Sample depth run complete" $(date)
 
 Submitted batch job 50546988. See [ANGSD manual](https://www.popgen.dk/angsd/index.php/ANGSD#Overview) and [github](https://github.com/ANGSD/angsd) for more info about the program. ANGSD will be used downstream to determine SAF and Fst. 
 
-Look at the `pop_all_depth.depthGlobal` in R. This shows total read depth across samples
+Look at the `pop_all_depth.depthGlobal` in R. This shows total read depth across samples per genomic site.
 
 ```{r}
 getwd()
@@ -286,6 +289,226 @@ abline(h=70, col="red", lty=2)
 abline(v=3, col="blue", lty=2)  # minDepth suggestion
 ```
 
+The coverage distribution shows exactly what we would expect--a peak around 1-2 total depth for specific sites (ie low coverage sites), with a rapid tapering off. This is consistent with low coverage TagSeq. 
+
+![](https://raw.githubusercontent.com/JillAshey/Ashey_Barott_Lab_Notebook/refs/heads/main/images/depth_coverage_distribution.png)
+
+If we set the minimum depth to 3 (as shown in the plot below), we retain the majority of covered sites and exclude the noise of 1-2 coverage. 
+
+![](https://raw.githubusercontent.com/JillAshey/Ashey_Barott_Lab_Notebook/refs/heads/main/images/depth_sites_retained.png)
+
+### Calculate Site Allele Frequency likelihoods (SAF) with ANGSD (for all samples and per population)
+
+SAF (Site Allele Frequency likelihoods) are probability distributions of allele counts at each genomic site across samples, based on genotype likelihoods from the BAM files. This is needed to estimate 1D SDS (diversity within a population) and 2D SDS (Fst between populations). 
+
+I am going to run one job with all samples and one job with samples separated by population. 
+
+`nano saf_all_angsd.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=1
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB
+#SBATCH -t 60:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /scratch4/workspace/jillashey_uri_edu-pdam_tagseq_analysis
+
+module load angsd/0.935
+
+cd /scratch4/workspace/jillashey_uri_edu-pdam_tagseq_analysis/bwa_alignments
+
+echo "Calculate SAF for all samples" $(date)
+
+angsd -b pop_all.bamlist \
+      -ref /work/pi_hputnam_uri_edu/HI_Genomes/PacutaV2/Pocillopora_acuta_HIv2.assembly.fasta \
+      -anc /work/pi_hputnam_uri_edu/HI_Genomes/PacutaV2/Pocillopora_acuta_HIv2.assembly.fasta \
+      -out ../pop_all \
+      -doSaf 1 \
+      -doCounts 1 \ 
+      -GL 1 \
+      -doMajorMinor 1 \
+      -doMaf 1 \
+      -minMapQ 20 \
+      -minQ 20 \
+      -minInd 24 \
+      -setMinDepth 3 \
+      -setMaxDepth 10000 
+
+echo "SAF calculations for all samples complete" $(date)
+```
+
+Submitted batch job 50548654. 
+
+`nano saf_per_pop_angsd.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=1
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB
+#SBATCH -t 60:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /scratch4/workspace/jillashey_uri_edu-pdam_tagseq_analysis
+
+module load angsd/0.935
+
+cd /scratch4/workspace/jillashey_uri_edu-pdam_tagseq_analysis/bwa_alignments
+
+echo "Calculate SAF for RF samples only" $(date)
+
+angsd -b popRF.bamlist \
+      -ref /work/pi_hputnam_uri_edu/HI_Genomes/PacutaV2/Pocillopora_acuta_HIv2.assembly.fasta \
+      -anc /work/pi_hputnam_uri_edu/HI_Genomes/PacutaV2/Pocillopora_acuta_HIv2.assembly.fasta \
+      -out ../popRF \
+      -doSaf 1 \
+      -doCounts 1 \ 
+      -GL 1 \
+      -doMajorMinor 1 \
+      -doMaf 1 \
+      -minMapQ 20 \
+      -minQ 20 \
+      -minInd 12 \
+      -setMinDepth 3 \
+      -setMaxDepth 10000 
+
+echo "SAF calculations for RF samples complete" $(date)
+echo "Calculate SAF for RS samples only" $(date)
+
+angsd -b popRS.bamlist \
+      -ref /work/pi_hputnam_uri_edu/HI_Genomes/PacutaV2/Pocillopora_acuta_HIv2.assembly.fasta \
+      -anc /work/pi_hputnam_uri_edu/HI_Genomes/PacutaV2/Pocillopora_acuta_HIv2.assembly.fasta \
+      -out ../popRS \
+      -doSaf 1 \
+      -doCounts 1 \ 
+      -GL 1 \
+      -doMajorMinor 1 \
+      -doMaf 1 \
+      -minMapQ 20 \
+      -minQ 20 \
+      -minInd 12 \
+      -setMinDepth 3 \
+      -setMaxDepth 10000 
+
+echo "SAF calculations for RS samples complete" $(date)
+```
+
+Submitted batch job 50548673. 
+
+There are lots of different arguments that can go into ANGSD. Here are explanatation of the arguments that I used (changed some from Marcelina's original code based on samples) and justification: 
+
+- `-b` - list of input BAM files for specific population
+- `-ref/anc` - reference + ancestral alleles. Since we don't have that information for our data, the reference genome was used as a proxy. 
+- `-out` - prefix for output files.
+- `-doSaf 1` - computes site allele frequency likelihoods, enabling calculation of SFS/Fst downstream. 
+- `doCounts 1` - enables read counting to calculate site allele frequency likelihoods. 
+- `-GL 1` - genotype likelihood framework (1 = Samtools model). 
+	- There are several [options](https://www.popgen.dk/angsd/index.php/Genotype_Likelihoods) for the `-GL` argument. I selected 1 (the Samtools model), as this is most appropriate when mapping with BWA and with low coverage data. Option 2 is the GATK model, which is similar to the Samtools model, but works best with data aligned with gatk. According to the [ANGSD manual](https://www.popgen.dk/angsd/index.php/Genotype_Likelihoods), there is little difference in output when using 1 or 2 for new bam files. 
+	- Other coral papers that I looked at also used `-GL 1`, so it appears to be the standard in the field (see Eriksson et al. [2025](https://onlinelibrary.wiley.com/doi/full/10.1002/ece3.70771) and associated [github](https://github.com/sanna2110/SYMBIO_WA/tree/main), Therkildsen & Palumbi [2016](https://onlinelibrary.wiley.com/doi/full/10.1111/1755-0998.12593?casa_token=Pw3tbUZWAD0AAAAA%3A0P6eZeCZRV6wo3G7VJ6rYB6aLZTsgWnDM3oeHPYVW2Jf03YpWelzOjb9fSQCNuOs-M5MrroWGuLIJzfu) and associated [dryad](https://datadryad.org/dataset/doi:10.5061/dryad.ft596), Fifer et al. [2022](https://www.sciencedirect.com/science/article/pii/S004896972107501X?via%3Dihub) and associated [github](https://github.com/jamesfifer/JapanRE/blob/650f342abcc518f059771e20075c502e7c9f8e84/JapanRE_Temperate_Walkthrough.txt#L9), Bell et al. [2025](https://onlinelibrary.wiley.com/doi/full/10.1111/rec.70234?casa_token=hHNzHcmUgUEAAAAA%3AHmtnIcLNyQtNn5kzWY4Vd4kSInMu7LAXGy-QhhCeho-SJfX6AhfkAD-F47zo9b1_NbeBLedHz5E-sjyM) and associated [github](https://github.com/Sydney-Bell/RTTproject.SCTLD)). 
+- `-doMajorMinor 1` and `-doMaf 1` - calls major and minor allele frequencies (may be needed downstream).
+- `-minMapQ 20` and `-minQ 20` - mapping/base quality filters. I set both to 20 (meaning Phred score of 20 or more for mapping and base quality is needed for a site to proceed). Phred 20 is equivalent to ~1% error, and this is standard in popgen analysis. 
+- `-minInd` - minimum number of individuals that have a particular SAF for that SAF to proceed in analysis. I set this number to be 50% of the population (ie 24 individuals across all 48 samples, 12 individuals across 24 samples per population). Again, this is standard for popgen, and I have seen some papers that use 70-80% of their samples (see Fifer et al. [2022](https://www.sciencedirect.com/science/article/pii/S004896972107501X?via%3Dihub) and Bell et al. [2025](https://onlinelibrary.wiley.com/doi/full/10.1111/rec.70234?casa_token=hHNzHcmUgUEAAAAA%3AHmtnIcLNyQtNn5kzWY4Vd4kSInMu7LAXGy-QhhCeho-SJfX6AhfkAD-F47zo9b1_NbeBLedHz5E-sjyM)). 
+- `-setMinDepth 3` - total sequencing depth across samples must be at least 3 or higher. This will omit any noise from potential sequencing artifacts or lowly expressed genes. 
+- `-setMaxDepth 10000` - total sequencing depth across samples cannot be greater than 10k. This is an absurdly high number, given the low coverage that we have, but I wanted to set it well above the threshold. 
+
+The output files produced are the following: 
+
+- `pop*.saf.pos.gz` - site positions (ie chromosome start positions) for each SAF entry. 
+- `pop*.saf.idx` - binary index of SAFs. This is the file needed for our next step! 
+- `	pop*.saf.gz` - raw likelihood data of SAFs. 
+- `pop*.mafs.gz` - minor allele frequencies.
+- `pop*.arg` - log file of parameters and runtime. 
+
+### Compute 1D Site Frequency Spectrum (SFS)
+
+Using the data with all the samples, regardless of population, I will now compress the SAF likelihood data into a 1D Site Frequency Spectrium (SFS), which shows the proportion of genome sites with derived alleles at each frequency. This will help us determine rare v. common alleles across all samples and determine baseline diversity in the samples. We may also be able to derive demographic history and selection of specific alleles. Read more about this method in Han et al. [2015](https://academic.oup.com/bioinformatics/article/31/5/720/318186?login=true). 
+
+`nano sfs_global_angsd.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=1
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB
+#SBATCH -t 60:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /scratch4/workspace/jillashey_uri_edu-pdam_tagseq_analysis
+
+module load angsd/0.935
+
+cd /scratch4/workspace/jillashey_uri_edu-pdam_tagseq_analysis
+
+echo "Estimate 1D SFS for all samples" $(date)
+realSFS pop_all.saf.idx > pop_all.sfs
+echo "1D SFS estimation for all samples complete" $(date)
+
+echo "Estimate 1D SFS for RF samples" $(date)
+realSFS popRF.saf.idx > popRF.sfs
+echo "1D SFS estimation for RF samples complete" $(date)
+
+echo "Estimate 1D SFS for RS samples" $(date)
+realSFS popRS.saf.idx > popRS.sfs
+echo "1D SFS estimation for RS samples complete" $(date)
+```
+
+Submitted batch job 50552649. Plot output in R. 
+
+```
+
+```
+
+### Calculate 2D SFS
+
+I will also use realSFS to calculate the 2D SFSs for the RF and RS populations. 
+
+`nano sfs_fst_angsd.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=1
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB
+#SBATCH -t 60:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /scratch4/workspace/jillashey_uri_edu-pdam_tagseq_analysis
+
+module load angsd/0.935
+
+cd /scratch4/workspace/jillashey_uri_edu-pdam_tagseq_analysis
+
+echo "Estimate 2D SFS comparing RS and RF pops" $(date)
+realSFS popRF.saf.idx popRS.saf.idx > RFpop_RSpop.sfs
+echo "2D SFS estimation complete" $(date)
+
+echo "Index SFS results in preperation for stats" $(date)
+realSFS fst index popRF.saf.idx popRS.saf.idx -sfs RFpop_RSpop.sfs -fstout RFpop_RSpop
+
+echo "Calculate Fst of the two populations" $(date)
+realSFS fst stats RFpop_RSpop.fst.idx
+
+echo "Print fst in window" $(date)
+realSFS fst stats2 RFpop_RSpop.fst.idx -win 50000 -step 10000 > RFpop_RSpop.fst.txt
+
+echo "2D SFS and Fst calculations complete" $(date)
+```
+
+Submitted batch job 50553096
 
 
 
@@ -301,25 +524,5 @@ abline(v=3, col="blue", lty=2)  # minDepth suggestion
 
 
 
+https://www.popgen.dk/angsd/index.php/RealSFS
 
-
-
-
-
-GL 1 or 2? 1 is Samtools, 2 is GATK. Leaning towards samtools since it is better with low coverage
-
-
-Data not high overage
-
-- https://academic.oup.com/g3journal/article/15/10/jkaf172/8219480
-
-
-Other coral papers 
-
-- https://onlinelibrary.wiley.com/doi/full/10.1111/eva.70115 -- they trimmed data before aligning 
-- https://onlinelibrary.wiley.com/doi/full/10.1002/ece3.70771 -- this used GL 1 (https://github.com/sanna2110/SYMBIO_WA/tree/main)
-- https://onlinelibrary.wiley.com/doi/full/10.1111/1755-0998.12593?casa_token=Pw3tbUZWAD0AAAAA%3A0P6eZeCZRV6wo3G7VJ6rYB6aLZTsgWnDM3oeHPYVW2Jf03YpWelzOjb9fSQCNuOs-M5MrroWGuLIJzfu -- used GL 1 (https://datadryad.org/dataset/doi:10.5061/dryad.ft596)
-- https://www.sciencedirect.com/science/article/pii/S004896972107501X?via%3Dihub#s0125 - used GL 1 )https://github.com/jamesfifer/JapanRE/blob/650f342abcc518f059771e20075c502e7c9f8e84/JapanRE_Temperate_Walkthrough.txt#L9)
-- https://onlinelibrary.wiley.com/doi/full/10.1111/rec.70234?casa_token=hHNzHcmUgUEAAAAA%3AHmtnIcLNyQtNn5kzWY4Vd4kSInMu7LAXGy-QhhCeho-SJfX6AhfkAD-F47zo9b1_NbeBLedHz5E-sjyM - used GL 1 (https://github.com/Sydney-Bell/RTTproject.SCTLD)
-
-ASK Jacob, Megan, Amy 
