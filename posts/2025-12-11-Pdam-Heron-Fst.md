@@ -209,13 +209,102 @@ There are two Pdam populations of interest - Reef Slope (RS) and Reef Flat (RF).
 cd /scratch4/workspace/jillashey_uri_edu-pdam_tagseq_analysis/bwa_alignments
 
 # RS population only
-ls RS*sorted.bam > pop_RS.bamlist
+ls RS*sorted.bam > popRS.bamlist
 
 # RF population only  
-ls RF*sorted.bam > pop_RF.bamlist
+ls RF*sorted.bam > popRF.bamlist
 ```
 
-### Run ANGSD to calculate SAF
+Make list of all bam files as well. 
+
+```
+ls *sorted.bam > pop_all.bamlist
+```
+
+### Run ANGSD to determine depth
+
+Software used and versions:
+
+- ANGSD (v0.935)
+
+Because our data is TagSeq (3-5M reads per sample, 3' bias), coverage will be relatively sparse and 3' biased (given the library prep methods). To choose depth filters, I'm going to run ANGSD's `-doDepth 1 -doCounts 1` before proceeding with the other analyses. This will generate depth histograms from the BAM files: `.depthGlobal` (total reads across all samples per site) and `.depthSample` (per-individual depths). These distributions will help us choose suitable depth parameters. 
+
+`nano depth_angsd.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=1
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB
+#SBATCH -t 24:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /scratch4/workspace/jillashey_uri_edu-pdam_tagseq_analysis
+
+module load angsd/0.935
+
+cd /scratch4/workspace/jillashey_uri_edu-pdam_tagseq_analysis/bwa_alignments
+
+echo "Determine sample depth to set downstream depth parameters" $(date)
+
+angsd -bam pop_all.bamlist \
+  -doCounts 1 -doDepth 1 \
+  -minMapQ 20 -minQ 20 \
+  -out pop_all_depth
+
+echo "Sample depth run complete" $(date)
+```
+
+Submitted batch job 50546988. See [ANGSD manual](https://www.popgen.dk/angsd/index.php/ANGSD#Overview) and [github](https://github.com/ANGSD/angsd) for more info about the program. ANGSD will be used downstream to determine SAF and Fst. 
+
+Look at the `pop_all_depth.depthGlobal` in R. This shows total read depth across samples
+
+```{r}
+getwd()
+
+library(tidyverse)
+
+# Read in data 
+data <- read.table("pop_all_depth.depthGlobal", header=FALSE)
+sites <- as.numeric(data[1,])  
+depth <- 0:(length(sites)-1)
+
+# Plot first 51 bins (0-50)
+barplot(sites[1:51], names.arg=0:50, las=2, cex.names=0.7,
+        xlab="Total Depth", ylab="# Sites", 
+        main="Coverage Distribution", col="steelblue")
+
+# Cumulative % retained
+cum_sites <- rev(cumsum(rev(sites)))
+pct <- 100 * cum_sites / sum(sites)
+plot(depth[1:51], pct[1:51], type="l", lwd=2, ylim=c(0,100),
+     xlab="maxDepth", ylab="% Sites Retained")
+abline(h=70, col="red", lty=2)
+abline(v=3, col="blue", lty=2)  # minDepth suggestion
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 GL 1 or 2? 1 is Samtools, 2 is GATK. Leaning towards samtools since it is better with low coverage
 

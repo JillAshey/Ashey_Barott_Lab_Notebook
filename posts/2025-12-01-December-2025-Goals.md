@@ -110,14 +110,26 @@ Nothing
 - Figured out seq stuff and started BWA 
 - e5 meeting 
 
+### 20251213
+
+Nothing 
+
+### 20251214
+
+Nothing 
+
+### 20251215
+
+- Put pans in drying oven
+
 
 
 
 
 to do
 
-- get trimming info from Nick
-- post translator reef bite articles 
+- Figure out nematostella care over break
+- post translator reef bite articles + any other articles 
 - send nick tRNA bam files 
 - hawaii paperwork
 
