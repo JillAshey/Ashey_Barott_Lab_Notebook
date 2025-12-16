@@ -593,6 +593,8 @@ Columns mean the following:
 - `Nsites` - number of sites (ie SNPs) within that window contribute to Fst
 - Last column - mean Fst for that window. These can be compared to the global Fsts calculated above to see if particular regions are more differentiated. 
 
+
+
 ### PCA of genotype likelihoods 
 
 Software used and versions:
@@ -729,7 +731,7 @@ legend("topright",
 #      pos = 1, cex = 0.7)
 ```
 
-ADD PLOT
+![](https://raw.githubusercontent.com/JillAshey/Ashey_Barott_Lab_Notebook/refs/heads/main/images/pca_pcangsd.png)
 
 PCA plot looks very interesting...separation of the two populations across PC1 but some interesting groupings. It looks like, for both populations, there is some genetic divergence within the population itself. Would be worth looking at which samples are the outliers and if these samples had particularly low counts/mapping rates. 
 
@@ -766,7 +768,7 @@ mid_x     <- (bp[start_idx] + bp[end_idx]) / 2
 axis(side = 1, at = mid_x, labels = runs$values, tick = FALSE, line = 1)
 ```
 
-![](https://raw.githubusercontent.com/JillAshey/Ashey_Barott_Lab_Notebook/refs/heads/main/images/admix_angsd.png)
+![](https://raw.githubusercontent.com/JillAshey/Ashey_Barott_Lab_Notebook/refs/heads/main/images/admix_pcangsd.png)
 
 This is also very interesting! It is showing the ancestry components across individuals (the colors represent the 4 ancestry components) and populations (RF individuals on left, RS individuals on right). We are seeing 5-ish groupings: almost pure blue individuals, almost pure red individuals, almost pure green individuals, mostly yellow with some green and blue individuals, and mostly yellow with some red and green individuals. These separate according to population as well. Some individuals may have intermediate ancestry? Not sure what to make of this. 
 
