@@ -299,6 +299,11 @@ If we set the minimum depth to 3 (as shown in the plot below), we retain the maj
 
 ### Calculate Site Allele Frequency likelihoods (SAF) with ANGSD (for all samples and per population)
 
+Software used and versions:
+
+- ANGSD (v0.935)
+	- Cite Nielsen et al. [2012](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0037558) and Korneliussen et al. [2014](https://link.springer.com/article/10.1186/s12859-014-0356-4)
+
 SAF (Site Allele Frequency likelihoods) are probability distributions of allele counts at each genomic site across samples, based on genotype likelihoods from the BAM files. This is needed to estimate 1D SDS (diversity within a population) and 2D SDS (Fst between populations). 
 
 I am going to run one job with all samples and one job with samples separated by population. 
@@ -429,7 +434,13 @@ The output files produced are the following:
 
 ### Compute 1D Site Frequency Spectrum (SFS)
 
-Using the data with all the samples, regardless of population, I will now compress the SAF likelihood data into a 1D Site Frequency Spectrium (SFS), which shows the proportion of genome sites with derived alleles at each frequency. This will help us determine rare v. common alleles across all samples and determine baseline diversity in the samples. We may also be able to derive demographic history and selection of specific alleles. Read more about this method in Han et al. [2015](https://academic.oup.com/bioinformatics/article/31/5/720/318186?login=true). 
+Software used and versions:
+
+- ANGSD (v0.935)
+	- Cite Nielsen et al. [2012](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0037558) and Korneliussen et al. [2014](https://link.springer.com/article/10.1186/s12859-014-0356-4)
+
+Using the data with all the samples, regardless of population, I will now compress the SAF likelihood data into a 1D Site Frequency Spectrium (SFS), which shows the proportion of genome sites with derived alleles at each frequency (see ANGSD [manual](https://www.popgen.dk/angsd/index.php/RealSFS
+) for more about SFS). This will help us determine the number of rare v. common alleles across all samples. Read more about this method in Han et al. [2015](https://academic.oup.com/bioinformatics/article/31/5/720/318186?login=true). 
 
 `nano sfs_global_angsd.sh`
 
@@ -487,12 +498,29 @@ barplot(sfs_RF[-c(1,length(sfs_RF))]/sum(sfs_RF[-c(1,length(sfs_RF))]),
         main="Global SFS (RF samples)")
 ```
 
-![](https://github.com/JillAshey/Ashey_Barott_Lab_Notebook/blob/main/images/global_SFS.png?raw=true)
+![](https://github.com/JillAshey/Ashey_Barott_Lab_Notebook/blob/main/images/RF_SFS.png?raw=true)
 
+RS population: 
+
+```{r}
+sfs_RS <- scan("popRS.sfs")
+barplot(sfs_RS[-c(1,length(sfs_RS))]/sum(sfs_RS[-c(1,length(sfs_RS))]), 
+        xlab="Derived allele frequency", ylab="Proportion of polymorphic sites",
+        main="Global SFS (RS samples)")
+```
+
+![](https://github.com/JillAshey/Ashey_Barott_Lab_Notebook/blob/main/images/RS_SFS.png?raw=true)
+
+Similar patterns for both populations. Data is also consistent with low coverage sequencing. 
 
 ### Calculate 2D SFS
 
-I will also use realSFS to calculate the 2D SFSs for the RF and RS populations. 
+Software used and versions:
+
+- ANGSD (v0.935)
+	- Cite Nielsen et al. [2012](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0037558) and Korneliussen et al. [2014](https://link.springer.com/article/10.1186/s12859-014-0356-4)
+
+I will also use realSFS to calculate the 2D SFSs for the RF and RS populations. This will allow us to examine the Fst between the two populations. 
 
 `nano sfs_fst_angsd.sh`
 
@@ -529,21 +557,221 @@ realSFS fst stats2 RFpop_RSpop.fst.idx -win 50000 -step 10000 > RFpop_RSpop.fst.
 echo "2D SFS and Fst calculations complete" $(date)
 ```
 
-Submitted batch job 50553096
+Submitted batch job 50553096. From the Fst `stats` calculation: 
 
+```
+Calculate Fst of the two populations Tue Dec 16 01:36:29 UTC 2025
+0.016514	0.101893
+```
 
+The first number is the unweighted Fst (0.016514), and the second number is the weighted Fst across sites (0.101893). The weighted and unweighted math is a bit confusing for me but this github [issue](https://github.com/ANGSD/angsd/issues/16) explains pretty well. The stats is using calculations derived from Reynolds et al. [1983](https://academic.oup.com/genetics/article-abstract/105/3/767/5996242?redirectedFrom=fulltext&login=true). 
 
+I also generated stats using a sliding window of 50000bp with a 10000bp step. Let's look at the output: 
 
+```
+wc -l RFpop_RSpop.fst.txt
+36067 RFpop_RSpop.fst.txt
 
+head RFpop_RSpop.fst.txt
+region  chr     midPos  Nsites
+(215,1510)(10000,30979)(10000,60000)    Pocillopora_acuta_HIv2___Sc0000000      35000   1297    0.061345
+(1257,3241)(30726,69999)(20000,70000)   Pocillopora_acuta_HIv2___Sc0000000      45000   1986    0.044385
+(1257,3321)(30726,70079)(30000,80000)   Pocillopora_acuta_HIv2___Sc0000000      55000   2066    0.043606
+(1511,4942)(60356,89492)(40000,90000)   Pocillopora_acuta_HIv2___Sc0000000      65000   3433    0.047008
+(1511,5136)(60356,96305)(50000,100000)  Pocillopora_acuta_HIv2___Sc0000000      75000   3627    0.048293
+(1511,6847)(60356,109999)(60000,110000) Pocillopora_acuta_HIv2___Sc0000000      85000   5338    0.046875
+(3242,9248)(70000,119102)(70000,120000) Pocillopora_acuta_HIv2___Sc0000000      95000   6008    0.048543
+(3322,9749)(85759,121796)(80000,130000) Pocillopora_acuta_HIv2___Sc0000000      105000  6429    0.054845
+(4943,9749)(90035,121796)(90000,140000) Pocillopora_acuta_HIv2___Sc0000000      115000  4808    0.055371
+```
 
+Columns mean the following: 
 
+- `region` - region on the chromosome where sites are found (?)
+- `chr` - chromosome name from reference genome 
+- `midPos` - midpoint of the sliding window 
+- `Nsites` - number of sites (ie SNPs) within that window contribute to Fst
+- Last column - mean Fst for that window. These can be compared to the global Fsts calculated above to see if particular regions are more differentiated. 
 
+### PCA of genotype likelihoods 
 
+Software used and versions:
 
+- ANGSD (v0.935)
+	- Cite Nielsen et al. [2012](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0037558) and Korneliussen et al. [2014](https://link.springer.com/article/10.1186/s12859-014-0356-4)
+- PCAngsd (v1.36.4)
+	- Cite Meisner & Albrechtsen [2018](https://academic.oup.com/genetics/article/210/2/719/5931101)
 
+I want to make a PCA from the genotype likelihoods using ANGSD (see [PCA info](https://www.popgen.dk/angsd/index.php/PCA)) and [PCAngsd](https://www.popgen.dk/software/index.php/PCAngsd). Through this, covariance estimates between individuals will be done using genotype likelihoods and then decomposed into principal components. This will help us see if populations are clustering together. 
 
+To make this PCA, I need to get the genotype likelihoods in beagle format with ANGSD. 
 
+`nano gl_beagle_all_angsd.sh`
 
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=1
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB
+#SBATCH -t 60:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /scratch4/workspace/jillashey_uri_edu-pdam_tagseq_analysis
 
-https://www.popgen.dk/angsd/index.php/RealSFS
+module load angsd/0.935
 
+cd /scratch4/workspace/jillashey_uri_edu-pdam_tagseq_analysis/bwa_alignments
+
+echo "Calculate SAF for all samples in beagle format" $(date)
+
+angsd -b pop_all.bamlist \
+       -ref /work/pi_hputnam_uri_edu/HI_Genomes/PacutaV2/Pocillopora_acuta_HIv2.assembly.fasta \
+       -anc /work/pi_hputnam_uri_edu/HI_Genomes/PacutaV2/Pocillopora_acuta_HIv2.assembly.fasta \
+       -out ../genoGL_pop_all \
+       -doSaf 1 \
+      	-doCounts 1 \ 
+		-GL 1 \
+ 		-doGlf 2 \               
+ 		-doMajorMinor 1 \
+  		-doMaf 1 \
+  		-SNP_pval 1e-6 \          
+  		-minMapQ 20 -minQ 20 \
+  		-minInd 24 \
+  		-setMinDepth 3 -setMaxDepth 10000
+
+echo "SAF beagle calculations for all samples complete" $(date)
+```
+
+Submitted batch job 50556304. I added the `-doGlf 1` and `-SNP_pval 1e-6` arguments here to ensure the output file was in beagle format and that the SNP calls had a pvalue cutoff. 
+
+Install PCAngsd (see instructions and information on [github](https://github.com/Rosemeis/pcangsd) on Unity. 
+
+```
+cd /work/pi_hputnam_uri_edu/conda/envs/
+module load conda/latest
+git clone https://github.com/Rosemeis/pcangsd.git
+conda env create \
+  --prefix /work/pi_hputnam_uri_edu/conda/envs/pcangsd \
+  -f pcangsd/environment.yml
+conda activate pcangsd
+```
+
+`nano all_pcangsd.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=1
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB
+#SBATCH -t 60:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /scratch4/workspace/jillashey_uri_edu-pdam_tagseq_analysis
+
+module load angsd/0.935
+module load conda/latest
+conda activate /work/pi_hputnam_uri_edu/conda/envs/pcangsd
+
+cd /scratch4/workspace/jillashey_uri_edu-pdam_tagseq_analysis
+
+echo "Perform PCA selection scan and estimate admixture proportions with pcangsd" $(date)
+
+pcangsd --beagle genoGL_pop_all.beagle.gz --out all_pcangsd --selection --admix
+
+echo "pcangsd complete" $(date)
+conda deactivate
+```
+
+Submitted batch job 50556788. 
+
+The output files are as follows: 
+
+- `all_pcangsd.cov` - pairwise covariance matrix between all individuals, estimated from genotype likelihoods. This is the raw material for making a PCA, giving PC1, PC2, etc. When plotted, it shows clustering of genetic similarity among individuals. 
+- `all_pcangsd.selection` - a matrix of selection statistics per SNP per PC. Higher values mean that SNP loads strongly on that PC. 
+- `all_pcangsd.admix.4.Q` - admixture proportions (Q matrix) for K=4 genetic clusters. Here, each row is an individual and columns are clusters. This tells us, for each coral, what fraction of the aligned reads comes from each inferred ancestry (ie genetic clusters). K is the number of ancestral clusters in the admixture model, and is inferred from the number of PCs (or eigenvectors) deemed 'significant' by the program. Here, we had 3 significant PCs. In the PCAngsd framework, K = number of significant PCs + 1 (4 in our case). 
+- `all_pcangsd.log` - log file for the run. 
+
+I made some plots in R to double check that things look okay. 
+
+PCA plot with the covariance matrix: 
+
+```{r}
+# Read covariance matrix
+C <- as.matrix(read.table("all_pcangsd.cov"))
+
+# Eigen decomposition
+e <- eigen(C)
+pcs <- e$vectors   # columns = PC1, PC2, ...
+var_expl <- e$values / sum(e$values)  # proportion per PC
+pc1_lab <- paste0("PC1 (", round(100 * var_expl[1], 1), "%)")
+pc2_lab <- paste0("PC2 (", round(100 * var_expl[2], 1), "%)")
+
+# Read in metadata
+meta <- read.table("samples.txt", header=TRUE, sep=",")  # columns: ID, POP
+
+# Make PCA plot 
+plot(pcs[,1], pcs[,2],
+     xlab = pc1_lab,
+     ylab = pc2_lab,
+     pch = 19,
+     col = as.factor(meta$POP))
+legend("topright",
+       legend = levels(as.factor(meta$POP)),
+       col = 1:length(levels(as.factor(meta$POP))), pch = 19)
+# text(pcs[,1], pcs[,2],
+#      labels = meta$ID,
+#      pos = 1, cex = 0.7)
+```
+
+ADD PLOT
+
+PCA plot looks very interesting...separation of the two populations across PC1 but some interesting groupings. It looks like, for both populations, there is some genetic divergence within the population itself. Would be worth looking at which samples are the outliers and if these samples had particularly low counts/mapping rates. 
+
+Admixture (Q) plot with the admix data: 
+
+```{r}
+Q <- as.matrix(read.table("all_pcangsd.admix.4.Q"))
+
+# Set colors 
+cols <- c("steelblue","tomato","gold","darkgreen")
+
+# index used to order Q 
+pop <- meta$POP
+mainK <- apply(Q, 1, which.max)
+ord <- order(pop, mainK)
+Qord <- Q[ord, ]
+pop_ord <- pop[ord]
+
+bp <- barplot(t(Qord),
+              col = cols,
+              border = NA, space = 0,
+              xlab = "Individuals (ordered by POP and cluster)",
+              ylab = "Ancestry proportion")
+
+# bp = x positions for the center of each bar
+# find contiguous blocks per population
+runs <- rle(as.character(pop_ord))
+
+start_idx <- cumsum(c(1, head(runs$lengths, -1)))
+end_idx   <- cumsum(runs$lengths)
+mid_x     <- (bp[start_idx] + bp[end_idx]) / 2
+
+# Add labels under x-axis indicating population blocks
+axis(side = 1, at = mid_x, labels = runs$values, tick = FALSE, line = 1)
+```
+
+ADD PLOT
+
+This is also very interesting! It is showing the ancestry components across individuals (the colors represent the 4 ancestry components) and populations (RF individuals on left, RS individuals on right). We are seeing 5-ish groupings: almost pure blue individuals, almost pure red individuals, almost pure green individuals, mostly yellow with some green and blue individuals, and mostly yellow with some red and green individuals. These separate according to population as well. Some individuals may have intermediate ancestry? Not sure what to make of this. 
+
+### Questions / next steps 
+
+- Do we need explicit SNPs? Would need to rerun angsd with VCF calling 
+- Will gene ext help with identifying SNPs? 
+- https://github.com/emmastrand/EmmaStrand_Notebook/blob/7da9d9cdd0250cb68743491bba4f7a132c9fc66c/_posts/2023-03-06-SNP-Calling-with-RNASeq-data.md 

@@ -120,9 +120,14 @@ Nothing
 
 ### 20251215
 
-- Put pans in drying oven
+- Weighed pans and put pans in drying oven
 - Popgen ANGSD on Pdam data 
+- e5 ncRNA paper got rejected from Molecular Ecology :'(
 
+### 20251216
+
+- Weighed pans and put in muffle furnance 
+- Popgen ANGSD on Pdam data 
 
 
 
@@ -133,6 +138,7 @@ to do
 - post translator reef bite articles + any other articles 
 - send nick tRNA bam files 
 - hawaii paperwork
+- for AST 2021: https://github.com/andymckenzie/DGCA?tab=readme-ov-file, https://r-packages.io/packages/MEGENA, https://chatgpt.com/share/6940713f-15e4-8003-a7df-cb7d0d1972cb
 
 
 
