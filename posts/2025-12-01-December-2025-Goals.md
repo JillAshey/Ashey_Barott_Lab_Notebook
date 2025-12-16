@@ -126,8 +126,10 @@ Nothing
 
 ### 20251216
 
-- Weighed pans and put in muffle furnance 
+- Weighed pans and put in muffle furnance + weighed again
 - Popgen ANGSD on Pdam data 
+- Submitted HIMB visitor form 
+- Working on AST 2021 mRNA-miRNA network stuff 
 
 
 

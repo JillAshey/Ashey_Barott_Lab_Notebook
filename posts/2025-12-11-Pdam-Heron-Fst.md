@@ -593,8 +593,6 @@ Columns mean the following:
 - `Nsites` - number of sites (ie SNPs) within that window contribute to Fst
 - Last column - mean Fst for that window. These can be compared to the global Fsts calculated above to see if particular regions are more differentiated. 
 
-
-
 ### PCA of genotype likelihoods 
 
 Software used and versions:
@@ -774,6 +772,6 @@ This is also very interesting! It is showing the ancestry components across indi
 
 ### Questions / next steps 
 
-- Do we need explicit SNPs? Would need to rerun angsd with VCF calling 
+- Do we need explicit SNPs? Would need to rerun angsd with specific SNP and VCF calling 
 - Will gene ext help with identifying SNPs? 
 - https://github.com/emmastrand/EmmaStrand_Notebook/blob/7da9d9cdd0250cb68743491bba4f7a132c9fc66c/_posts/2023-03-06-SNP-Calling-with-RNASeq-data.md 
