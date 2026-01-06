@@ -131,38 +131,73 @@ Nothing
 - Submitted HIMB visitor form 
 - Working on AST 2021 mRNA-miRNA network stuff 
 
+### 20251217
+
+- Travel to RI 
+
+### 20251218
+
+- Working on AST 2021 mRNA-miRNA network stuff 
+
+### 20251219 
+
+- e5 meeting -- resubmit to Environmental Epigenetics 
+
+### 20251220
+
+- e5 paper revisions 
+
+### 20251221
+
+- Travel back to philly 
+
+### 20251222
+
+- e5 paper revisions and cover letter writing 
+- Feeding anemones 
+
+### 20251223
+
+- Extended scratch workspace for cnidarian sperm 
+- Paid student loans 
+- Checked that Ptua genome stuff was on Unity 
+
+### 20251223-20251229
+
+Nothing! 
+
+### 20251230 
+
+- Prepped e5 manuscript for submission
+
+### 20251231 
+
+- Submitted e5 ncRNA paper to environmental epigenetics 
+
+## How did I do on my goals this month?
+
+### Writing and manuscripts 
+
+1. Results for cnidarian sperm smRNA - kinda sorta. I want to talk to Nick more about the sequence distribution plots. 
+2. Connect w/ Chloe re AST histology paper - nope.
+3. Update results for PI TPC paper - nope.
+4. Submit AST 2021 to journal and biorxiv - nope! Hollie read intro and methods and said I need to include network analysis so that sets me back quite a bit. 
+
+### Sample processing
+
+1. Continue processing NSF CAREER phys samples - airbrushing, guava, etc - yes, completed lots of AFDW. 
+
+### Data analysis
+
+1. Cnidarian sperm miRNA enrichment + homology of targets - yes. 
+2. Trim Mcap 2023 smRNA data and run shortstack - nope
+3. Ptua assembly QC and start annotation - yes, assembly is very fragmented. Need to discuss w/ Hollie before moving forward. Could try other assemblers but it may be a sample issue idk.
+4. Any e5 stuff - resubmitted e5 ncRNA paper to Environmental Epigenetics 
+
+### Field work / travel 
+
+1. Planning for HI Jan trip - yes, confirmed dates w/ Ford. Booked housing/flights and submitted visitor form. 
+
+Goodbye 2025! So much to do in 2026. 
 
 
-
-to do
-
-- Figure out nematostella care over break
-- post translator reef bite articles + any other articles 
-- send nick tRNA bam files 
-- hawaii paperwork
-- for AST 2021: https://github.com/andymckenzie/DGCA?tab=readme-ov-file, https://r-packages.io/packages/MEGENA, https://chatgpt.com/share/6940713f-15e4-8003-a7df-cb7d0d1972cb
-
-
-
-
-
-
-
-
-to do 
-
-- sign up for BIO-WHP speaking slot 
-- pay women's and infant health charge 
-- ask marissa about postdoc travel $$
-
-look into / make calender reminders for: 
-
-- look into Human Frontier Science Programme Longterm Postdoctoral fellowship for postdoc fellowships
-- https://www.wdhof.org/
-- https://www.bwfund.org/funding-opportunities/postdoctoral-fellows/ 
-- https://postdocs.upenn.edu/provosts-fellowship/provosts-postdoctoral-fellowship/ 
-- https://www.gwis.org/page/fellowship_program 
-- NSF!! come back pls 
-- Lizard island postdoc 
-- https://upenn-provost.smapply.io/prog/penn_global_research_and_engagement_grants/ 
-- https://reviverestore.org/projects/wild-genomes/ 
