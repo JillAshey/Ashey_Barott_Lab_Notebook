@@ -775,3 +775,87 @@ This is also very interesting! It is showing the ancestry components across indi
 - Do we need explicit SNPs? Would need to rerun angsd with specific SNP and VCF calling 
 - Will gene ext help with identifying SNPs? 
 - https://github.com/emmastrand/EmmaStrand_Notebook/blob/7da9d9cdd0250cb68743491bba4f7a132c9fc66c/_posts/2023-03-06-SNP-Calling-with-RNASeq-data.md 
+
+### Subset sliding window text file and find genes that overlap with regions of interest 
+
+Parse the `RFpop_RSpop.fst.txt` file to extract the genomic coordinates in a BED file and then intersect this with the locations of genes. 
+
+```
+head RFpop_RSpop.fst.txt 
+region  chr     midPos  Nsites
+(215,1510)(10000,30979)(10000,60000)    Pocillopora_acuta_HIv2___Sc0000000      35000   1297    0.061345
+(1257,3241)(30726,69999)(20000,70000)   Pocillopora_acuta_HIv2___Sc0000000      45000   1986    0.044385
+(1257,3321)(30726,70079)(30000,80000)   Pocillopora_acuta_HIv2___Sc0000000      55000   2066    0.043606
+(1511,4942)(60356,89492)(40000,90000)   Pocillopora_acuta_HIv2___Sc0000000      65000   3433    0.047008
+(1511,5136)(60356,96305)(50000,100000)  Pocillopora_acuta_HIv2___Sc0000000      75000   3627    0.048293
+(1511,6847)(60356,109999)(60000,110000) Pocillopora_acuta_HIv2___Sc0000000      85000   5338    0.046875
+(3242,9248)(70000,119102)(70000,120000) Pocillopora_acuta_HIv2___Sc0000000      95000   6008    0.048543
+(3322,9749)(85759,121796)(80000,130000) Pocillopora_acuta_HIv2___Sc0000000      105000  6429    0.054845
+(4943,9749)(90035,121796)(90000,140000) Pocillopora_acuta_HIv2___Sc0000000      115000  4808    0.055371
+
+WIN=50000
+
+awk -v WIN="$WIN" 'BEGIN{OFS="\t"}
+NR==1 {next}  # skip header
+{
+    chr = $2
+    mid = $3
+    start = mid - (WIN/2)
+    end   = mid + (WIN/2)
+
+    if (start < 0) start = 0
+
+    fst = $5
+    print chr, start, end, fst
+}' RFpop_RSpop.fst.txt > RFpop_RSpop.fst.50kb.bed
+```
+
+Extract transcript features from GFF to BED
+
+```
+awk 'BEGIN{OFS="\t"}
+$0 !~ /^#/ && ($3=="transcript" || $3=="mRNA") {
+    chr=$1; start=$4-1; end=$5; strand=$7; id="."
+    match($9,/ID=([^;]+)/,m)
+    if(m[1]=="") match($9,/Parent=([^;]+)/,m)  # fallback to Parent
+    if(m[1]!="") id=m[1]
+    print chr, start, end, id, 0, strand
+}' /work/pi_hputnam_uri_edu/HI_Genomes/PacutaV2/Pocillopora_acuta_HIv2.genes.gff3 > Pacuta_transcripts.bed
+
+wc -l Pacuta_transcripts.bed
+33730 Pacuta_transcripts.bed
+```
+
+There are 33730 transcripts/genes. 
+
+Intersect Fst BED file with transcript BED file to find gene overlaps 
+
+```
+module load bedtools2/2.31.1
+bedtools intersect -a RFpop_RSpop.fst.50kb.bed -b Pacuta_transcripts.bed -wa -wb > Fst_50kb_windows_genes.bed
+
+wc -l Fst_50kb_windows_genes.bed
+150834 Fst_50kb_windows_genes.bed
+```
+
+Look at number of unique genes that overlap with Fst regions 
+
+```
+cut -f8 Fst_50kb_windows_genes.bed | sort | uniq | wc -l
+29436
+```
+
+That is a lot of genes! Let's filter so that we are only looking at regions with high Fst values (0.3 in this case). 
+
+```
+# First filter high Fst windows (e.g., >0.3)
+awk '$4>=0.3' RFpop_RSpop.fst.50kb.bed > highFst.bed
+bedtools intersect -a highFst.bed -b Pacuta_transcripts.bed -wa -wb > highFst_genes.bed
+
+# Count unique genes
+awk '{print $8}' highFst_genes.bed | sort | uniq | wc -l
+617
+```
+
+Angela can figure out what Fst thresholds to filter for when running the functional annotation. 
+

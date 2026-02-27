@@ -14,20 +14,22 @@ February 2026 goals and daily notebook entries.
 
 1. Molecular ecology review 
 2. AST 2021 network metrics + results
-3. Start to integrate network info into discussion for AST 2021 
-4. Start outlining AST histology paper
+3. Integrate network info into discussion for AST 2021 
+4. Outlining AST histology paper
+5. Resubmit e5 paper to Environmental Epigenetics 
 
 ### Sample processing
 
-1. KBay AFDW 
-2. KBay wax dipping 
+1. TPC 2025 airbrushing -- no phys needed
+1. TPC 2025 wax dipping 
 
 ### Data analysis
 
 1. Revisit cnidarian sperm tRNA and see if I can use Nick code to plot the 3' and 5' ends 
 2. Cnidarian sperm smRNA bp plots 
-3. Finish AST 2021 network analysis and organize code/repo 
-4. Trim Mcap 2023 data and run shortstack 
+3. Cnidarian sperm smRNA miRNA interaction - seed length of 13, rerun scripts 
+4. Finish AST 2021 network analysis and organize code/repo 
+5. 2025 photo TPC code 
 
 ### Field work / travel 
 
@@ -64,20 +66,158 @@ February 2026 goals and daily notebook entries.
 - Emailed Nick, Brandon, Teegan
 - AST 2021 network analysis code + visualizations 
 - Hollie meeting prep 
+- Finalized ICRS lineup
+
+### 20260206
+
+- Hollie meeting -- AST 2021 stuff mostly 
+- Created new Chloe histology doc 
+
+### 20260207 
+
+- Coding for AST 2021 network stuff 
+- Submitted expense report for HI Jan 2026
+
+### 20260208 
+
+- Travel back to PA
+- Molec ecology review 
+
+### 20260209 
+
+- AST 2021 coding 
+- Katie meeting 
+- Chloe meeting 
+- AST histology writing + temp plots
+- Molec ecology review 
+
+### 20260210
+
+- AST 2021 coding -- seasonal done, some writing for methods/results/discussion
+- Read Zoe LCM results
+- Finished molec ecology review 
+- Emailed DAR back
+
+### 20260211
+
+- AST 2021 coding + writing 
+- Jazmin meeting 
+- Lab meeting 
+
+### 20260212
+
+- AST 2021 coding + writing 
+- Angela meeting 
+- Seminar 
+- Cleaned up AST 2021 repo
+
+### 20260213
+
+- Booked dentist + eye appt 
+- e5 ncRNA responding to reviewers + editing manuscript 
+- e5 meeting 
+
+### 20260214
+
+- Nothing 
+
+### 20260215
+
+- e5 ncRNA responding to reviewers + editing manuscript 
+
+### 20260216
+
+- e5 ncRNA responding to reviewers + editing manuscript 
+- Alison meeting (Lord lab)
+- Looking at random lab stuff (homogenizer, antibodies, etc)
+- Brandon meeting 
+- Project planning for NSF CAREER exp in May 
+
+### 20260217
+
+- e5 ncRNA responding to reviewers + editing manuscript 
+- Looking at hanna grey fellowship stuff 
+- Chloe meeting 
+- Made temperature plots for AST histology 
+- AST 2021 discussion + intro writing 
+
+### 20260218
+
+- TPC calc coding 
+- Lab meeting 
+
+### 20260219 
+
+- TPC calc coding 
+- Katie meeting 
+- More TPC coding - photosynthesis 2023 
+
+### 20260220
+
+- Writing up Nvec larvae pSMAD protocol
+- Fixing and washing Nvec larvs
+- Ben Daniella Angela meeting about Ben experiments 
+
+### 20260221
+
+- Reefbites posting 
+
+### 20260222
+
+Nothing 
+
+### 20260223
+
+- KBay TPC coding + writing methods 
+- Chloe meeting 
+
+### 20260224
+
+- KBay TPC coding + writing methods 
+- Read Zoe LCM discussion 
+- Wrote up 'smear' protocol 
+- Labeled tubes for TPC airbrushing 
+- Kaufman LOI
+
+### 20260225
+
+- Airbrushed Oct 2025 TPC samples (except for the 5 that are stuck in the dewar)
+- Lab meeting 
+- Katie meeting 
+- Reefbites meeting 
+- Worked on aims for LOI
+- Prep for Hollie meeting 
+
+### 20260226
+
+- Wax dip for TPC 2025 fragments 
+- Stats and plotting for TPC photosynthesis and env data 
+- Writing results for TPC photosynthesis data
+- Hollie meeting 
+ 
+### 20260227
+
+- Stats + writing results for TPC calc data 
+- Luella meeting 
+- Anemone spawning and fertilization 
+- Registered for ICRS! 
+- Started doc for Ptua genome 
+ 
 
 
-to do 2/5
-- start expense report 
-- ICRS excel sheet 
-- prep for Hollie meeting 
+to do 2/27
 
-- message dr re dermatologist appt 
-- post translator reef bite articles + any other articles, add author names --> cant log in to wordpress acct, get someone to reset PW 
+- LOI for Kauffman proposal 
+- message steven, zach, sam re e5 paper 
+- email conall 
+- order stuff 
+- respond to ppa person
+- ast 2021 stuff -- review what I need to do 
+
+- lncrna e5 -- feature counts and pfam ?
+- appts -- derm, therapy 
 - email colin and xu re meetings 
 - take picture in hawaii for katie website and get info for katie website 
-- for AST 2021: https://github.com/andymckenzie/DGCA?tab=readme-ov-file, https://r-packages.io/packages/MEGENA, https://chatgpt.com/share/6940713f-15e4-8003-a7df-cb7d0d1972cb, mouse paper, despard et al. 2025
-- register for icrs 
 - ask marissa about postdoc travel $$
 - https://github.com/conine-lab/trna-derived-rna-celegans-analysis/tree/main/scripts -- run Nick scripts on cnidarian sperm data 
 
-- ask hollie about chloe histology manuscript -- does hollie have it on her google drive 
