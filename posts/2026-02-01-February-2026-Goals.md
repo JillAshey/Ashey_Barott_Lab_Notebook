@@ -21,7 +21,7 @@ February 2026 goals and daily notebook entries.
 ### Sample processing
 
 1. TPC 2025 airbrushing -- no phys needed
-1. TPC 2025 wax dipping 
+2. TPC 2025 wax dipping 
 
 ### Data analysis
 
@@ -36,6 +36,8 @@ February 2026 goals and daily notebook entries.
 1. Expense report for HI Jan 2026 trip 
 2. Register for ICRS 
 3. Confirm dates for HI May 2025 trip + book flights/housing 
+
+## Daily log 
 
 ### 20260201
 
@@ -202,22 +204,42 @@ Nothing
 - Anemone spawning and fertilization 
 - Registered for ICRS! 
 - Started doc for Ptua genome 
+- Fixed Nvec samples 
+- AST 2021 treatment GO enrichment results 
+
+### 20260228
+
+- Fixed Nvec samples 
+- Remade upset plots for AST 2021 
+
+## How did I do on my goals for this month?
+
+### Writing and manuscripts 
+
+1. Molecular ecology review - done 
+2. AST 2021 network metrics + results - done. still need to add minor details 
+3. Integrate network info into discussion for AST 2021 - done
+4. Outlining AST histology paper - kinda? still meeting with chloe
+5. Resubmit e5 paper to Environmental Epigenetics - nope but have addressed most comments
+
+### Sample processing
+
+1. TPC 2025 airbrushing -- no phys needed - done
+2. TPC 2025 wax dipping - done
+
+### Data analysis
+
+1. Revisit cnidarian sperm tRNA and see if I can use Nick code to plot the 3' and 5' ends - nope 
+2. Cnidarian sperm smRNA bp plots - nope
+3. Cnidarian sperm smRNA miRNA interaction - seed length of 13, rerun scripts - nope
+4. Finish AST 2021 network analysis and organize code/repo - done
+5. 2025 photo TPC code - done
+
+### Field work / travel 
+
+1. Expense report for HI Jan 2026 trip - done, need to check that stuff got deposited
+2. Register for ICRS - success
+3. Confirm dates for HI May 2025 trip + book flights/housing - almost there, need to confirm dates w/ Ford 
  
-
-
-to do 2/27
-
-- LOI for Kauffman proposal 
-- message steven, zach, sam re e5 paper 
-- email conall 
-- order stuff 
-- respond to ppa person
-- ast 2021 stuff -- review what I need to do 
-
-- lncrna e5 -- feature counts and pfam ?
-- appts -- derm, therapy 
-- email colin and xu re meetings 
-- take picture in hawaii for katie website and get info for katie website 
-- ask marissa about postdoc travel $$
-- https://github.com/conine-lab/trna-derived-rna-celegans-analysis/tree/main/scripts -- run Nick scripts on cnidarian sperm data 
+Quite a lot got done! 
 

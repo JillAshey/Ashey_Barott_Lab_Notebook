@@ -32,6 +32,8 @@ December 2025 goals and daily notebook entries.
 
 1. Planning for HI Jan trip 
 
+## Daily log 
+
 ### 20251201
 
 - Started running hifiasm on Ptua genome 
