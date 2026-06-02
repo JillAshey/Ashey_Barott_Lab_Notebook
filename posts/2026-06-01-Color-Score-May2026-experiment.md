@@ -34,9 +34,15 @@ xxxx coral image
 - On the Fiji bar, select the Rectangle tool. 
 - Draw a rectangle in as much of the red square as possible. 
 - In the histogram window, click through the RGB options and stop at "Red". Record the Mean value in the spreadsheet under "Red.Standard". 
+
+![](https://raw.githubusercontent.com/JillAshey/Ashey_Barott_Lab_Notebook/refs/heads/main/images/color_score_standard_example.png)
+
 - Repeat the following steps for both the green and blue tape squares. Record the mean value of the "Green" and "Blue" options in their respective columns on the spreadsheet. 
 - Select the freehand drawing tool in the Fiji bar (the one that books like a bean). Outline LIVE coral tissue only. Do not select any portions that represent the coral skeleton, the plug, or any part that has a shadow. 
 - On the histogram window, click through the RGB options to record the mean red, blue, green AND intensity (unweighted) values. 
+
+![](https://raw.githubusercontent.com/JillAshey/Ashey_Barott_Lab_Notebook/refs/heads/main/images/color_score_coral_example.png)
+
 - Fill in the rest of the information for the sample in the spreadsheet. 
 	- Sample ID - the ID on the tag in each image 
 	- Image_Date - the date that the image was taken (corresponds to the date on the folder you are analyzing)
@@ -45,6 +51,6 @@ xxxx coral image
 	- Image_name - name of the image file on Box
 	- Notes - If there is anything unusual about the image, record it in the notes column
 
-xxx add image of spreadsheet
+![](https://raw.githubusercontent.com/JillAshey/Ashey_Barott_Lab_Notebook/refs/heads/main/images/color_score_spreadsheet.png)
 
 - Close the image in Fiji and move onto the next one! 
