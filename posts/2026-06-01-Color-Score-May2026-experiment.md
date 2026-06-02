@@ -13,13 +13,12 @@ projects: NSF CAREER
 
 Before starting on the image analysis, the images of corals need to be renamed so we can keep track of them. The images are stored as jpegs on the Barott Lab Box in this location: `Data/NSF CAREER KBay pairs 2023-2028/Aim 3 - May 2026/Color Score`. Inside the Color Score folder are 7 folders from different days with images in them. The folders are titled YYYYMMDD. 
 
-- Open one of the folders and click on an image. You will see the following: 
+- Open one of the folders and click on an image. Each picture will have the color card, ruler, ID tag, and the coral on a ceramic plug. You will see the following: 
 
-xxxx coral image 
+![](https://raw.githubusercontent.com/JillAshey/Ashey_Barott_Lab_Notebook/refs/heads/main/images/coral_photo.png)
 
-- Each picture will have the color card, ruler, ID tag, and the coral on a ceramic plug. 
 - Rename each image file so that the name of the image is the ID tag, followed by an underscore and the date. 
-	- For example, the image with the coral above would be renamed `PC-242-A1_20260510`. 
+	- For example, the image with the coral above would be renamed `PC-242-A1_20260506`. 
 	- I already renamed all image files in the `20260506` folder, so use these as a reference for image naming if needed. 
 - DO NOT proceed to image analysis before all the images are renamed. 
 
@@ -29,7 +28,7 @@ xxxx coral image
 - Download Fiji/ImageJ from [here](https://imagej.net/software/fiji/) onto your local computer. 
 - Unzip the folder, and this will create a folder called Fiji. Go into the Fiji folder and there will be an application called Fiji. Click this to open Fiji. 
 - You can open images by either going to File > Open and then navigating to the image or by dragging and dropping the image onto the Fiji bar.
-- Once the image is up in Fiji, open the histogram analysis option via Analyze > Histogram. 
+- Once the image is open in Fiji, open the histogram analysis option via Analyze > Histogram. 
 - Click Live so that it is highlighted in red. This means that you can select different regions of the photo and the histogram will change intensity levels automatically. 
 - On the Fiji bar, select the Rectangle tool. 
 - Draw a rectangle in as much of the red square as possible. 
