@@ -19,9 +19,7 @@ When put under the microscope with no sample, the hemocytometer looks like this:
 
 ![](https://github.com/urol-e5/protocols/blob/master/images/hema1.png?raw=true)
 
-![](https://github.com/urol-e5/protocols/blob/master/images/hema2.png?raw=true)
-
-The grid can be used to count cells. 
+The 3x3 grid can be used to count cells. 
 
 ### Materials 
 
@@ -42,5 +40,10 @@ The grid can be used to count cells.
 - Get a new aliquot of sample and fill the other side of the hemocytometer. 
 	- Do not fill both sides from same pipette fill.
 - Using a 10x objective (or higher), count cells in one side of the hemocytometer. 
-	- Count the number of cells in whole squares 
+	- Count the number of cells in the large squares until you reach 100 cells or you count all the squares. 
+	- Keep track of the number of squares you counted. 
+- Repeat on the other side of the hemocytometer, counting the same number of squares as before. 
+- Clean the hemocytometer and cover slip with a kim wipe and DI water. 
+- Repeat the steps above 2x for a total of 6 counts. 
 
+This is a good [video](https://www.youtube.com/watch?v=rR1ov4VEJXQ) that explains the "rules" of cell counting (ie what to do when a cell is on a square border). 
