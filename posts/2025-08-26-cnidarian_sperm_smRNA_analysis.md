@@ -5286,3 +5286,197 @@ NR%4==2 {  # Sequence lines (2nd line of each 4-line FASTQ record)
     print len, start_nt
 }' apoc_4_S33_L001_R1_001_trim.fastq > apoc_4_length_start.txt
 ```
+
+## Trying more stuff 
+
+Going to try to run protrac without the repeatmasker argument (since it was just the genome). Then will intersect with repeats down the line. Hopefully this will allow the piRNAs to cluster together better? `nano protrac_apoc.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=2
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB
+#SBATCH -t 50:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2
+
+module load uri/main
+module load Perl/5.40.0-GCCcore-14.2.0
+
+echo "Starting protrac for apoc"
+
+cd /scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/apoc/sortmerna
+
+for f in apoc_*_L001_R1_001_trim.fastq.collapsed.filt.no-dust
+do
+perl /work/pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/scripts/ngs_toolbox/proTRAC_2.4.2.pl \
+-map ${f}/out/other.fq.map.weighted-10000-1000-b-0 \
+-genome /work/pi_hputnam_uri_edu/genomes/Apoc/apoculata.genome.fasta \
+-geneset /work/pi_hputnam_uri_edu/genomes/Apoc/apoculata.gtf
+done
+
+echo "Apoc protrac complete!"
+```
+
+Submitted batch job 63611462. okay gave me similar results as before. 
+
+let's move to ahya and try to intersect the repeat gff with the piRNAs. 
+
+```
+bedtools intersect -wo -a ahya.merged.piRNA.bed -b /scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/ahya/Ahyacinthus.repeat.gff > Ahya_piRNAs_TEs_repeats_intersect.txt
+```
+
+This yielded way more hooray!
+
+Going to try rerunning repeat masker. I did not run repeat modeler initially which maybe was a mistake. 
+
+`apoc_repeats.sh` -- this genome shouldn't be masked (downloaded the unmasked one from Kate's [zenodo](https://zenodo.org/records/14110456)). 
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=2
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB
+#SBATCH -t 50:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2
+
+echo "Apoc repeat modeler"
+
+module load conda/latest 
+conda activate /work/pi_hputnam_uri_edu/conda/envs/repeatmodeler 
+
+mkdir -i repeats
+cd repeats 
+
+echo "Building repeatmodeler database" $(date)
+
+BuildDatabase -name apoc_repeat_db /work/pi_hputnam_uri_edu/genomes/Apoc/apoculata.genome.fasta
+
+echo "Db build complete, run repeatmodeler" $(date)
+
+RepeatModeler -database apoc_repeat_db -engine ncbi -LTRStruct -threads 15
+
+echo "Repeatmodeler complete" $(date)
+echo "Start repeatmasker" $(date)
+
+RepeatMasker \
+	-lib apoc_repeat_db-families.fa \
+	-engine ncbi \
+	-parallel 20 \
+	-gff -xsmall -s \
+	-poly \
+	-dir ptua_softmasked \
+	-a \
+	/work/pi_hputnam_uri_edu/genomes/Apoc/apoculata.genome.fasta
+
+echo "Repeatmasker complete" $(date)
+conda deactivate 
+```
+
+Submitted batch job 63613128
+
+
+`ahya_repeats.sh` -- im assuming this genome is already masked?. 
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=2
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB
+#SBATCH -t 50:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2
+
+echo "Ahya repeat modeler"
+
+module load conda/latest 
+conda activate /work/pi_hputnam_uri_edu/conda/envs/repeatmodeler 
+
+echo "Building repeatmodeler database" $(date)
+
+BuildDatabase -name ahya_repeat_db /work/pi_hputnam_uri_edu/refs/Ahyacinthus_genome/Ahyacinthus_genome_V1/Ahyacinthus.chrsV1.fasta
+
+echo "Db build complete, run repeatmodeler" $(date)
+
+RepeatModeler -database ahya_repeat_db -engine ncbi -LTRStruct -threads 15
+
+echo "Repeatmodeler complete" $(date)
+echo "Start repeatmasker" $(date)
+
+RepeatMasker \
+	-lib ahya_repeat_db-families.fa \
+	-engine ncbi \
+	-parallel 20 \
+	-gff -xsmall -s \
+	-poly \
+	-dir ptua_softmasked \
+	-a \
+	/work/pi_hputnam_uri_edu/refs/Ahyacinthus_genome/Ahyacinthus_genome_V1/Ahyacinthus.chrsV1.fasta
+
+echo "Repeatmasker complete for Ahya" $(date)
+conda deactivate 
+```
+
+Submitted batch job 63613243
+
+`nano nvec_repeats.sh` -- im assuming this genome is already masked?. 
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=2
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB
+#SBATCH -t 50:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2
+
+echo "Nvec repeat modeler"
+
+module load conda/latest 
+conda activate /work/pi_hputnam_uri_edu/conda/envs/repeatmodeler 
+
+echo "Building repeatmodeler database" $(date)
+
+BuildDatabase -name nvec_repeat_db /work/pi_hputnam_uri_edu/genomes/Nvec/Nvec200.fasta
+
+echo "Db build complete, run repeatmodeler" $(date)
+
+RepeatModeler -database nvec_repeat_db -engine ncbi -LTRStruct -threads 15
+
+echo "Repeatmodeler complete" $(date)
+echo "Start repeatmasker" $(date)
+
+RepeatMasker \
+	-lib nvec_repeat_db-families.fa \
+	-engine ncbi \
+	-parallel 20 \
+	-gff -xsmall -s \
+	-poly \
+	-dir nvec_softmasked \
+	-a \
+	/work/pi_hputnam_uri_edu/genomes/Nvec/Nvec200.fasta
+
+echo "Repeatmasker complete for Nvec" $(date)
+conda deactivate 
+```
+
+Submitted batch job 63613344
+
+
