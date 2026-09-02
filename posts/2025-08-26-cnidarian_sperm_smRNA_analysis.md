@@ -5384,6 +5384,12 @@ conda deactivate
 
 Submitted batch job 63613128
 
+```
+cd /scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/apoc/sortmerna/piRNA_bed
+
+module load bedtools2/2.31.1
+bedtools intersect -wo -a apoc.merged.piRNA.bed -b /scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/ptua_softmasked/apoculata.genome.fasta.out.gff > Apoc_piRNAs_TEs_repeats_intersect.txt
+```
 
 `ahya_repeats.sh` -- im assuming this genome is already masked?. 
 
@@ -5430,9 +5436,17 @@ echo "Repeatmasker complete for Ahya" $(date)
 conda deactivate 
 ```
 
-Submitted batch job 63613243
+Submitted batch job 63613243.
 
-`nano nvec_repeats.sh` -- im assuming this genome is already masked?. 
+```
+cd /scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/ahya/sortmerna/piRNA_bed
+
+module load bedtools2/2.31.1
+bedtools intersect -wo -a ahya.merged.piRNA.bed -b /scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/ptua_softmasked/Ahyacinthus.chrsV1.fasta.out.gff > Ahya_piRNAs_TEs_repeats_intersect.txt
+```
+
+`nano nvec_repeats.sh` -- im assuming this genome is already masked?
+
 
 ```
 #!/usr/bin/env bash
@@ -5477,6 +5491,21 @@ echo "Repeatmasker complete for Nvec" $(date)
 conda deactivate 
 ```
 
-Submitted batch job 63613344
+Submitted batch job 63613344. Job complete! Intersect piRNAs with repeats for nvec
+
+```
+cd /scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/nvec/sortmerna/piRNA_bed
+
+module load bedtools2/2.31.1
+bedtools intersect -wo -a nvec.merged.piRNA.bed -b /scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/nvec_softmasked/Nvec200.fasta.out.gff > Nvec_piRNAs_TEs_repeats_intersect.txt
+```
+
+
+- 364493 piRNAs in Ahya
+- 201796 piRNAs overlap with only TE (285871 - 84075 = 201796)
+- 35588 piRNAs overlap with only genes (119663 - 84075 = 35588)
+- 84075 piRNAs overlap with both TE and genes 
+- 201796+35588+84075 = 321459 piRNAs overlapping TEs, genes or both 
+- 43034 piRNAs in intergenic space (364493 - 321459 = 43034)
 
 
