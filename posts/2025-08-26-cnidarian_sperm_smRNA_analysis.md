@@ -5500,12 +5500,457 @@ module load bedtools2/2.31.1
 bedtools intersect -wo -a nvec.merged.piRNA.bed -b /scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/nvec_softmasked/Nvec200.fasta.out.gff > Nvec_piRNAs_TEs_repeats_intersect.txt
 ```
 
+### tRNA fragments 
 
-- 364493 piRNAs in Ahya
-- 201796 piRNAs overlap with only TE (285871 - 84075 = 201796)
-- 35588 piRNAs overlap with only genes (119663 - 84075 = 35588)
-- 84075 piRNAs overlap with both TE and genes 
-- 201796+35588+84075 = 321459 piRNAs overlapping TEs, genes or both 
-- 43034 piRNAs in intergenic space (364493 - 321459 = 43034)
+Colin is interested in seeing if there are tRNA derived fragments in our data and if so, what they are classified as. To do this, I'm going to use [MINTmap](https://github.com/TJU-CMC-Org/MINTmap/tree/release/v1.0) to map the tRNAs to tRNA derived fragments. I downloaded their github repo to Unity (`/scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/MINTmap-release-v1.0`). Let's try to run it for ahya. No concept of how long this might take. 
 
+`nano mintmap_ahya.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=2
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB
+#SBATCH -t 50:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL #email you when job starts, stops and/or fails
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2
+
+module load uri/main
+module load Perl/5.40.0-GCCcore-14.2.0
+
+echo "MINTmap for ahya" $(date)
+
+cd /scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/ahya/sortmerna
+
+for f in ahya_*_L001_R1_001_trim.fastq.collapsed.filt.no-dust
+do
+perl /scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/MINTmap-release-v1.0/MINTmap.pl \
+-f ${f}/out/aligned.fq \
+-p /scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/ahya/sortmerna/${f/-mintmap} \
+-l /scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/MINTmap-release-v1.0/LookupTable.tRFs.MINTmap_v1.txt \
+-s /scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/ahya/Ahya-tRNA_cleaned.fasta \
+-o /scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/MINTmap-release-v1.0/OtherAnnotations.MINTmap_v1.txt \
+-a /work/pi_hputnam_uri_edu/refs/Ahyacinthus_genome/Ahyacinthus_genome_V1/Ahyacinthus.chrsV1.fasta \
+-j /scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/MINTmap-release-v1.0/MINTplates/
+done
+
+echo "MINTmap ahya complete" $(date)
+```
+
+Submitted batch job 64097675. Running into issues because this tool is hard coded for human sequences boo. Going to try to change the md5sum in the lookup files to my tRNA md5sum to see if that impacts anything. 
+
+Get the md5sum 
+
+```
+md5sum /scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/ahya/Ahya-tRNA_cleaned.fasta
+307443d17f74e8ed3e226cc56fff7f38  /scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/ahya/Ahya-tRNA_cleaned.fasta
+
+cp /scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/ahya/Ahya-tRNA_cleaned.fasta .
+```
+
+Change header in lookup table and replace with tRNA Ahya info 
+
+```
+#TRNASEQUENCES:Ahya-tRNA_cleaned.fasta MD5SUM:307443d17f74e8ed3e226cc56fff7f38
+```
+
+Submitted batch job 64098384. Let's see if that does anything. Nope, still failed. Going to run with all human defaults. Worked but its just the tDRs that are identical to human. Let's try just mapping to the tRNAs and then assigning 5', 3' or internal based on the alignment. `nano ahya_trna_align.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --nodes=1 --ntasks-per-node=8
+#SBATCH --partition=uri-cpu
+#SBATCH --mem=32GB
+#SBATCH -t 24:00:00
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/ahya/sortmerna
+
+module load bowtie2/2.5.2 samtools/1.19.2
+
+TRNA_FASTA="/scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/ahya/Ahya-tRNA_cleaned.fasta"
+
+# Build Bowtie index for coral tRNAs
+echo "Building Bowtie index for tRNAs"
+bowtie2-build ${TRNA_FASTA} ahya_trna_index
+
+# Extract reference tRNA lengths using base awk
+awk '/^>/ {if (seqlen) print seqname"\t"seqlen; seqname=substr($1,2); seqlen=0; next} {seqlen+=length($0)} END {print seqname"\t"seqlen}' ${TRNA_FASTA} > trna_lengths.txt
+
+# Align reads 
+for f in ahya_*_L001_R1_001_trim.fastq.collapsed.filt.no-dust
+do
+  BASE=$(basename "$f" _trim.fastq.collapsed.filt.no-dust)
+  echo "Processing sample: ${BASE}..." $(date)
+
+  # Align with Bowtie2 and stream directly to sorted BAM
+  bowtie2 -p 16 -U "${f}/out/aligned.fq" -x ahya_trna_index --no-unal -N 1 -L 12 \
+    --end-to-end --very-sensitive-local | \
+    samtools view -u -F 4 - | \
+    samtools sort -o "${BASE}.bam" -
+
+  # Index BAM
+  samtools index "${BASE}.bam"
+done
+```
+
+Submitted batch job 64100771
+
+Based on alignments, assign the tDRs to 5' end, 3' end, or interal. 
+
+```
+# Ensure Python and Samtools are loaded
+module load samtools/1.19.2
+module load python/3.9.19
+
+# Run the base Python classifier to generate coral_tdr_counts.csv
+python3 - << 'EOF'
+import subprocess
+import glob
+import csv
+import re
+
+# Load reference tRNA lengths
+ref_lengths = {}
+with open("trna_lengths.txt", "r") as f:
+    for line in f:
+        parts = line.strip().split("\t")
+        if len(parts) == 2:
+            ref_lengths[parts[0]] = int(parts[1])
+
+bam_files = glob.glob("*.bam")
+summary_data = []
+
+for bam in sorted(bam_files):
+    sample = bam.replace(".bam", "")
+    
+    counts = {"5' tDR": 0, "3' tDR": 0, "i-tDR": 0}
+    
+    proc = subprocess.Popen(["samtools", "view", bam], stdout=subprocess.PIPE, text=True)
+    
+    for line in proc.stdout:
+        fields = line.split("\t")
+        if len(fields) < 10 or fields[2] == "*":
+            continue
+            
+        ref_name = fields[2]
+        pos = int(fields[3]) - 1  # 0-based start
+        cigar = fields[5]
+        
+        matches = re.findall(r'(\d+)[MDN=X]', cigar)
+        align_len = sum(int(m) for m in matches) if matches else len(fields[9])
+        
+        start = pos
+        end = start + align_len
+        ref_len = ref_lengths.get(ref_name, 75)
+        
+        is_5prime = (start <= 3)
+        is_3prime = ((ref_len - end) <= 3)
+        
+        if is_5prime and not is_3prime:
+            counts["5' tDR"] += 1
+        elif is_3prime and not is_5prime:
+            counts["3' tDR"] += 1
+        else:
+            counts["i-tDR"] += 1
+
+    proc.stdout.close()
+    proc.wait()
+    
+    for tdr_type, count in counts.items():
+        summary_data.append([sample, tdr_type, count])
+
+with open("ahya_tdr_counts.csv", "w", newline="") as f:
+    writer = csv.writer(f)
+    writer.writerow(["Sample", "Type", "Count"])
+    writer.writerows(summary_data)
+
+print("Finished classifying tDRs! Output saved to ahya_tdr_counts.csv")
+EOF
+```
+
+Success!!!!!
+
+```
+Sample,Type,Count
+ahya_1_S27_L001_R1_001,5' tDR,1218
+ahya_1_S27_L001_R1_001,3' tDR,149
+ahya_1_S27_L001_R1_001,i-tDR,948
+ahya_2_S28_L001_R1_001,5' tDR,618
+ahya_2_S28_L001_R1_001,3' tDR,54
+ahya_2_S28_L001_R1_001,i-tDR,331
+ahya_3_S29_L001_R1_001,5' tDR,1616
+ahya_3_S29_L001_R1_001,3' tDR,260
+ahya_3_S29_L001_R1_001,i-tDR,1235
+ahya_4_S30_L001_R1_001,5' tDR,1758
+ahya_4_S30_L001_R1_001,3' tDR,326
+ahya_4_S30_L001_R1_001,i-tDR,1331
+```
+
+Do for apoc
+
+`nano apoc_trna_align.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --nodes=1 --ntasks-per-node=8
+#SBATCH --partition=uri-cpu
+#SBATCH --mem=32GB
+#SBATCH -t 24:00:00
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/apoc/sortmerna
+
+module load bowtie2/2.5.2 samtools/1.19.2
+
+TRNA_FASTA="/scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/apoc/Apoc-tRNA_cleaned.fasta"
+
+# Build Bowtie index for coral tRNAs
+echo "Building Bowtie index for tRNAs"
+bowtie2-build ${TRNA_FASTA} apoc_trna_index
+
+# Extract reference tRNA lengths using base awk
+awk '/^>/ {if (seqlen) print seqname"\t"seqlen; seqname=substr($1,2); seqlen=0; next} {seqlen+=length($0)} END {print seqname"\t"seqlen}' ${TRNA_FASTA} > trna_lengths.txt
+
+# Align reads 
+for f in apoc_*_L001_R1_001_trim.fastq.collapsed.filt.no-dust
+do
+  BASE=$(basename "$f" _trim.fastq.collapsed.filt.no-dust)
+  echo "Processing sample: ${BASE}..." $(date)
+
+  # Align with Bowtie2 and stream directly to sorted BAM
+  bowtie2 -p 16 -U "${f}/out/aligned.fq" -x apoc_trna_index --no-unal -N 1 -L 12 \
+    --end-to-end --very-sensitive-local | \
+    samtools view -u -F 4 - | \
+    samtools sort -o "${BASE}.bam" -
+
+  # Index BAM
+  samtools index "${BASE}.bam"
+done
+```
+
+Submitted batch job 64101088
+
+```
+# Ensure Python and Samtools are loaded
+module load samtools/1.19.2
+module load python/3.9.19
+
+# Run the base Python classifier to generate coral_tdr_counts.csv
+python3 - << 'EOF'
+import subprocess
+import glob
+import csv
+import re
+
+# Load reference tRNA lengths
+ref_lengths = {}
+with open("trna_lengths.txt", "r") as f:
+    for line in f:
+        parts = line.strip().split("\t")
+        if len(parts) == 2:
+            ref_lengths[parts[0]] = int(parts[1])
+
+bam_files = glob.glob("*.bam")
+summary_data = []
+
+for bam in sorted(bam_files):
+    sample = bam.replace(".bam", "")
+    
+    counts = {"5' tDR": 0, "3' tDR": 0, "i-tDR": 0}
+    
+    proc = subprocess.Popen(["samtools", "view", bam], stdout=subprocess.PIPE, text=True)
+    
+    for line in proc.stdout:
+        fields = line.split("\t")
+        if len(fields) < 10 or fields[2] == "*":
+            continue
+            
+        ref_name = fields[2]
+        pos = int(fields[3]) - 1  # 0-based start
+        cigar = fields[5]
+        
+        matches = re.findall(r'(\d+)[MDN=X]', cigar)
+        align_len = sum(int(m) for m in matches) if matches else len(fields[9])
+        
+        start = pos
+        end = start + align_len
+        ref_len = ref_lengths.get(ref_name, 75)
+        
+        is_5prime = (start <= 3)
+        is_3prime = ((ref_len - end) <= 3)
+        
+        if is_5prime and not is_3prime:
+            counts["5' tDR"] += 1
+        elif is_3prime and not is_5prime:
+            counts["3' tDR"] += 1
+        else:
+            counts["i-tDR"] += 1
+
+    proc.stdout.close()
+    proc.wait()
+    
+    for tdr_type, count in counts.items():
+        summary_data.append([sample, tdr_type, count])
+
+with open("apoc_tdr_counts.csv", "w", newline="") as f:
+    writer = csv.writer(f)
+    writer.writerow(["Sample", "Type", "Count"])
+    writer.writerows(summary_data)
+
+print("Finished classifying tDRs! Output saved to apoc_tdr_counts.csv")
+EOF
+```
+
+Success! 
+
+```
+Sample,Type,Count
+apoc_2_S31_L001_R1_001,5' tDR,1422
+apoc_2_S31_L001_R1_001,3' tDR,452
+apoc_2_S31_L001_R1_001,i-tDR,678
+apoc_3_S32_L001_R1_001,5' tDR,901
+apoc_3_S32_L001_R1_001,3' tDR,147
+apoc_3_S32_L001_R1_001,i-tDR,401
+apoc_4_S33_L001_R1_001,5' tDR,952
+apoc_4_S33_L001_R1_001,3' tDR,135
+apoc_4_S33_L001_R1_001,i-tDR,614
+```
+
+Do for nvec 
+
+`nano nvec_trna_align.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --nodes=1 --ntasks-per-node=8
+#SBATCH --partition=uri-cpu
+#SBATCH --mem=32GB
+#SBATCH -t 24:00:00
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/nvec/sortmerna
+
+module load bowtie2/2.5.2 samtools/1.19.2
+
+TRNA_FASTA="/scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/nvec/Nvec-tRNA_cleaned.fasta"
+
+# Build Bowtie index for coral tRNAs
+echo "Building Bowtie index for tRNAs"
+bowtie2-build ${TRNA_FASTA} nvec_trna_index
+
+# Extract reference tRNA lengths using base awk
+awk '/^>/ {if (seqlen) print seqname"\t"seqlen; seqname=substr($1,2); seqlen=0; next} {seqlen+=length($0)} END {print seqname"\t"seqlen}' ${TRNA_FASTA} > trna_lengths.txt
+
+# Align reads 
+for f in nvec_*_L001_R1_001_trim.fastq.collapsed.filt.no-dust
+do
+  BASE=$(basename "$f" _trim.fastq.collapsed.filt.no-dust)
+  echo "Processing sample: ${BASE}..." $(date)
+
+  # Align with Bowtie2 and stream directly to sorted BAM
+  bowtie2 -p 16 -U "${f}/out/aligned.fq" -x nvec_trna_index --no-unal -N 1 -L 12 \
+    --end-to-end --very-sensitive-local | \
+    samtools view -u -F 4 - | \
+    samtools sort -o "${BASE}.bam" -
+
+  # Index BAM
+  samtools index "${BASE}.bam"
+done
+```
+
+Submitted batch job 64101346
+
+```
+# Ensure Python and Samtools are loaded
+module load samtools/1.19.2
+module load python/3.9.19
+
+# Run the base Python classifier to generate coral_tdr_counts.csv
+python3 - << 'EOF'
+import subprocess
+import glob
+import csv
+import re
+
+# Load reference tRNA lengths
+ref_lengths = {}
+with open("trna_lengths.txt", "r") as f:
+    for line in f:
+        parts = line.strip().split("\t")
+        if len(parts) == 2:
+            ref_lengths[parts[0]] = int(parts[1])
+
+bam_files = glob.glob("*.bam")
+summary_data = []
+
+for bam in sorted(bam_files):
+    sample = bam.replace(".bam", "")
+    
+    counts = {"5' tDR": 0, "3' tDR": 0, "i-tDR": 0}
+    
+    proc = subprocess.Popen(["samtools", "view", bam], stdout=subprocess.PIPE, text=True)
+    
+    for line in proc.stdout:
+        fields = line.split("\t")
+        if len(fields) < 10 or fields[2] == "*":
+            continue
+            
+        ref_name = fields[2]
+        pos = int(fields[3]) - 1  # 0-based start
+        cigar = fields[5]
+        
+        matches = re.findall(r'(\d+)[MDN=X]', cigar)
+        align_len = sum(int(m) for m in matches) if matches else len(fields[9])
+        
+        start = pos
+        end = start + align_len
+        ref_len = ref_lengths.get(ref_name, 75)
+        
+        is_5prime = (start <= 3)
+        is_3prime = ((ref_len - end) <= 3)
+        
+        if is_5prime and not is_3prime:
+            counts["5' tDR"] += 1
+        elif is_3prime and not is_5prime:
+            counts["3' tDR"] += 1
+        else:
+            counts["i-tDR"] += 1
+
+    proc.stdout.close()
+    proc.wait()
+    
+    for tdr_type, count in counts.items():
+        summary_data.append([sample, tdr_type, count])
+
+with open("nvec_tdr_counts.csv", "w", newline="") as f:
+    writer = csv.writer(f)
+    writer.writerow(["Sample", "Type", "Count"])
+    writer.writerows(summary_data)
+
+print("Finished classifying tDRs! Output saved to nvec_tdr_counts.csv")
+EOF
+```
+
+Success! 
+
+```
+Sample,Type,Count
+nvec_1_S25_L001_R1_001,5' tDR,2612
+nvec_1_S25_L001_R1_001,3' tDR,1246
+nvec_1_S25_L001_R1_001,i-tDR,1580
+nvec_2_S26_L001_R1_001,5' tDR,2248
+nvec_2_S26_L001_R1_001,3' tDR,1350
+nvec_2_S26_L001_R1_001,i-tDR,1867
+nvec_3_S34_L001_R1_001,5' tDR,665
+nvec_3_S34_L001_R1_001,3' tDR,224
+nvec_3_S34_L001_R1_001,i-tDR,327
+nvec_4_S35_L001_R1_001,5' tDR,734
+nvec_4_S35_L001_R1_001,3' tDR,224
+nvec_4_S35_L001_R1_001,i-tDR,370
+```
 
