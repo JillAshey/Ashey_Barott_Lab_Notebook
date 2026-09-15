@@ -111,7 +111,12 @@ Nothing
 - QC and trimming for POC Heron 
 - Emma meeting 
 - John + Elisa meeting 
-- 
+
+### 20260915
+
+- Another trimming iteration for POC Heron 
+- ECR spotlight 
+
 
 
 
@@ -120,6 +125,8 @@ Nothing
 
 to do 
 
+- book himb housing -- email himbdorm@hawaii.edu
+- himb visitor form https://docs.google.com/forms/d/e/1FAIpQLSe50MQZnw4zK5WGgIn6M6MvJ59tsaXd1wIi-JAuYl7O_Rtu1g/viewform?pli=1
 - read for lab meeting 
 - look at zoe NZ budget 
 - jeb ecr 

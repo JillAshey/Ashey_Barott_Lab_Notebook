@@ -124,7 +124,7 @@ zgrep -c "^+$" "${TRIM_DATA}"/*.fastq.gz > "${TRIM_DATA}"/trim_read_counts.txt
 echo "Read count complete" $(date)
 ```
 
-Submitted batch job 64490004
+Submitted batch job 64490004. Still a lot of duplication but moving on to alignment. 
 
 ### Download genomic resources 
 
@@ -189,7 +189,204 @@ gunzip *
 
 ### Align reads to genome with hisat2 
 
+Versions: Hisat2 v2.2.1; 
+
 Align against all published POC genomes. 
+
+`nano align_pmea.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=8         
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB                
+#SBATCH -t 72:00:00                
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /scratch4/workspace/jillashey_uri_edu-POC_Heron/
+
+echo "Alignment to Pmea genome" $(date)
+
+# Load modules 
+module load uri/main all/HISAT2/2.2.1-gompi-2022a
+module load samtools/1.19.2
+
+# Define directory paths
+TRIM_DATA="/scratch4/workspace/jillashey_uri_edu-POC_Heron/data/trim"
+OUTPUT_DIR="/scratch4/workspace/jillashey_uri_edu-POC_Heron/output/alignment/Pmea"
+REF_DIR="/scratch4/workspace/jillashey_uri_edu-POC_Heron/refs"
+
+# Create output directory if it doesn't exist
+mkdir -p "${OUTPUT_DIR}"
+
+echo "Index Pmea reference genome" $(date)
+if [ ! -f "${REF_DIR}/Pmea_ref.1.ht2" ]; then
+    echo "Indexing Pmea reference genome $(date)"
+    hisat2-build -f "${REF_DIR}/Pocillopora_meandrina_HIv1.assembly.fasta" "${REF_DIR}/Pmea_ref"
+else
+    echo "Reference index already exists. Skipping build step."
+fi
+
+echo "Reference genome indexed, begin alignment" $(date)
+for i in "${TRIM_DATA}"/*.fastq.gz; do
+    fname=$(basename "$i") 
+    sample_name="${fname%.fastq.gz}"
+    echo "Aligning ${sample_name}..."
+    hisat2 -p 8 --dta -x "${REF_DIR}/Pmea_ref" -U "${i}" | \
+    samtools sort -@ 8 -o "${OUTPUT_DIR}/${sample_name}.bam" -
+    samtools index -@ 8 "${OUTPUT_DIR}/${sample_name}.bam"
+    echo "${sample_name} aligned, sorted, and indexed!"
+done
+
+echo "Alignment complete, calculate mapping percentages" $(date)
+STATS_FILE="${OUTPUT_DIR}/alignment_Pmea_summary.txt"
+
+for i in "${OUTPUT_DIR}"/*.bam; do
+    sample=$(basename "$i")
+    echo "=== Sample: ${sample} ===" >> "${STATS_FILE}"
+    samtools flagstat "${i}" | grep "mapped (" >> "${STATS_FILE}"
+    echo "" >> "${STATS_FILE}"
+done
+
+echo "Summary report saved to ${STATS_FILE}"
+```
+
+Submitted batch job 64492344
+
+`nano align_ptua.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=8         
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB                
+#SBATCH -t 72:00:00                
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /scratch4/workspace/jillashey_uri_edu-POC_Heron/
+
+echo "Alignment to Ptua genome" $(date)
+
+# Load modules 
+module load uri/main all/HISAT2/2.2.1-gompi-2022a
+module load samtools/1.19.2
+
+# Define directory paths
+TRIM_DATA="/scratch4/workspace/jillashey_uri_edu-POC_Heron/data/trim"
+OUTPUT_DIR="/scratch4/workspace/jillashey_uri_edu-POC_Heron/output/alignment/Ptua"
+REF_DIR="/scratch4/workspace/jillashey_uri_edu-POC_Heron/refs"
+
+# Create output directory if it doesn't exist
+mkdir -p "${OUTPUT_DIR}"
+
+echo "Index Ptua reference genome" $(date)
+if [ ! -f "${REF_DIR}/Ptua_ref.1.ht2" ]; then
+    echo "Indexing Ptua reference genome $(date)"
+    hisat2-build -f "${REF_DIR}/Pocillopora_tuahiniensis_genome_v1.0.fasta.masked" "${REF_DIR}/Ptua_ref"
+else
+    echo "Reference index already exists. Skipping build step."
+fi
+
+echo "Reference genome indexed, begin alignment" $(date)
+for i in "${TRIM_DATA}"/*.fastq.gz; do
+    fname=$(basename "$i") 
+    sample_name="${fname%.fastq.gz}"
+    echo "Aligning ${sample_name}..."
+    hisat2 -p 8 --dta -x "${REF_DIR}/Ptua_ref" -U "${i}" | \
+    samtools sort -@ 8 -o "${OUTPUT_DIR}/${sample_name}.bam" -
+    samtools index -@ 8 "${OUTPUT_DIR}/${sample_name}.bam"
+    echo "${sample_name} aligned, sorted, and indexed!"
+done
+
+echo "Alignment complete, calculate mapping percentages" $(date)
+STATS_FILE="${OUTPUT_DIR}/alignment_Ptua_summary.txt"
+
+for i in "${OUTPUT_DIR}"/*.bam; do
+    sample=$(basename "$i")
+    echo "=== Sample: ${sample} ===" >> "${STATS_FILE}"
+    samtools flagstat "${i}" | grep "mapped (" >> "${STATS_FILE}"
+    echo "" >> "${STATS_FILE}"
+done
+
+echo "Summary report saved to ${STATS_FILE}"
+```
+
+Submitted batch job 64492477
+
+`nano align_pacu.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=8         
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB                
+#SBATCH -t 72:00:00                
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /scratch4/workspace/jillashey_uri_edu-POC_Heron/
+
+echo "Alignment to Pacu genome" $(date)
+
+# Load modules 
+module load uri/main all/HISAT2/2.2.1-gompi-2022a
+module load samtools/1.19.2
+
+# Define directory paths
+TRIM_DATA="/scratch4/workspace/jillashey_uri_edu-POC_Heron/data/trim"
+OUTPUT_DIR="/scratch4/workspace/jillashey_uri_edu-POC_Heron/output/alignment/Pacu"
+REF_DIR="/scratch4/workspace/jillashey_uri_edu-POC_Heron/refs"
+
+# Create output directory if it doesn't exist
+mkdir -p "${OUTPUT_DIR}"
+
+echo "Index Pacu reference genome" $(date)
+if [ ! -f "${REF_DIR}/Pacu_ref.1.ht2" ]; then
+    echo "Indexing Pacu reference genome $(date)"
+    hisat2-build -f "${REF_DIR}/Pocillopora_acuta_HIv2.assembly.fasta" "${REF_DIR}/Pacu_ref"
+else
+    echo "Reference index already exists. Skipping build step."
+fi
+
+echo "Reference genome indexed, begin alignment" $(date)
+for i in "${TRIM_DATA}"/*.fastq.gz; do
+    fname=$(basename "$i") 
+    sample_name="${fname%.fastq.gz}"
+    echo "Aligning ${sample_name}..."
+    hisat2 -p 8 --dta -x "${REF_DIR}/Pacu_ref" -U "${i}" | \
+    samtools sort -@ 8 -o "${OUTPUT_DIR}/${sample_name}.bam" -
+    samtools index -@ 8 "${OUTPUT_DIR}/${sample_name}.bam"
+    echo "${sample_name} aligned, sorted, and indexed!"
+done
+
+echo "Alignment complete, calculate mapping percentages" $(date)
+STATS_FILE="${OUTPUT_DIR}/alignment_Pacu_summary.txt"
+
+for i in "${OUTPUT_DIR}"/*.bam; do
+    sample=$(basename "$i")
+    echo "=== Sample: ${sample} ===" >> "${STATS_FILE}"
+    samtools flagstat "${i}" | grep "mapped (" >> "${STATS_FILE}"
+    echo "" >> "${STATS_FILE}"
+done
+
+echo "Summary report saved to ${STATS_FILE}"
+```
+
+Submitted batch job 64492478
 
 `nano align_pdam.sh`
 
@@ -207,6 +404,8 @@ Align against all published POC genomes.
 #SBATCH -o slurm-%j.out
 #SBATCH -e slurm-%j.error
 #SBATCH -D /scratch4/workspace/jillashey_uri_edu-POC_Heron/
+
+echo "Alignment to Pdam genome (which is actually Pgrandis)" $(date)
 
 # Load modules 
 module load uri/main all/HISAT2/2.2.1-gompi-2022a
@@ -252,8 +451,138 @@ done
 echo "Summary report saved to ${STATS_FILE}"
 ```
 
+Submitted batch job 64492487
+
+`nano align_pver.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=8         
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB                
+#SBATCH -t 72:00:00                
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /scratch4/workspace/jillashey_uri_edu-POC_Heron/
+
+echo "Alignment to Pver genome (which is actually Pfavosa)" $(date)
+
+# Load modules 
 module load uri/main all/HISAT2/2.2.1-gompi-2022a
 module load samtools/1.19.2
+
+# Define directory paths
+TRIM_DATA="/scratch4/workspace/jillashey_uri_edu-POC_Heron/data/trim"
+OUTPUT_DIR="/scratch4/workspace/jillashey_uri_edu-POC_Heron/output/alignment/Pver"
+REF_DIR="/scratch4/workspace/jillashey_uri_edu-POC_Heron/refs"
+
+# Create output directory if it doesn't exist
+mkdir -p "${OUTPUT_DIR}"
+
+echo "Index Pver reference genome" $(date)
+if [ ! -f "${REF_DIR}/Pver_ref.1.ht2" ]; then
+    echo "Indexing Pver reference genome $(date)"
+    hisat2-build -f "${REF_DIR}/Pver_genome_assembly_v1.0.fasta" "${REF_DIR}/Pver_ref"
+else
+    echo "Reference index already exists. Skipping build step."
+fi
+
+echo "Reference genome indexed, begin alignment" $(date)
+for i in "${TRIM_DATA}"/*.fastq.gz; do
+    fname=$(basename "$i") 
+    sample_name="${fname%.fastq.gz}"
+    echo "Aligning ${sample_name}..."
+    hisat2 -p 8 --dta -x "${REF_DIR}/Pver_ref" -U "${i}" | \
+    samtools sort -@ 8 -o "${OUTPUT_DIR}/${sample_name}.bam" -
+    samtools index -@ 8 "${OUTPUT_DIR}/${sample_name}.bam"
+    echo "${sample_name} aligned, sorted, and indexed!"
+done
+
+echo "Alignment complete, calculate mapping percentages" $(date)
+STATS_FILE="${OUTPUT_DIR}/alignment_Pver_summary.txt"
+
+for i in "${OUTPUT_DIR}"/*.bam; do
+    sample=$(basename "$i")
+    echo "=== Sample: ${sample} ===" >> "${STATS_FILE}"
+    samtools flagstat "${i}" | grep "mapped (" >> "${STATS_FILE}"
+    echo "" >> "${STATS_FILE}"
+done
+
+echo "Summary report saved to ${STATS_FILE}"
+```
+
+Submitted batch job 64492489
+
+`nano align_peff.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=8         
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB                
+#SBATCH -t 72:00:00                
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /scratch4/workspace/jillashey_uri_edu-POC_Heron/
+
+echo "Alignment to Peff genome" $(date)
+
+# Load modules 
+module load uri/main all/HISAT2/2.2.1-gompi-2022a
+module load samtools/1.19.2
+
+# Define directory paths
+TRIM_DATA="/scratch4/workspace/jillashey_uri_edu-POC_Heron/data/trim"
+OUTPUT_DIR="/scratch4/workspace/jillashey_uri_edu-POC_Heron/output/alignment/Peff"
+REF_DIR="/scratch4/workspace/jillashey_uri_edu-POC_Heron/refs"
+
+# Create output directory if it doesn't exist
+mkdir -p "${OUTPUT_DIR}"
+
+echo "Index Peff reference genome" $(date)
+if [ ! -f "${REF_DIR}/Peff_ref.1.ht2" ]; then
+    echo "Indexing Peff reference genome $(date)"
+    hisat2-build -f "${REF_DIR}/Pocillopora_effusa_v3.fa" "${REF_DIR}/Peff_ref"
+else
+    echo "Reference index already exists. Skipping build step."
+fi
+
+echo "Reference genome indexed, begin alignment" $(date)
+for i in "${TRIM_DATA}"/*.fastq.gz; do
+    fname=$(basename "$i") 
+    sample_name="${fname%.fastq.gz}"
+    echo "Aligning ${sample_name}..."
+    hisat2 -p 8 --dta -x "${REF_DIR}/Peff_ref" -U "${i}" | \
+    samtools sort -@ 8 -o "${OUTPUT_DIR}/${sample_name}.bam" -
+    samtools index -@ 8 "${OUTPUT_DIR}/${sample_name}.bam"
+    echo "${sample_name} aligned, sorted, and indexed!"
+done
+
+echo "Alignment complete, calculate mapping percentages" $(date)
+STATS_FILE="${OUTPUT_DIR}/alignment_Peff_summary.txt"
+
+for i in "${OUTPUT_DIR}"/*.bam; do
+    sample=$(basename "$i")
+    echo "=== Sample: ${sample} ===" >> "${STATS_FILE}"
+    samtools flagstat "${i}" | grep "mapped (" >> "${STATS_FILE}"
+    echo "" >> "${STATS_FILE}"
+done
+
+echo "Summary report saved to ${STATS_FILE}"
+```
+
+Submitted batch job 64492497
+
 
 ### Assemble reads with stringtie
 
