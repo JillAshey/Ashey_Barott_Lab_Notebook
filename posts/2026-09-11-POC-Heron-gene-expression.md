@@ -650,12 +650,162 @@ echo "Summary report saved to ${STATS_FILE}"
 
 Submitted batch job 64492497
 
+SUMMARY
+
+|         | Pacuta | Pdamicornis | Pdamicornis (NCBI) | Peffusa | Pmeandrina | Ptuahiniensis | Pverrucosa |
+| ------- | ------ | ----------- | ------------------ | ------- | ---------- | ------------- | ---------- |
+| AVERAGE | 57.09  | 9.15        | 12.54              | 71.71   | 57.94      | 76.82         | 38.19      |
+
+This is surprising to me! I expected Pacuta to have the highest alignment, given that it is most closely related to Pdam (which these samples putatively are). But the samples aligned best against the Ptua genome and the Peffusa genome.
+
+### Align to symbiont genome and rRNAs 
+
+High levels of duplication and multi-mapping in hisat2 is sus. Going to align to rRNA database and symbiont genome to see if there is contamination. 
+
+Obtain symbiont genome and rRNA database. There is no genome for Cladocopium latusorum, which is the dominant symbiont in the Heron samples. I'm going to use Cladocopium goreaui, a closely related symbiont species. 
+
+```
+cd /scratch4/workspace/jillashey_uri_edu-POC_Heron/refs
+
+wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/947/184/155/GCA_947184155.2_Cgoreaui_SCF055-01_v2.1/GCA_947184155.2_Cgoreaui_SCF055-01_v2.1_genomic.fna.gz
+
+wget https://www.arb-silva.de/fileadmin/silva_databases/release_138/Exports/SILVA_138_SSURef_tax_silva.fasta.gz
+
+gunzip *
+```
+
+`nano align_sym.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=8         
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB                
+#SBATCH -t 72:00:00                
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /scratch4/workspace/jillashey_uri_edu-POC_Heron/
+
+echo "Alignment to sym genome" $(date)
+
+# Load modules 
+module load uri/main all/HISAT2/2.2.1-gompi-2022a
+module load samtools/1.19.2
+
+# Define directory paths
+TRIM_DATA="/scratch4/workspace/jillashey_uri_edu-POC_Heron/data/trim"
+OUTPUT_DIR="/scratch4/workspace/jillashey_uri_edu-POC_Heron/output/alignment/Sym"
+REF_DIR="/scratch4/workspace/jillashey_uri_edu-POC_Heron/refs"
+
+# Create output directory if it doesn't exist
+mkdir -p "${OUTPUT_DIR}"
+
+echo "Index sym reference genome" $(date)
+if [ ! -f "${REF_DIR}/Sym_ref.1.ht2" ]; then
+    echo "Indexing Sym reference genome $(date)"
+    hisat2-build -f "${REF_DIR}/GCA_947184155.2_Cgoreaui_SCF055-01_v2.1_genomic.fna" "${REF_DIR}/Sym_ref"
+else
+    echo "Reference index already exists. Skipping build step."
+fi
+
+echo "Reference genome indexed, begin alignment" $(date)
+for i in "${TRIM_DATA}"/*.fastq.gz; do
+    fname=$(basename "$i") 
+    sample_name="${fname%.fastq.gz}"
+    echo "Aligning ${sample_name}..."
+    hisat2 -p 8 --dta -x "${REF_DIR}/Sym_ref" -U "${i}" | \
+    samtools sort -@ 8 -o "${OUTPUT_DIR}/${sample_name}.bam" -
+    samtools index -@ 8 "${OUTPUT_DIR}/${sample_name}.bam"
+    echo "${sample_name} aligned, sorted, and indexed!"
+done
+
+echo "Alignment complete, calculate mapping percentages" $(date)
+STATS_FILE="${OUTPUT_DIR}/alignment_Sym_summary.txt"
+
+for i in "${OUTPUT_DIR}"/*.bam; do
+    sample=$(basename "$i")
+    echo "=== Sample: ${sample} ===" >> "${STATS_FILE}"
+    samtools flagstat "${i}" | grep "mapped (" >> "${STATS_FILE}"
+    echo "" >> "${STATS_FILE}"
+done
+
+echo "Summary report saved to ${STATS_FILE}"
+```
+
+Submitted batch job 64514194
+
+`nano align_rRNA.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=8         
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB                
+#SBATCH -t 72:00:00                
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /scratch4/workspace/jillashey_uri_edu-POC_Heron/
+
+echo "Alignment to rRNA db" $(date)
+
+# Load modules 
+module load uri/main all/HISAT2/2.2.1-gompi-2022a
+module load samtools/1.19.2
+
+# Define directory paths
+TRIM_DATA="/scratch4/workspace/jillashey_uri_edu-POC_Heron/data/trim"
+OUTPUT_DIR="/scratch4/workspace/jillashey_uri_edu-POC_Heron/output/alignment/rRNA"
+REF_DIR="/scratch4/workspace/jillashey_uri_edu-POC_Heron/refs"
+
+# Create output directory if it doesn't exist
+mkdir -p "${OUTPUT_DIR}"
+
+echo "Index rRNA reference genome" $(date)
+if [ ! -f "${REF_DIR}/rRNA_ref.1.ht2" ]; then
+    echo "Indexing rRNA db $(date)"
+    hisat2-build -f "${REF_DIR}/SILVA_138_SSURef_tax_silva.fasta" "${REF_DIR}/rRNA_ref"
+else
+    echo "Reference index already exists. Skipping build step."
+fi
+
+echo "Reference genome indexed, begin alignment" $(date)
+for i in "${TRIM_DATA}"/*.fastq.gz; do
+    fname=$(basename "$i") 
+    sample_name="${fname%.fastq.gz}"
+    echo "Aligning ${sample_name}..."
+    hisat2 -p 8 --dta -x "${REF_DIR}/rRNA_ref" -U "${i}" | \
+    samtools sort -@ 8 -o "${OUTPUT_DIR}/${sample_name}.bam" -
+    samtools index -@ 8 "${OUTPUT_DIR}/${sample_name}.bam"
+    echo "${sample_name} aligned, sorted, and indexed!"
+done
+
+echo "Alignment complete, calculate mapping percentages" $(date)
+STATS_FILE="${OUTPUT_DIR}/alignment_rRNA_summary.txt"
+
+for i in "${OUTPUT_DIR}"/*.bam; do
+    sample=$(basename "$i")
+    echo "=== Sample: ${sample} ===" >> "${STATS_FILE}"
+    samtools flagstat "${i}" | grep "mapped (" >> "${STATS_FILE}"
+    echo "" >> "${STATS_FILE}"
+done
+
+echo "Summary report saved to ${STATS_FILE}"
+```
+
+Submitted batch job 64514219
 
 
-High levels of duplication and multi-mapping in hisat2 is sus. Things to try?
 
-- Align to C symbiont genome Cladocopium latusorum
-- Align to rRNAs https://www.arb-silva.de/arb-files
 
 
 ### Assemble reads with stringtie
