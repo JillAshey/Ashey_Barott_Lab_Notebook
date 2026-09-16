@@ -123,6 +123,7 @@ Nothing
 ### 20260916
 
 - Species ID protocol 
+- Alignment of POC to sym and rRNAs
 
 
 
@@ -131,12 +132,13 @@ Nothing
 
 to do 
 
-- powerpoint for mon class 
+- make gene count matrix for pacuta, peff, ptua
+- make coral reproduction pres for lab meeting next week 
+- send updated bio to Katie for lab website 
+- powerpoint for mon class -- email elisa 
 - book himb housing -- email himbdorm@hawaii.edu
 - himb visitor form https://docs.google.com/forms/d/e/1FAIpQLSe50MQZnw4zK5WGgIn6M6MvJ59tsaXd1wIi-JAuYl7O_Rtu1g/viewform?pli=1
-- read for lab meeting 
 - look at zoe NZ budget 
-- do marcelina stuff on Unity 
 - run orthofinder for POC proteins 
 - writing for cnidarian sperm paper 
 

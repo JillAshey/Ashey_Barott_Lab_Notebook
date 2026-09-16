@@ -737,7 +737,7 @@ done
 echo "Summary report saved to ${STATS_FILE}"
 ```
 
-Submitted batch job 64514194
+Submitted batch job 64514194. Sym alignments across all samples <2%, which is great! 
 
 `nano align_rRNA.sh`
 
@@ -802,11 +802,7 @@ done
 echo "Summary report saved to ${STATS_FILE}"
 ```
 
-Submitted batch job 64514219
-
-
-
-
+Submitted batch job 64514219. Less than <1% aligning to rRNAs which is also great! Pretty confident that these are all coral sequences. 
 
 ### Assemble reads with stringtie
 
