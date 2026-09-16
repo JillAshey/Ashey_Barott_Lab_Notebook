@@ -116,7 +116,13 @@ Nothing
 
 - Another trimming iteration for POC Heron 
 - ECR spotlight 
+- Zenodo for cnidarain sperm refs and Ptua genome 
+- Writing up stuff for Ptua genome 
+- Alignment for POC Heron samples against all available POC genomes 
 
+### 20260916
+
+- Read
 
 
 
@@ -125,11 +131,11 @@ Nothing
 
 to do 
 
+- powerpoint for mon class 
 - book himb housing -- email himbdorm@hawaii.edu
 - himb visitor form https://docs.google.com/forms/d/e/1FAIpQLSe50MQZnw4zK5WGgIn6M6MvJ59tsaXd1wIi-JAuYl7O_Rtu1g/viewform?pli=1
 - read for lab meeting 
 - look at zoe NZ budget 
-- jeb ecr 
 - do marcelina stuff on Unity 
 - run orthofinder for POC proteins 
 - writing for cnidarian sperm paper 
