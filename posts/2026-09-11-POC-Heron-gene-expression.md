@@ -658,6 +658,14 @@ SUMMARY
 
 This is surprising to me! I expected Pacuta to have the highest alignment, given that it is most closely related to Pdam (which these samples putatively are). But the samples aligned best against the Ptua genome and the Peffusa genome.
 
+Marcelina plotted the alignment data: 
+
+![](https://github.com/JillAshey/Ashey_Barott_Lab_Notebook/blob/main/images/alignment_timepoint.png?raw=true)
+
+![](https://github.com/JillAshey/Ashey_Barott_Lab_Notebook/blob/main/images/alignment_site.png?raw=true)
+
+Very interesting as well. For the shallow lagoon (SL), it looks like there are two groupings of samples depending on which genome you are looking at. 
+
 ### Align to symbiont genome and rRNAs 
 
 High levels of duplication and multi-mapping in hisat2 is sus. Going to align to rRNA database and symbiont genome to see if there is contamination. 

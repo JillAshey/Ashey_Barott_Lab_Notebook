@@ -124,6 +124,15 @@ Nothing
 
 - Species ID protocol 
 - Alignment of POC to sym and rRNAs
+- Reviewing POC alignment with Marcelina 
+- Reading for lab meeting 
+- Lab meeting
+- Started looking at HHMI questions 
+
+### 20260917
+
+- Writing/brainstorming for HHMI questions 
+- Writing for WDHOF grant 
 
 
 
