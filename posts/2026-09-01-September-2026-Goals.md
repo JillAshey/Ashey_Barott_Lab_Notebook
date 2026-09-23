@@ -122,7 +122,7 @@ Nothing
 
 ### 20260916
 
-- Species ID protocol 
+- Wrote up species ID protocol 
 - Alignment of POC to sym and rRNAs
 - Reviewing POC alignment with Marcelina 
 - Reading for lab meeting 
@@ -133,6 +133,30 @@ Nothing
 
 - Writing/brainstorming for HHMI questions 
 - Writing for WDHOF grant 
+- Filled out HIMB visitor form 
+- Emailed Kelsey for HIMB housing 
+- Ford Katie meeting 
+- Seminar 
+
+### 20260918
+
+- UZELA meeting 
+
+### 20260921
+
+- CBASS paper review 
+- Forwarded HIMB housing email to main HIMB email 
+- Restarted Ben experiment 
+- Writing for cnidarian sperm paper (finished intro draft and wrote some of piRNA/tDR discussion)
+- Prepped for Katie and Colin meetings 
+- Made presentation for lab meeting 
+
+### 20260922
+
+- Writing for cnidarian sperm 
+- Katie meeting 
+- Colin meeting 
+- Bermuda reading and question prep 
 
 
 
@@ -141,19 +165,20 @@ Nothing
 
 to do 
 
+- send katie questions
+- tRNA fragment plotting 
+- email kelsey on weds and cc ford
+- coordinate w Khalil for field stuff 
+- update ben nvec notes 
+- book return flights 
 - make gene count matrix for pacuta, peff, ptua
-- make coral reproduction pres for lab meeting next week 
 - send updated bio to Katie for lab website 
-- powerpoint for mon class -- email elisa 
-- book himb housing -- email himbdorm@hawaii.edu
-- himb visitor form https://docs.google.com/forms/d/e/1FAIpQLSe50MQZnw4zK5WGgIn6M6MvJ59tsaXd1wIi-JAuYl7O_Rtu1g/viewform?pli=1
 - look at zoe NZ budget 
 - run orthofinder for POC proteins 
 - writing for cnidarian sperm paper 
 
 - apply for grc 
 - call dr to schedule annual visit and renew prescriptions 
-- email davide re cbass paper 
 - email colleen bove re guest lecture at ursinus 
 - email randi re lecture at tufts 
 - check in w chloe re histology 

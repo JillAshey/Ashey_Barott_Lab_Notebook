@@ -5691,6 +5691,94 @@ ahya_4_S30_L001_R1_001,3' tDR,326
 ahya_4_S30_L001_R1_001,i-tDR,1331
 ```
 
+Extract positional coverage from BAMs
+
+```
+module load samtools/1.19.2
+module load python/3.9.19
+
+python3 - << 'EOF'
+import csv
+from collections import defaultdict
+import glob
+import re
+import subprocess
+
+# 1. Load tRNA lengths extracted from trna_lengths.txt
+ref_lengths = {}
+with open("trna_lengths.txt", "r") as f:
+    for line in f:
+        parts = line.strip().split("\t")
+        if len(parts) == 2:
+            ref_lengths[parts[0]] = int(parts[1])
+
+bam_files = sorted(glob.glob("*.bam"))
+output_rows = []
+
+for bam in bam_files:
+    sample = bam.replace(".bam", "")
+    print(f"Processing positional coverage for sample: {sample}...")
+
+    # pos_counts[ref_name][position_1_based] = coverage count
+    pos_counts = defaultdict(lambda: defaultdict(int))
+    total_aligned_reads = 0
+
+    # Stream BAM file directly via samtools view
+    proc = subprocess.Popen(
+        ["samtools", "view", bam], stdout=subprocess.PIPE, text=True
+    )
+
+    for line in proc.stdout:
+        fields = line.split("\t")
+        if len(fields) < 10 or fields[2] == "*":
+            continue
+
+        ref_name = fields[2]
+        pos_0based = int(fields[3]) - 1  # Convert SAM 1-based start to 0-based
+        cigar = fields[5]
+
+        # Calculate aligned length across the reference tRNA sequence
+        matches = re.findall(r'(\d+)[MDN=X]', cigar)
+        align_len = sum(int(m) for m in matches) if matches else len(fields[9])
+
+        start = pos_0based
+        end = start + align_len
+
+        # Increment count for every position covered by this read
+        for p in range(start, end):
+            pos_1based = p + 1
+            pos_counts[ref_name][pos_1based] += 1
+
+        total_aligned_reads += 1
+
+    proc.stdout.close()
+    proc.wait()
+
+    # Format output across all positions (1 to length) for each tRNA
+    for ref_name, ref_len in ref_lengths.items():
+        for pos in range(1, ref_len + 1):
+            raw_count = pos_counts[ref_name][pos]
+            rpm = (
+                (raw_count / total_aligned_reads * 1000000)
+                if total_aligned_reads > 0
+                else 0.0
+            )
+            output_rows.append(
+                [sample, ref_name, pos, ref_len, raw_count, round(rpm, 2)]
+            )
+
+# Write output to CSV
+with open("ahya_trna_positional_coverage.csv", "w", newline="") as f:
+    writer = csv.writer(f)
+    writer.writerow(
+        ["Sample", "tRNA", "Position", "tRNA_Length", "Raw_Count", "RPM"]
+    )
+    writer.writerows(output_rows)
+
+print("Finished! Coverage depth output saved to ahya_trna_positional_coverage.csv")
+EOF
+```
+
 Do for apoc
 
 `nano apoc_trna_align.sh`
@@ -5820,6 +5908,104 @@ apoc_4_S33_L001_R1_001,5' tDR,952
 apoc_4_S33_L001_R1_001,3' tDR,135
 apoc_4_S33_L001_R1_001,i-tDR,614
 ```
+
+Extract positional coverage from BAMs
+
+```
+module load samtools/1.19.2
+module load python/3.9.19
+
+python3 - << 'EOF'
+import csv
+from collections import defaultdict
+import glob
+import re
+import subprocess
+
+# 1. Load tRNA lengths extracted from trna_lengths.txt
+ref_lengths = {}
+with open("trna_lengths.txt", "r") as f:
+    for line in f:
+        parts = line.strip().split("\t")
+        if len(parts) == 2:
+            ref_lengths[parts[0]] = int(parts[1])
+
+bam_files = sorted(glob.glob("*.bam"))
+output_rows = []
+
+for bam in bam_files:
+    sample = bam.replace(".bam", "")
+    print(f"Processing positional coverage for sample: {sample}...")
+
+    # pos_counts[ref_name][position_1_based] = coverage count
+    pos_counts = defaultdict(lambda: defaultdict(int))
+    total_aligned_reads = 0
+
+    # Stream BAM file directly via samtools view
+    proc = subprocess.Popen(
+        ["samtools", "view", bam], stdout=subprocess.PIPE, text=True
+    )
+
+    for line in proc.stdout:
+        fields = line.split("\t")
+        if len(fields) < 10 or fields[2] == "*":
+            continue
+
+        ref_name = fields[2]
+        pos_0based = int(fields[3]) - 1  # Convert SAM 1-based start to 0-based
+        cigar = fields[5]
+
+        # Calculate aligned length across the reference tRNA sequence
+        matches = re.findall(r'(\d+)[MDN=X]', cigar)
+        align_len = sum(int(m) for m in matches) if matches else len(fields[9])
+
+        start = pos_0based
+        end = start + align_len
+
+        # Increment count for every position covered by this read
+        for p in range(start, end):
+            pos_1based = p + 1
+            pos_counts[ref_name][pos_1based] += 1
+
+        total_aligned_reads += 1
+
+    proc.stdout.close()
+    proc.wait()
+
+    # Format output across all positions (1 to length) for each tRNA
+    for ref_name, ref_len in ref_lengths.items():
+        for pos in range(1, ref_len + 1):
+            raw_count = pos_counts[ref_name][pos]
+            rpm = (
+                (raw_count / total_aligned_reads * 1000000)
+                if total_aligned_reads > 0
+                else 0.0
+            )
+            output_rows.append(
+                [sample, ref_name, pos, ref_len, raw_count, round(rpm, 2)]
+            )
+
+# Write output to CSV
+with open("apoc_trna_positional_coverage.csv", "w", newline="") as f:
+    writer = csv.writer(f)
+    writer.writerow(
+        ["Sample", "tRNA", "Position", "tRNA_Length", "Raw_Count", "RPM"]
+    )
+    writer.writerows(output_rows)
+
+print("Finished! Coverage depth output saved to apoc_trna_positional_coverage.csv")
+EOF
+```
+
+
+
+
+
+
+
+
+
+
 
 Do for nvec 
 
@@ -5953,4 +6139,93 @@ nvec_4_S35_L001_R1_001,5' tDR,734
 nvec_4_S35_L001_R1_001,3' tDR,224
 nvec_4_S35_L001_R1_001,i-tDR,370
 ```
+
+Extract positional coverage from BAMs
+
+```
+module load samtools/1.19.2
+module load python/3.9.19
+
+python3 - << 'EOF'
+import csv
+from collections import defaultdict
+import glob
+import re
+import subprocess
+
+# 1. Load tRNA lengths extracted from trna_lengths.txt
+ref_lengths = {}
+with open("trna_lengths.txt", "r") as f:
+    for line in f:
+        parts = line.strip().split("\t")
+        if len(parts) == 2:
+            ref_lengths[parts[0]] = int(parts[1])
+
+bam_files = sorted(glob.glob("*.bam"))
+output_rows = []
+
+for bam in bam_files:
+    sample = bam.replace(".bam", "")
+    print(f"Processing positional coverage for sample: {sample}...")
+
+    # pos_counts[ref_name][position_1_based] = coverage count
+    pos_counts = defaultdict(lambda: defaultdict(int))
+    total_aligned_reads = 0
+
+    # Stream BAM file directly via samtools view
+    proc = subprocess.Popen(
+        ["samtools", "view", bam], stdout=subprocess.PIPE, text=True
+    )
+
+    for line in proc.stdout:
+        fields = line.split("\t")
+        if len(fields) < 10 or fields[2] == "*":
+            continue
+
+        ref_name = fields[2]
+        pos_0based = int(fields[3]) - 1  # Convert SAM 1-based start to 0-based
+        cigar = fields[5]
+
+        # Calculate aligned length across the reference tRNA sequence
+        matches = re.findall(r'(\d+)[MDN=X]', cigar)
+        align_len = sum(int(m) for m in matches) if matches else len(fields[9])
+
+        start = pos_0based
+        end = start + align_len
+
+        # Increment count for every position covered by this read
+        for p in range(start, end):
+            pos_1based = p + 1
+            pos_counts[ref_name][pos_1based] += 1
+
+        total_aligned_reads += 1
+
+    proc.stdout.close()
+    proc.wait()
+
+    # Format output across all positions (1 to length) for each tRNA
+    for ref_name, ref_len in ref_lengths.items():
+        for pos in range(1, ref_len + 1):
+            raw_count = pos_counts[ref_name][pos]
+            rpm = (
+                (raw_count / total_aligned_reads * 1000000)
+                if total_aligned_reads > 0
+                else 0.0
+            )
+            output_rows.append(
+                [sample, ref_name, pos, ref_len, raw_count, round(rpm, 2)]
+            )
+
+# Write output to CSV
+with open("nvec_trna_positional_coverage.csv", "w", newline="") as f:
+    writer = csv.writer(f)
+    writer.writerow(
+        ["Sample", "tRNA", "Position", "tRNA_Length", "Raw_Count", "RPM"]
+    )
+    writer.writerows(output_rows)
+
+print("Finished! Coverage depth output saved to nvec_trna_positional_coverage.csv")
+EOF
+```
+
 
