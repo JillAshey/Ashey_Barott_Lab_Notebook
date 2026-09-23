@@ -158,24 +158,28 @@ Nothing
 - Colin meeting 
 - Bermuda reading and question prep 
 
+### 20260923
 
-
+- Emma meeting 
+- Coding for tRNA stuff and making plot 
+- Writing for tRNA stuff 
+- Lab meeting 
+- Checked settled anemones 
+- Sent Katie class questions
+- Finished writing cnidarian sperm -- sending to Ben and Nick tomorrow for comments 
 
 
 
 to do 
 
-- send katie questions
-- tRNA fragment plotting 
-- email kelsey on weds and cc ford
+- remind steven and sam to look at ptua
+- charge dewar 
 - coordinate w Khalil for field stuff 
-- update ben nvec notes 
 - book return flights 
 - make gene count matrix for pacuta, peff, ptua
 - send updated bio to Katie for lab website 
 - look at zoe NZ budget 
 - run orthofinder for POC proteins 
-- writing for cnidarian sperm paper 
 
 - apply for grc 
 - call dr to schedule annual visit and renew prescriptions 
