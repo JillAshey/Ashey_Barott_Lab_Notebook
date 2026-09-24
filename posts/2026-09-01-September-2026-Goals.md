@@ -168,6 +168,17 @@ Nothing
 - Sent Katie class questions
 - Finished writing cnidarian sperm -- sending to Ben and Nick tomorrow for comments 
 
+### 20260924
+
+- Working on Monday class presentation 
+- Booked return trip from HI
+- Led Katie class 
+- Seminar 
+- Brief check in w John 
+- Stringtie and gene count matrix (Pacu and Ptua alignments) for POC Heron 
+- Anemone check
+- Broccoli for POC proteomes 
+- BLAST annotation for POC proteomes 
 
 
 to do 
@@ -175,11 +186,9 @@ to do
 - remind steven and sam to look at ptua
 - charge dewar 
 - coordinate w Khalil for field stuff 
-- book return flights 
-- make gene count matrix for pacuta, peff, ptua
 - send updated bio to Katie for lab website 
 - look at zoe NZ budget 
-- run orthofinder for POC proteins 
+- hhmi writing 
 
 - apply for grc 
 - call dr to schedule annual visit and renew prescriptions 

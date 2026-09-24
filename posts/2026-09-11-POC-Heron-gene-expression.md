@@ -666,6 +666,8 @@ Marcelina plotted the alignment data:
 
 Very interesting as well. For the shallow lagoon (SL), it looks like there are two groupings of samples depending on which genome you are looking at. 
 
+Given the alignments (and the fact that our samples are putatively Pdam), I'm going to make gene count matrices for Pacuta and Ptuahiniensis. Should probably use the Ptuahiniensis one, given the higher mapping. 
+
 ### Align to symbiont genome and rRNAs 
 
 High levels of duplication and multi-mapping in hisat2 is sus. Going to align to rRNA database and symbiont genome to see if there is contamination. 
@@ -812,10 +814,332 @@ echo "Summary report saved to ${STATS_FILE}"
 
 Submitted batch job 64514219. Less than <1% aligning to rRNAs which is also great! Pretty confident that these are all coral sequences. 
 
+### Fix GFFs so they are compatible with stringtie 
+
+#### Pacuta 
+
+Zoe already fixed the Pacuta one using [this script](https://github.com/imkristenbrown/Heron-Pdam-gene-expression/blob/master/BioInf/scripts/fix_gff_format.Rmd). I downloaded the gff [here](https://github.com/imkristenbrown/Heron-Pdam-gene-expression/blob/master/BioInf/data/Pocillopora_acuta_HIv2.genes_fixed.gff3.gz). 
+
+#### Ptuahiniensis
+
+Fixed this in R on my local computer. 
+
+```{r}
+Load libraries
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(R.utils)
+
+# Set working directory 
+setwd("~/Desktop/GFFs")
+
+# Read in gff
+gff <- read.delim("Ptua_braker_cleaned.gff3", comment.char = "#", header = FALSE)
+
+# Rename cols 
+colnames(gff) <- c("scaffold", "Gene.Predict", "id", "gene.start","gene.stop", "pos1", "pos2","pos3", "gene")
+
+# Create transcript ID
+gff$transcript_id <- sub(";.*", "", gff$gene)
+gff$transcript_id <- gsub("ID=", "", gff$transcript_id) #remove ID= 
+gff$transcript_id <- gsub("Parent=", "", gff$transcript_id) #remove Parent= 
+
+# Create Parent ID 
+gff$parent_id <- sub(".*Parent=", "", gff$gene)
+gff$parent_id <- sub(";.*", "", gff$parent_id)
+gff$parent_id <- gsub("ID=", "", gff$parent_id) #remove ID= 
+
+# Add these back to gene column separated by semicolons
+gff <- gff %>% 
+  mutate(gene = ifelse(id != "gene", paste0(gene, ";transcript_id=", gff$transcript_id, ";gene_id=", gff$parent_id),  paste0(gene)))
+
+# Remove transcript and parent ID cols
+gff<-gff %>%
+  select(!transcript_id)%>%
+  select(!parent_id)
+
+# Save file and upload to unity to use in stringtie
+write.table(gff, file="Ptua_fixed.gff3", sep="\t", col.names = FALSE, row.names=FALSE, quote=FALSE)
+```
+
 ### Assemble reads with stringtie
 
+#### Pacu
+
+`nano assemble_pacu.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=8
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB
+#SBATCH -t 72:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /scratch4/workspace/jillashey_uri_edu-POC_Heron/
+
+echo "Assembling samples with stringtie $(date)"
+
+# Load modules
 module load uri/main StringTie/2.2.1-GCC-11.2.0
 
+# Define directory paths
+BAM_DATA="/scratch4/workspace/jillashey_uri_edu-POC_Heron/output/alignment/Pacu"
+OUTPUT_DIR="/scratch4/workspace/jillashey_uri_edu-POC_Heron/output/assembly/Pacu"
+REF_DIR="/scratch4/workspace/jillashey_uri_edu-POC_Heron/refs"
 
+# Create output directory if it doesn't exist
+mkdir -p "${OUTPUT_DIR}"
+
+for i in "${BAM_DATA}"/*.bam; do
+    [ -e "$i" ] || continue  # Skip loop if no .bam files exist
+    
+    fname=$(basename "$i")
+    sample_name="${fname%.bam}"
+    
+    echo "Assembling ${sample_name}..."
+    stringtie -p 8 -e -B \
+        -G "${REF_DIR}/Pocillopora_acuta_HIv2.genes_fixed.gff3" \
+        -A "${OUTPUT_DIR}/${sample_name}.gene_abund.tab" \
+        -o "${OUTPUT_DIR}/${sample_name}.gtf" \
+        "${i}"
+        
+    echo "${sample_name} assembled!"
+done
+
+echo "Assembly complete! $(date)"
+```
+
+Submitted batch job 64823750
+
+#### Ptua
+
+`nano assemble_ptua.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=8
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB
+#SBATCH -t 72:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /scratch4/workspace/jillashey_uri_edu-POC_Heron/
+
+echo "Assembling samples with stringtie $(date)"
+
+# Load modules
+module load uri/main StringTie/2.2.1-GCC-11.2.0
+
+# Define directory paths
+BAM_DATA="/scratch4/workspace/jillashey_uri_edu-POC_Heron/output/alignment/Ptua"
+OUTPUT_DIR="/scratch4/workspace/jillashey_uri_edu-POC_Heron/output/assembly/Ptua"
+REF_DIR="/scratch4/workspace/jillashey_uri_edu-POC_Heron/refs"
+
+# Create output directory if it doesn't exist
+mkdir -p "${OUTPUT_DIR}"
+
+for i in "${BAM_DATA}"/*.bam; do
+    [ -e "$i" ] || continue  # Skip loop if no .bam files exist
+    
+    fname=$(basename "$i")
+    sample_name="${fname%.bam}"
+    
+    echo "Assembling ${sample_name}..."
+    stringtie -p 8 -e -B \
+        -G "${REF_DIR}/Ptua_fixed.gff3" \
+        -A "${OUTPUT_DIR}/${sample_name}.gene_abund.tab" \
+        -o "${OUTPUT_DIR}/${sample_name}.gtf" \
+        "${i}"
+        
+    echo "${sample_name} assembled!"
+done
+
+echo "Assembly complete! $(date)"
+```
+
+Submitted batch job 64833305
+
+### Make gene count matrix 
+
+Download the [prep_DE.py](https://github.com/gpertea/stringtie/blob/master/prepDE.py3) script from the stringtie github repo. I'm downloading the one compatible with python3 since that is what we have on the server. Once downloaded, make the file executable. 
+
+```
+chmod +x /scratch4/workspace/jillashey_uri_edu-POC_Heron/prepDE.py3
+```
+
+#### Pacu
+
+`nano prepDE_pacu.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=8
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB
+#SBATCH -t 72:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /scratch4/workspace/jillashey_uri_edu-POC_Heron/
+
+# Load modules
+module load uri/main StringTie/2.2.1-GCC-11.2.0 GffCompare/0.12.6-GCC-11.2.0
+module load python/3.9.19
+
+# Define directory paths
+GTF_DIR="/scratch4/workspace/jillashey_uri_edu-POC_Heron/output/assembly/Pacu"
+REF_DIR="/scratch4/workspace/jillashey_uri_edu-POC_Heron/refs"
+
+# Make gtf list for stringtie merge
+ls "${GTF_DIR}"/*.gtf > "${GTF_DIR}/gtf_list_pacu.txt"
+
+echo "Merge gtfs with stringtie $(date)"
+stringtie --merge -e -p 8 \
+    -G "${REF_DIR}/Pocillopora_acuta_HIv2.genes_fixed.gff3" \
+    -o "${GTF_DIR}/POC_Heron_Pacu_merged.gtf" \
+    "${GTF_DIR}/gtf_list_pacu.txt"
+
+echo "Merge complete, check completeness $(date)"
+gffcompare -r "${REF_DIR}/Pocillopora_acuta_HIv2.genes_fixed.gff3" \
+    -G \
+    -o "${GTF_DIR}/merge" \
+    "${GTF_DIR}/POC_Heron_Pacu_merged.gtf"
+
+echo "Check complete, assemble count matrix $(date)"
+
+# Create listGTF.txt mapping sample_id to file path for prepDE.py
+> "${GTF_DIR}/listGTF.txt" # Clear file if exists
+for f in "${GTF_DIR}"/*.gtf; do
+    [ -e "$f" ] || continue
+    # Exclude the merged output GTF
+[[ "$f" == *"POC_Heron_Pacu_merged.gtf"* || "$f" == *"merge.annotated.gtf"* ]] && continue    
+    sample_name=$(basename "$f" .gtf)
+    echo "${sample_name} ${f}" >> "${GTF_DIR}/listGTF.txt"
+done
+
+# Run prepDE.py
+/scratch4/workspace/jillashey_uri_edu-POC_Heron/prepDE.py3 -g "${GTF_DIR}/POC_Heron_Pacu_gene_counts.csv" -t "${GTF_DIR}/POC_Heron_Pacu_transcript_counts.csv" \
+          -i "${GTF_DIR}/listGTF.txt"
+
+echo "Counts matrix complete $(date)"
+```
+
+Submitted batch job 64831578. Look at how many genes are expressed (ie >1 in at least 1 sample) and how many are not expressed (ie 0 in all samples). 
+
+```
+cd /scratch4/workspace/jillashey_uri_edu-POC_Heron/output/assembly/Pacu
+
+awk -F',' 'NR>1 {
+    expressed = 0;
+    for (i=2; i<=NF; i++) {
+        if ($i > 0) { expressed = 1; break }
+    }
+    if (expressed) pass++; else zero++;
+} END {
+    print "Expressed (>0 in >=1 sample): " pass;
+    print "Unexpressed (0 in all samples): " zero;
+    print "Total genes:                   " pass + zero;
+}' POC_Heron_Pacu_gene_counts.csv
+Expressed (>0 in >=1 sample): 19279
+Unexpressed (0 in all samples): 14451
+Total genes:                   33730
+```
+
+#### Ptua
+
+`nano prepDE_ptua.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=8
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB
+#SBATCH -t 72:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /scratch4/workspace/jillashey_uri_edu-POC_Heron/
+
+# Load modules
+module load uri/main StringTie/2.2.1-GCC-11.2.0 GffCompare/0.12.6-GCC-11.2.0
+module load python/3.9.19
+
+# Define directory paths
+GTF_DIR="/scratch4/workspace/jillashey_uri_edu-POC_Heron/output/assembly/Ptua"
+REF_DIR="/scratch4/workspace/jillashey_uri_edu-POC_Heron/refs"
+
+# Make gtf list for stringtie merge
+ls "${GTF_DIR}"/*.gtf > "${GTF_DIR}/gtf_list_ptua.txt"
+
+echo "Merge gtfs with stringtie $(date)"
+stringtie --merge -e -p 8 \
+    -G "${REF_DIR}/Ptua_fixed.gff3" \
+    -o "${GTF_DIR}/POC_Heron_Ptua_merged.gtf" \
+    "${GTF_DIR}/gtf_list_ptua.txt"
+
+echo "Merge complete, check completeness $(date)"
+gffcompare -r "${REF_DIR}/Ptua_fixed.gff3" \
+    -G \
+    -o "${GTF_DIR}/merge" \
+    "${GTF_DIR}/POC_Heron_Ptua_merged.gtf"
+
+echo "Check complete, assemble count matrix $(date)"
+
+# Create listGTF.txt mapping sample_id to file path for prepDE.py
+> "${GTF_DIR}/listGTF.txt" # Clear file if exists
+for f in "${GTF_DIR}"/*.gtf; do
+    [ -e "$f" ] || continue
+    # Exclude the merged output GTF
+[[ "$f" == *"POC_Heron_Ptua_merged.gtf"* || "$f" == *"merge.annotated.gtf"* ]] && continue    
+    sample_name=$(basename "$f" .gtf)
+    echo "${sample_name} ${f}" >> "${GTF_DIR}/listGTF.txt"
+done
+
+# Run prepDE.py
+/scratch4/workspace/jillashey_uri_edu-POC_Heron/prepDE.py3 -g "${GTF_DIR}/POC_Heron_Ptua_gene_counts.csv" -t "${GTF_DIR}/POC_Heron_Ptua_transcript_counts.csv" \
+          -i "${GTF_DIR}/listGTF.txt"
+
+echo "Counts matrix complete $(date)"
+```
+
+Submitted batch job 64834700. Look at how many genes are expressed (ie >1 in at least 1 sample) and how many are not expressed (ie 0 in all samples). 
+
+```
+cd /scratch4/workspace/jillashey_uri_edu-POC_Heron/output/assembly/Ptua
+
+awk -F',' 'NR>1 {
+    expressed = 0;
+    for (i=2; i<=NF; i++) {
+        if ($i > 0) { expressed = 1; break }
+    }
+    if (expressed) pass++; else zero++;
+} END {
+    print "Expressed (>0 in >=1 sample): " pass;
+    print "Unexpressed (0 in all samples): " zero;
+    print "Total genes:                   " pass + zero;
+}' POC_Heron_Ptua_gene_counts.csv
+Expressed (>0 in >=1 sample): 16754
+Unexpressed (0 in all samples): 10327
+Total genes:                   27081
+```
 
 
