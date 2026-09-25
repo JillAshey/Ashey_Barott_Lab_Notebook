@@ -180,11 +180,23 @@ Nothing
 - Broccoli for POC proteomes 
 - BLAST annotation for POC proteomes 
 
+### 20260925
+
+- Filled dewar 
+- Made POC compare repo and started moving data there 
+- Jacob defense 
+- Packing for HI 
+- John meeting 
+- Anemone check 
+
 
 to do 
 
+- email erika w/ poc update
+- work on monday pres -- write paragraphs as examples from my stuff 
+- print out permit x3
+- lab stuff for jan 2026
 - remind steven and sam to look at ptua
-- charge dewar 
 - coordinate w Khalil for field stuff 
 - send updated bio to Katie for lab website 
 - look at zoe NZ budget 

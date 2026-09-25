@@ -14,6 +14,8 @@ I did not include the Pacuta genome from [Vidal-Dupiol et al. 2020](https://www.
 
 ### Broccoli
 
+Running [broccoli](https://github.com/rderelle/Broccoli/tree/master) to identify orthologous groups across POC species. 
+
 - P. meandrina 
 	- Location: Hawai'i
 	- Citation: Stephens et al. 2022 
@@ -32,7 +34,7 @@ I did not include the Pacuta genome from [Vidal-Dupiol et al. 2020](https://www.
 - P. damicornis 
 	- Location: Panama 
 	- Citation: Cunning et al. 2018
-	- Accession: PRJNA454489 or http://pdam.reefgenomics.org/
+	- Accession: PRJNA454489 or http://pdam.reefgenomics.org/ (I used the one from reef genomics)
 	- Determined to be P. grandis (Oury et al. 2023) or P. capitata (Connelly et al. 2025)
 - P. verrucosa
 	- Location: Saudi Arabia
@@ -87,12 +89,12 @@ unlink braker_clean.aa
 Rename all fasta files so its easier to understand output
 
 ```
-mv braker_clean_Ptua.aa Ptua_protein.fasta
-mv pdam_proteins_clean.fasta Pdam_proteins.fasta
-mv Pocillopora_acuta_HIv2.genes.pep.faa Pacu_proteins.fasta
-mv Pocillopora_effusa_v3.annot.pep.fa Peff_proteins.fasta
-mv Pocillopora_meandrina_HIv1.genes.pep.faa Pmea_proteins.fasta
-mv Pver_proteins_names_v1.0.faa Pver_proteins.fasta
+mv braker_clean_Ptua.aa Ptua_protein.faa
+mv pdam_proteins_clean.fasta Pdam_proteins.faa
+mv Pocillopora_acuta_HIv2.genes.pep.faa Pacu_proteins.faa
+mv Pocillopora_effusa_v3.annot.pep.fa Peff_proteins.faa
+mv Pocillopora_meandrina_HIv1.genes.pep.faa Pmea_proteins.faa
+mv Pver_proteins_names_v1.0.faa Pver_proteins.faa
 ```
 
 Run Broccoli. `nano POC_broccoli.sh`
@@ -406,6 +408,21 @@ echo "Peff annotation complete $(date)"
 ```
 
 Submitted batch job 64839990
+
+Check how many protein sequences were annotated relative to total
+
+```
+grep -c ">" *.faa
+Pacu_proteins.faa:33730
+Pdam_proteins.faa:26077
+Peff_proteins.faa:32095
+Pmea_proteins.faa:31840
+Ptua_proteins.faa:32520
+Pver_proteins.faa:27439
+
+
+```
+
 
 
 
