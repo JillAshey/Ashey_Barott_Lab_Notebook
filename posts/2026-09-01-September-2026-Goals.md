@@ -202,15 +202,19 @@ Nothing
 - HHMI writing -- leadership and research program 
 - Anemone check 
 - Printing lots of stuff 
+- Taught seminar 
 
 ### 20260929 
 
 - Shipped dewar (tracking number 877853887447)
 - Uploaded Pverr tagseq and its2 data to NCBI 
-- Writing for hhmi -- leadership
+- Writing for hhmi -- leadership, career development 
+- Writing for wdhof
+- Anemone check and feed 
 
 to do 
 
+- email nina to connect when in HI
 - work on mcap stuff 
 - remind steven and sam to look at ptua
 - send updated bio to Katie for lab website 
