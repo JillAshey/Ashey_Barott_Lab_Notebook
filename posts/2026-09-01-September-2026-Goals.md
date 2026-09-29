@@ -150,6 +150,7 @@ Nothing
 - Writing for cnidarian sperm paper (finished intro draft and wrote some of piRNA/tDR discussion)
 - Prepped for Katie and Colin meetings 
 - Made presentation for lab meeting 
+- Taught seminar 
 
 ### 20260922
 
@@ -189,18 +190,34 @@ Nothing
 - John meeting 
 - Anemone check 
 
+### 20260927
+
+- Paragraphs for monday pres 
+- Looking into my mcap stuff 
+- Scheduled sent emails 
+
+### 20260928
+
+- Emma meeting 
+- HHMI writing -- leadership and research program 
+- Anemone check 
+- Printing lots of stuff 
+
+### 20260929 
+
+- Shipped dewar (tracking number 877853887447)
+- Uploaded Pverr tagseq and its2 data to NCBI 
+- Writing for hhmi -- leadership
 
 to do 
 
-- email erika w/ poc update
-- work on monday pres -- write paragraphs as examples from my stuff 
-- print out permit x3
-- lab stuff for jan 2026
+- work on mcap stuff 
 - remind steven and sam to look at ptua
-- coordinate w Khalil for field stuff 
 - send updated bio to Katie for lab website 
 - look at zoe NZ budget 
 - hhmi writing 
+- wdhof proposal and ask hollie or colin for letter
+- write brandon letter
 
 - apply for grc 
 - call dr to schedule annual visit and renew prescriptions 

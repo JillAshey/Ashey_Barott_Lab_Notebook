@@ -420,10 +420,11 @@ Pmea_proteins.faa:31840
 Ptua_proteins.faa:32520
 Pver_proteins.faa:27439
 
-
+wc -l *GO.tsv
+19489 pacu_blast_GO.tsv
+15743 pdam_blast_GO.tsv
+20499 peff_blast_GO.tsv
+18992 pmea_blast_GO.tsv
+21938 ptua_blast_GO.tsv
+19616 pver_blast_GO.tsv
 ```
-
-
-
-
-failing at the merge w/ GO info step -- may have to do that after it finishes running 
