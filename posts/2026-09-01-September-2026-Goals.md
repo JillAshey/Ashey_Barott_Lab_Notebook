@@ -212,21 +212,38 @@ Nothing
 - Writing for wdhof
 - Anemone check and feed 
 
-to do 
+### 20260930
 
-- email nina to connect when in HI
-- work on mcap stuff 
-- remind steven and sam to look at ptua
-- send updated bio to Katie for lab website 
-- look at zoe NZ budget 
-- hhmi writing 
-- wdhof proposal and ask hollie or colin for letter
-- write brandon letter
+- Writing for wdhof
+- writing for hhmi -- leadership and career goals 
+- Emails
 
-- apply for grc 
-- call dr to schedule annual visit and renew prescriptions 
-- email colleen bove re guest lecture at ursinus 
-- email randi re lecture at tufts 
-- check in w chloe re histology 
+## How did I do on my goals this month? 
+
+### Writing and manuscripts 
+
+1. Write results and discussion for piRNA and miRNA sections of cnidarian sperm small RNA paper - yes, draft is done and waiting for review by Ben and Nick
+2. Resubmit TPC paper - yes, resubmitted to ProcB
+3. Gather materials / start writing HHMI application - yes
+4. Submit Ptua genome paper - no, waiting for review from Steven and Sam
+5. Write some paragraphs for epigenetic biomarker paper - yes Emma and I consistently working on it
+
+### Lab work 
+
+1. Anything Rainey did not do for the Jan 2026 samples (surface area, protein, chl) - no
+2. Think about May 2026 samples--talk to Nina when we are in HI in October - kinda
+3. Restart Ben diapause project - yes! 
+
+### Data analysis
+
+1. tRNA analysis for cnidarian sperm - yes
+2. Upload Ptua genome to NCBI - yes
+3. Upload Ptua data to Zenodo - yes
+
+### Field work / travel 
+
+1. Plan for Hawaii fall travel - yes, will be there Oct 5-17
+
+Good month! Busy month. Lots of fellowship writing on the horizon.
 
 
