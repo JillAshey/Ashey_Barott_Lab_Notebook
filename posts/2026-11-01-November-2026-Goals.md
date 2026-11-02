@@ -42,6 +42,12 @@ xxxx add more
 
 ### 20261101
 
+- Mcap coding 
+
+### 20261102
+
+- Submitted cnidarian sperm paper to MBE and biorxiv
+- Coding for mcap 
 
 
 
