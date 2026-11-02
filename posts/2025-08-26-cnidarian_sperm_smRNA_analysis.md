@@ -6228,4 +6228,321 @@ print("Finished! Coverage depth output saved to nvec_trna_positional_coverage.cs
 EOF
 ```
 
+Trying read mapping again for relative proportions. `nano bowtie_apoc_redo.sh`
 
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=10
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB
+#SBATCH -t 48:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/apoc
+
+module load uri/main
+module load all/Bowtie2/2.4.5-GCC-11.3.0
+module load samtools/1.19.2
+echo "testing bowtie2 smrna mapping on Apoc samples" $(date)
+
+echo "Create small RNA indices from fastas" $(date)
+bowtie2-build Apoc-tRNA_cleaned.fasta Apoc_tRNA
+bowtie2-build expressed_miRNAs_apoc_T.fasta Apoc_miRNA_T  
+bowtie2-build Apoc-rRNA.fasta Apoc_rRNA
+bowtie2-build /scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/apoc/sortmerna/piRNA_bed/apoc.merged.piRNA.fasta Apoc_piRNA
+
+# Define your samples and indices
+SAMPLES=(apoc_2_S31_L001_R1_001_trim.fastq apoc_3_S32_L001_R1_001_trim.fastq apoc_4_S33_L001_R1_001_trim.fastq)
+
+mkdir -p mapping_stats_exclusive
+
+echo "Sample,Total_Reads,rRNA,tRNA,miRNA,piRNA,Unmapped,Pct_rRNA,Pct_tRNA,Pct_miRNA,Pct_piRNA,Pct_Unmapped" > mapping_stats_summary.csv
+
+for SAMPLE in "${SAMPLES[@]}"; do
+  BASE=$(basename "$SAMPLE" _trim.fastq)
+  echo "Processing $BASE..."
+
+  # 1. Get total starting reads safely
+  TOTAL_READS=$(( $(wc -l < "$SAMPLE") / 4 ))
+
+  # 2. Map to rRNA (and save unmapped reads for the next step)
+  bowtie2 -p 16 -U "$SAMPLE" -x Apoc_rRNA --no-unal -N 1 -L 12 --end-to-end --un temp_${BASE}_norRNA.fastq | samtools view -c -F 4 > temp_${BASE}_rRNA_count.txt
+  RRNA=$(cat temp_${BASE}_rRNA_count.txt)
+
+  # 3. Map non-rRNA to tRNA
+  bowtie2 -p 16 -U temp_${BASE}_norRNA.fastq -x Apoc_tRNA --no-unal -N 1 -L 12 --end-to-end --un temp_${BASE}_notRNA.fastq | samtools view -c -F 4 > temp_${BASE}_tRNA_count.txt
+  TRNA=$(cat temp_${BASE}_tRNA_count.txt)
+
+  # 4. Map non-tRNA to miRNA
+  bowtie2 -p 16 -U temp_${BASE}_notRNA.fastq -x Apoc_miRNA_T --no-unal -N 1 -L 12 --end-to-end --un temp_${BASE}_nomiRNA.fastq | samtools view -c -F 4 > temp_${BASE}_miRNA_count.txt
+  MIRNA=$(cat temp_${BASE}_miRNA_count.txt)
+
+  # 5. Map non-miRNA to piRNA
+  bowtie2 -p 16 -U temp_${BASE}_nomiRNA.fastq -x Apoc_piRNA --no-unal -N 1 -L 12 --end-to-end --un temp_${BASE}_nopiRNA.fastq | samtools view -c -F 4 > temp_${BASE}_piRNA_count.txt
+  PIRNA=$(cat temp_${BASE}_piRNA_count.txt)
+
+  # 6. Whatever is left over is truly unmapped
+  UNMAPPED=$((TOTAL_READS - RRNA - TRNA - MIRNA - PIRNA))
+
+  # Calculate percentages using awk
+  PCT_RRNA=$(awk "BEGIN {print sprintf(\"%.1f\", ($RRNA/$TOTAL_READS)*100)}")
+  PCT_TRNA=$(awk "BEGIN {print sprintf(\"%.1f\", ($TRNA/$TOTAL_READS)*100)}")
+  PCT_MIRNA=$(awk "BEGIN {print sprintf(\"%.1f\", ($MIRNA/$TOTAL_READS)*100)}")
+  PCT_PIRNA=$(awk "BEGIN {print sprintf(\"%.1f\", ($PIRNA/$TOTAL_READS)*100)}")
+  PCT_UNMAP=$(awk "BEGIN {print sprintf(\"%.1f\", ($UNMAPPED/$TOTAL_READS)*100)}")
+
+  # Save to summary
+  echo "$BASE,$TOTAL_READS,$RRNA,$TRNA,$MIRNA,$PIRNA,$UNMAPPED,$PCT_RRNA,$PCT_TRNA,$PCT_MIRNA,$PCT_PIRNA,$PCT_UNMAP" >> mapping_stats_summary.csv
+
+  # Cleanup temporary fastq files
+  rm temp_${BASE}_*.fastq temp_${BASE}_*_count.txt
+done
+
+echo "Done! Results saved to mapping_stats_summary.csv"
+```
+
+Submitted batch job 66519061
+
+Run nvec. `nano bowtie_nvec_redo.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=1
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB
+#SBATCH -t 24:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/nvec
+
+module load uri/main
+module load all/Bowtie2/2.4.5-GCC-11.3.0
+module load samtools/1.19.2
+echo "testing exclusive bowtie2 smrna mapping on Nvec samples" $(date)
+
+echo "Create small RNA indices from fastas" $(date)
+bowtie2-build Nvec-tRNA_cleaned.fasta Nvec_tRNA
+bowtie2-build expressed_miRNAs_nvec_T.fasta Nvec_miRNA_T  
+bowtie2-build Nvec-rRNA.fasta Nvec_rRNA
+bowtie2-build /scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/nvec/sortmerna/piRNA_bed/nvec.merged.piRNA.fasta Nvec_piRNA
+
+# Define samples (using correct tab/space separation)
+SAMPLES=(
+  nvec_1_S25_L001_R1_001_trim.fastq 
+  nvec_2_S26_L001_R1_001_trim.fastq 
+  nvec_3_S34_L001_R1_001_trim.fastq 
+  nvec_4_S35_L001_R1_001_trim.fastq
+)
+
+mkdir -p mapping_stats_exclusive
+
+echo "Sample,Total_Reads,rRNA,tRNA,miRNA,piRNA,Unmapped,Pct_rRNA,Pct_tRNA,Pct_miRNA,Pct_piRNA,Pct_Unmapped" > mapping_stats_summary.csv
+
+for SAMPLE in "${SAMPLES[@]}"; do
+  BASE=$(basename "$SAMPLE" _trim.fastq)
+  echo "=== Processing $BASE ==="
+
+  # 1. Get total starting reads safely
+  TOTAL_READS=$(( $(wc -l < "$SAMPLE") / 4 ))
+
+  # 2. Map to rRNA first (save unmapped for next step)
+  echo "  rRNA..." $(date)
+  bowtie2 -p 16 -U "$SAMPLE" -x Nvec_rRNA --no-unal -N 1 -L 12 \
+    --end-to-end --very-sensitive-local --un temp_${BASE}_norRNA.fastq | \
+    samtools view -c -F 4 > temp_${BASE}_rRNA_count.txt
+  RRNA=$(cat temp_${BASE}_rRNA_count.txt)
+
+  # 3. Map non-rRNA to tRNA
+  echo "  tRNA..." $(date)
+  bowtie2 -p 16 -U temp_${BASE}_norRNA.fastq -x Nvec_tRNA --no-unal -N 1 -L 12 \
+    --end-to-end --very-sensitive-local --un temp_${BASE}_notRNA.fastq | \
+    samtools view -c -F 4 > temp_${BASE}_tRNA_count.txt
+  TRNA=$(cat temp_${BASE}_tRNA_count.txt)
+
+  # 4. Map non-tRNA to miRNA
+  echo "  miRNA..." $(date)
+  bowtie2 -p 16 -U temp_${BASE}_notRNA.fastq -x Nvec_miRNA_T --no-unal -N 1 -L 12 \
+    --end-to-end --very-sensitive-local --un temp_${BASE}_nomiRNA.fastq | \
+    samtools view -c -F 4 > temp_${BASE}_miRNA_count.txt
+  MIRNA=$(cat temp_${BASE}_miRNA_count.txt)
+
+  # 5. Map non-miRNA to piRNA
+  echo "  piRNA..." $(date)
+  bowtie2 -p 16 -U temp_${BASE}_nomiRNA.fastq -x Nvec_piRNA --no-unal -N 1 -L 12 \
+    --end-to-end --very-sensitive-local --un temp_${BASE}_nopiRNA.fastq | \
+    samtools view -c -F 4 > temp_${BASE}_piRNA_count.txt
+  PIRNA=$(cat temp_${BASE}_piRNA_count.txt)
+
+  # 6. Remainder is truly unmapped background
+  UNMAPPED=$((TOTAL_READS - RRNA - TRNA - MIRNA - PIRNA))
+
+  # Calculate percentages using awk
+  PCT_RRNA=$(awk "BEGIN {print sprintf(\"%.1f\", ($RRNA/$TOTAL_READS)*100)}")
+  PCT_TRNA=$(awk "BEGIN {print sprintf(\"%.1f\", ($TRNA/$TOTAL_READS)*100)}")
+  PCT_MIRNA=$(awk "BEGIN {print sprintf(\"%.1f\", ($MIRNA/$TOTAL_READS)*100)}")
+  PCT_PIRNA=$(awk "BEGIN {print sprintf(\"%.1f\", ($PIRNA/$TOTAL_READS)*100)}")
+  PCT_UNMAP=$(awk "BEGIN {print sprintf(\"%.1f\", ($UNMAPPED/$TOTAL_READS)*100)}")
+
+  # Save to summary CSV
+  echo "$BASE,$TOTAL_READS,$RRNA,$TRNA,$MIRNA,$PIRNA,$UNMAPPED,$PCT_RRNA,$PCT_TRNA,$PCT_MIRNA,$PCT_PIRNA,$PCT_UNMAP" >> mapping_stats_summary.csv
+
+  # Cleanup temporary fastq and count files
+  rm temp_${BASE}_*.fastq temp_${BASE}_*_count.txt
+done
+
+echo "Done! Exclusive mapping stats saved to mapping_stats_summary.csv"
+cat mapping_stats_summary.csv
+```
+
+Submitted batch job 66519754
+
+Run ahya. `nano bowtie_ahya_redo.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=1
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=100GB
+#SBATCH -t 24:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/ahya
+
+set -euo pipefail
+
+module load uri/main
+module load all/Bowtie2/2.4.5-GCC-11.3.0
+module load samtools/1.19.2
+
+echo "Testing exclusive Bowtie2 small RNA mapping on Ahya samples" $(date)
+
+# 1. Build indices
+echo "Building small RNA indices" $(date)
+
+bowtie2-build Ahya-tRNA_cleaned.fasta Ahya_tRNA
+bowtie2-build expressed_miRNAs_ahya_T.fasta Ahya_miRNA_T
+bowtie2-build Ahya-rRNA.fasta Ahya_rRNA
+bowtie2-build sortmerna/piRNA_bed/ahya.merged.piRNA.fasta Ahya_piRNA
+
+# 2. Define samples
+SAMPLES=(
+ahya_1_S27_L001_R1_001_trim.fastq
+ahya_2_S28_L001_R1_001_trim.fastq
+ahya_3_S29_L001_R1_001_trim.fastq
+ahya_4_S30_L001_R1_001_trim.fastq
+)
+
+mkdir -p mapping_stats_exclusive
+
+cd mapping_stats_exclusive
+
+echo "Sample,Total_Reads,rRNA,tRNA,miRNA,piRNA,Unmapped,Pct_rRNA,Pct_tRNA,Pct_miRNA,Pct_piRNA,Pct_Unmapped" > mapping_stats_summary.csv
+
+# 3. Process samples
+for SAMPLE in "${SAMPLES[@]}"; do
+
+    BASE=$(basename "$SAMPLE" _trim.fastq)
+
+    echo "=== Processing $BASE ==="
+
+    # Total starting reads
+    TOTAL_READS=$(( $(wc -l < "../$SAMPLE") / 4 ))
+
+    if [[ $TOTAL_READS -eq 0 ]]; then
+        echo "ERROR: No reads found in $SAMPLE"
+        exit 1
+    fi
+
+    # rRNA mapping
+    echo "  Mapping rRNA..." $(date)
+
+    bowtie2 -p 16 -U "../$SAMPLE" -x ../Ahya_rRNA \
+        --no-unal -N 1 -L 12 \
+        --end-to-end --very-sensitive \
+        --un temp_${BASE}_norRNA.fastq \
+        2> temp_${BASE}_rRNA.log |
+        samtools view -c -F 4 > temp_${BASE}_rRNA_count.txt
+
+    RRNA=$(cat temp_${BASE}_rRNA_count.txt)
+
+    # tRNA mapping
+    echo "  Mapping tRNA..." $(date)
+
+    bowtie2 -p 16 -U temp_${BASE}_norRNA.fastq -x ../Ahya_tRNA \
+        --no-unal -N 1 -L 12 \
+        --end-to-end --very-sensitive \
+        --un temp_${BASE}_notRNA.fastq \
+        2> temp_${BASE}_tRNA.log |
+        samtools view -c -F 4 > temp_${BASE}_tRNA_count.txt
+
+    TRNA=$(cat temp_${BASE}_tRNA_count.txt)
+
+    # miRNA mapping
+    echo "  Mapping miRNA..." $(date)
+
+    bowtie2 -p 16 -U temp_${BASE}_notRNA.fastq -x ../Ahya_miRNA_T \
+        --no-unal -N 1 -L 12 \
+        --end-to-end --very-sensitive \
+        --un temp_${BASE}_nomiRNA.fastq \
+        2> temp_${BASE}_miRNA.log |
+        samtools view -c -F 4 > temp_${BASE}_miRNA_count.txt
+
+    MIRNA=$(cat temp_${BASE}_miRNA_count.txt)
+
+    # piRNA mapping
+    echo "  Mapping piRNA..." $(date)
+
+    bowtie2 -p 16 -U temp_${BASE}_nomiRNA.fastq -x ../Ahya_piRNA \
+        --no-unal -N 1 -L 12 \
+        --end-to-end --very-sensitive \
+        --un temp_${BASE}_nopiRNA.fastq \
+        2> temp_${BASE}_piRNA.log |
+        samtools view -c -F 4 > temp_${BASE}_piRNA_count.txt
+
+    PIRNA=$(cat temp_${BASE}_piRNA_count.txt)
+
+    # Remaining unmapped reads
+    UNMAPPED=$((TOTAL_READS - RRNA - TRNA - MIRNA - PIRNA))
+
+    # Calculate percentages
+    PCT_RRNA=$(awk -v n="$RRNA" -v t="$TOTAL_READS" 'BEGIN {printf "%.1f", n/t*100}')
+    PCT_TRNA=$(awk -v n="$TRNA" -v t="$TOTAL_READS" 'BEGIN {printf "%.1f", n/t*100}')
+    PCT_MIRNA=$(awk -v n="$MIRNA" -v t="$TOTAL_READS" 'BEGIN {printf "%.1f", n/t*100}')
+    PCT_PIRNA=$(awk -v n="$PIRNA" -v t="$TOTAL_READS" 'BEGIN {printf "%.1f", n/t*100}')
+    PCT_UNMAP=$(awk -v n="$UNMAPPED" -v t="$TOTAL_READS" 'BEGIN {printf "%.1f", n/t*100}')
+
+    # Save results
+    echo "$BASE,$TOTAL_READS,$RRNA,$TRNA,$MIRNA,$PIRNA,$UNMAPPED,$PCT_RRNA,$PCT_TRNA,$PCT_MIRNA,$PCT_PIRNA,$PCT_UNMAP" >> mapping_stats_summary.csv
+
+    echo "  Results: Total=$TOTAL_READS rRNA=$RRNA tRNA=$TRNA miRNA=$MIRNA piRNA=$PIRNA Unmapped=$UNMAPPED"
+
+    # Cleanup temporary files
+    rm -f temp_${BASE}_*.fastq temp_${BASE}_*_count.txt temp_${BASE}_*.log
+
+done
+
+echo "Done! Exclusive mapping stats saved to mapping_stats_summary.csv"
+cat mapping_stats_summary.csv
+```
+
+Submitted batch job 66521643
+
+piRNA counts look weird. Going to revisit mapping by doing: 
+
+```
+bowtie2 -p 16 -U temp_${BASE}_nomiRNA.fastq -x Ahya_piRNA \
+    --no-unal -N 1 -L 12 \
+    --end-to-end --very-sensitive \
+    --al temp_${BASE}_piRNA_aligned.fastq \
+    --un temp_${BASE}_nopiRNA.fastq |
+    samtools view -c -F 4 > temp_${BASE}_piRNA_count.txt
+```
