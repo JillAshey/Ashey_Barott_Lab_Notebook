@@ -39,6 +39,8 @@ RORF 5′-SCCAATATGTTAAACASCATGTCA-3′
 
 **Important**: All references to water/H20 means PCR-grade, nucelic acid, DNAse, and RNAse free water. 
 
+**Note**: A 96-well PCR plate or PCR strip tubes can be used for these amplifications. If using a PCR plate, make sure to put a foil cover on it before putting it in the thermocycler or the product will evaporate. 
+
 ### Protocol 
 
 #### Primer hydration 
@@ -88,6 +90,8 @@ For each amplification, make a positive and negative control. The positive contr
 
 #### PCR product gel check 
 
+**Note**: This can be skipped unless troubleshooting. 
+
 Make a 1% gel to visualize PCR product and successful amplification. 
 
 - Add 75mL new 1x TAE buffer + 0.75g agarose (for small gel) to an Erlenmeyer flask and microwave for ~60 seconds 
@@ -123,12 +127,12 @@ The following formula will be used for the digestion mix (total volume is 10uL):
 - Into labeled PCR tubes, add 5uL of the digestion mix 
 - Add 5uL of unpurified PCR product to each tube (the rest of the PCR product can be stored at -20°C)
 - Spin down tubes 
-- Put in thermocycler and nagivate to digestion program: 65°C for 1 hour, 80°C for ~20 mins, 4°C hold
+- Put in thermocycler and nagivate to digestion program: 65°C for 1 hour, 4°C hold
 - Once program is done, run a gel and store the digested product at -20°C
 
-#### PCR gel check 
+#### PCR product gel check 
 
-Run a 2% gel (smaller pore size, good for restriction fragments) for 1 hour at 70V. Load ~4uL from each tube, along with the 1kb ladder. 
+Run a 2% gel (smaller pore size, good for restriction fragments) for 1.5 hrs at 70V. Load ~4uL from each tube, along with the 1kb ladder. 
 
 If the sample is Pdamicornis, there will be a ~550 bp band (with or without a residual ~1000 bp band) or two bands at 534 bp and ~460 bp. If there is no ~550 bp band, the sample is not Pdamicornis and is some other species. 
 

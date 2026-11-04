@@ -422,7 +422,7 @@ GENOME="/work/pi_hputnam_uri_edu/HI_Genomes/MCapV3/Montipora_capitata_HIv3.assem
 
 echo "ID miRNAs" $(date)
 
-miRDeep2.pl "${OUT_DIR}"/mapped_reads.fa "${GENOME}" "${OUT_DIR}"/mapped_reads_vs_genome.arf miRNA_reference_fixed.fasta none none -P 2>report.log
+miRDeep2.pl "${OUT_DIR}"/mapped_reads.fa "${GENOME}" "${OUT_DIR}"/mapped_reads_vs_genome.arf miRNA_reference_fixed.fasta none none -P -g -1 2>report.log
 
 echo "miRNA ID complete" $(date)
 
@@ -430,11 +430,10 @@ echo "miRNA ID complete" $(date)
 #miRDeep2.pl ahya_1_processed.fa /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/Ahyacinthus.chrsV1.fasta ahya_1_mappings.arf /work/#pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/data/miRNA_reference_cleaned.fasta none none -t N.vectensis -P
 ```
 
-Submitted batch job 66537637
+Submitted batch job 66549321
 
 
 
-do i need to clean the miRNA fasta reference??
 
 
 

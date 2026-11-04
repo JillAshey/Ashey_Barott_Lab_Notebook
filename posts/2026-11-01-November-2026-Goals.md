@@ -31,8 +31,8 @@ November 2026 goals and daily notebook entries.
 ### Data analysis
 
 1. Upload Mcap DT small RNA data to NCBI 
-xxxx add more 
-
+2. Mcap DT miRNA ID 
+3. Mcap DT miRNA-mRNA target predictions 
 
 ### Field work / travel 
 
@@ -49,8 +49,22 @@ xxxx add more
 - Submitted cnidarian sperm paper to MBE and biorxiv
 - Coding for mcap 
 
+### 20261103
 
+- Temp Kbay plotting 
+- Daniella meeting 
+- Looking at FemtoJet and trying to put it together 
+- Filled out parts of HHMI application 
+- Some writing on research program for HHMI
 
+### 20261104
+
+- Emma meeting 
+- Epigenetic biomarker paper writing 
+- Lab meeting 
+- Amelia PCR
+- Submitted request for facilities to look at lock
+- Random writing 
 
 
 
@@ -62,21 +76,18 @@ xxxx add more
 
 to do asap
 
-- write up resp protocol 
-- email Khalil re AAPLYING
-- remind steven and sam to look at ptua
-- send katie list of things for letter of rec wdhof 
-- read more about TPC theory and in other organisms 
+- run stuff on shelf 4 in freezer - chl 
+- read brandon capstone 
+- mcap miRNA ID
+- HHMI app
+- steven and sam to read ptua 
+- write up resp protocol -- maybe do in Jan?
+- Schedule meeting with Colin and Katie 
+- Send Katie and Colin wdhof stuff 
 
-to do 
 
-- work on mcap stuff 
-- send updated bio to Katie for lab website 
-- look at zoe NZ budget 
-- hhmi writing 
 
 - apply for grc 
 - call dr to schedule annual visit and renew prescriptions 
 - email colleen bove re guest lecture at ursinus 
-- email randi re lecture at tufts 
 
