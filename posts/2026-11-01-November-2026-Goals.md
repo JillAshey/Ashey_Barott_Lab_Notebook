@@ -66,6 +66,14 @@ November 2026 goals and daily notebook entries.
 - Submitted request for facilities to look at lock
 - Random writing 
 
+### 20261105
+
+- HHMI writing and figure making 
+- Maya meeting 
+- Seminar 
+- Amelia PCR 
+- Read brandon capstone
+
 
 
 
@@ -76,8 +84,10 @@ November 2026 goals and daily notebook entries.
 
 to do asap
 
+
+- work on presentation for class 
 - run stuff on shelf 4 in freezer - chl 
-- read brandon capstone 
+- read brandon capstone -- he needs to use a citation manager, some citations are wrong 
 - mcap miRNA ID
 - HHMI app
 - steven and sam to read ptua 

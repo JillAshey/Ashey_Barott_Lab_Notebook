@@ -94,15 +94,15 @@ For each amplification, make a positive and negative control. The positive contr
 
 Make a 1% gel to visualize PCR product and successful amplification. 
 
-- Add 75mL new 1x TAE buffer + 0.75g agarose (for small gel) to an Erlenmeyer flask and microwave for ~60 seconds 
+- Add 50mL new 1x TAE buffer + 0.5g agarose (for small gel) to an Erlenmeyer flask and microwave for ~60 seconds 
 	- Keep an eye on the flask in the microwave, as it could boil over during that time. Every ~20 seconds, open the microwave and swirl the flask to mix. Use heat resistant gloves because the flask gets hot. 
-- Add 5uL of gel red or 1uL of gel green to the flask
+- Add 5uL of syber safe to gel 
 - Set up gel cast mold 
 - Pour the gel into the mold and put combs into tray. Let the gel harden/cool until opaque
 - Once gel is cool, orient the gel so the comb side is at the top of the box. Take the combs out
 - Pour enough "used" TAE buffer into gel box to cover gel with thin layer of liquid 
-- Load 4uL of PCR product into the gel (no loading dye should be needed if using the Emerald master mix, as this has loading dye in it already)
-- Load 1kb ladder 
+- Load 3uL of PCR product into the gel (no loading dye should be needed if using the Emerald master mix, as this has loading dye in it already)
+- Load 3uL of 1kb ladder 
 - Run gel at 80V for 30 mins
 - Visualize gel on gel machine
 
@@ -132,7 +132,7 @@ The following formula will be used for the digestion mix (total volume is 10uL):
 
 #### PCR product gel check 
 
-Run a 2% gel (smaller pore size, good for restriction fragments) for 1.5 hrs at 70V. Load ~4uL from each tube, along with the 1kb ladder. 
+Run a 2% gel (smaller pore size, good for restriction fragments) for 1.5 hrs at 70V. Load ~3uL from each tube, along with the 1kb ladder. 
 
 If the sample is Pdamicornis, there will be a ~550 bp band (with or without a residual ~1000 bp band) or two bands at 534 bp and ~460 bp. If there is no ~550 bp band, the sample is not Pdamicornis and is some other species. 
 
