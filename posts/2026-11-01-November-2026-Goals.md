@@ -74,8 +74,20 @@ November 2026 goals and daily notebook entries.
 - Amelia PCR 
 - Read brandon capstone
 
+### 20261106
 
+- Worked on class presentation 
+- Ran a gel 
+- HHMI writing
 
+### 20261109
+
+- Epigenetic biomarker paper writing 
+- Nvec week 8 sampling 
+- Prepping for Katie meeting 
+- MICHELLE defense!!!
+- Edits/comments to Brandon captstone intro/methods/results
+- Helping Amelia with PCR 
 
 
 
@@ -84,8 +96,8 @@ November 2026 goals and daily notebook entries.
 
 to do asap
 
-
-- work on presentation for class 
+- finish epigenetics and env for biomarkers paper 
+- prep for katie meeting on 11/16
 - run stuff on shelf 4 in freezer - chl 
 - read brandon capstone -- he needs to use a citation manager, some citations are wrong 
 - mcap miRNA ID

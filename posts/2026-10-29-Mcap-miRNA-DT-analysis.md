@@ -453,3 +453,4 @@ For target prediction
 
 - also try https://github.com/carringtonlab/TargetFinder
 - remove strict flag from miranda?
+- https://github.com/jtremblay/mirnatarget
