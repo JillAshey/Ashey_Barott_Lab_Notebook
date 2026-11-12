@@ -21,10 +21,10 @@ November 2026 goals and daily notebook entries.
 
 ### Lab work 
 
-1. Protein for Jan 2026 samples 
+1. Protein for Jan 2026 and May 2025 samples 
 2. Airbrushing for Oct 2026 samples 
 	- See if guava works?
-3. Extractions / sample processing for Mcap samples 
+3. Extractions / sample processing for Mcap samples -- maybe?
 4. Sampling for Nvec early development  
 5. Ben diapause project sampling
 
@@ -88,24 +88,41 @@ November 2026 goals and daily notebook entries.
 - MICHELLE defense!!!
 - Edits/comments to Brandon captstone intro/methods/results
 - Helping Amelia with PCR 
+- teaching seminar 
 
+### 20261110
 
+- WDHOF figures and editing for proposal 
+- Edits/comments to Brandon captstone discussion
+- Anemone check
+- Emails 
 
+### 20261111
 
+- HHMI app figures and writing
+- Meeting with Elisa for class next week 
+- Small edits for Ptua 
+- Anemone check 
+- Lab meeting 
+
+### 20261112
+
+- Protein plate 
+- Plotting chl and prot data for KBay
+- Seminar 
+- Class stuff for monday
+- 
 
 
 to do asap
 
+- EXTEND MCAP MIRNA JOB!!!
 - finish epigenetics and env for biomarkers paper 
-- prep for katie meeting on 11/16
 - run stuff on shelf 4 in freezer - chl 
-- read brandon capstone -- he needs to use a citation manager, some citations are wrong 
 - mcap miRNA ID
 - HHMI app
-- steven and sam to read ptua 
-- write up resp protocol -- maybe do in Jan?
+- sam to read ptua 
 - Schedule meeting with Colin and Katie 
-- Send Katie and Colin wdhof stuff 
 
 
 
