@@ -111,22 +111,41 @@ November 2026 goals and daily notebook entries.
 - Plotting chl and prot data for KBay
 - Seminar 
 - Class stuff for monday
-- 
+- Gel w/ Ameila 
+
+### 20261113
+
+- Looked at miRNA ID output 
+- Some HHMI writing 
+
+### 20261115
+
+- Anemone check
+
+### 20261116
+
+- Mcap miRNA ID and filtering 
+- Katie meeting 
+- Anemone check 
+- Mcap miRNA quantification
+
+
 
 
 to do asap
 
-- EXTEND MCAP MIRNA JOB!!!
+- prep for lab meeting 
+- resubmit sperm paper to molec ecology
+- Schedule meeting with Colin and Katie 
+- remind colin and katie to write letters 
+- Email Ford re trips -- TPCs, spawning, etc 
 - finish epigenetics and env for biomarkers paper 
-- run stuff on shelf 4 in freezer - chl 
-- mcap miRNA ID
+- mcap miRNA ID finalize 
 - HHMI app
 - sam to read ptua 
-- Schedule meeting with Colin and Katie 
+- apply for mbl course 
 
 
-
-- apply for grc 
 - call dr to schedule annual visit and renew prescriptions 
 - email colleen bove re guest lecture at ursinus 
 
