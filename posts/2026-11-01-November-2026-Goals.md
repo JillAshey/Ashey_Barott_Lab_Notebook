@@ -127,25 +127,62 @@ November 2026 goals and daily notebook entries.
 - Mcap miRNA ID and filtering 
 - Katie meeting 
 - Anemone check 
-- Mcap miRNA quantification
+- Mcap miRNA quantification script 
+- Teaching seminar 
+- Resubmitted cnidarian sperm paper to molecular ecology 
+
+### 20261117
+
+- Prepped for lab meeting -- slides and read paper 
+- Filled out WDHOF application
+- HHMI writing
+- Looked at mcap miRNA expression results 
+- Anemone check
+
+### 20261118
+
+- HHMI research program writing 
+- Resubmitted cnidarian sperm paper to molec ecology -- had to make minor edits to manuscript 
+- Lab meeting 
+- Emma meeting / writing 
+- Some futile mcap mRNA coding 
+
+### 20261119
+
+- Eva meeting 
+- Amelia meeting
+- Zoe meeting 
+- HHMI writing -- reworked intro 
+
+### 20261120
+
+- HHMI writing 
+- Amelia rec letter 
+
+### 20261121
+
+- HHMI writing 
+- Rerunning mirdeep2 on sperm samples 
+- Almost done resubmitting sperm paper -- katie needs to approve
+
+### 20261123
+
+- Working on procb reviews for tpc paper 
+- Katie approved sperm paper -- submitted to biology of reproduction! 
 
 
+to do
 
-
-to do asap
-
-- prep for lab meeting 
-- resubmit sperm paper to molec ecology
+- upload rerun of mirdeep2 to cnidarian sperm repo 
+- send amelia letter to katie 
+- work on adding examples to epigenetic paper, edit biomarker section 
 - Schedule meeting with Colin and Katie 
-- remind colin and katie to write letters 
-- Email Ford re trips -- TPCs, spawning, etc 
-- finish epigenetics and env for biomarkers paper 
-- mcap miRNA ID finalize 
 - HHMI app
-- sam to read ptua 
+- sam to read ptua ?
 - apply for mbl course 
-
-
-- call dr to schedule annual visit and renew prescriptions 
+- mcap mirna target prediction
 - email colleen bove re guest lecture at ursinus 
+- ask upenn about open access charges for publishing in evo applications nrajpal@upenn.edu
 
+
+maybe email leslie babonis and jake warner re NIH apps?

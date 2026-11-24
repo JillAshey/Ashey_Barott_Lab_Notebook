@@ -6546,3 +6546,331 @@ bowtie2 -p 16 -U temp_${BASE}_nomiRNA.fastq -x Ahya_piRNA \
     --un temp_${BASE}_nopiRNA.fastq |
     samtools view -c -F 4 > temp_${BASE}_piRNA_count.txt
 ```
+
+Going to retry running mirdeep2 based on my mcap [analysis](https://github.com/JillAshey/Ashey_Barott_Lab_Notebook/blob/main/posts/2026-10-29-Mcap-miRNA-DT-analysis.md). 
+
+Make a config file with file location and 3 letter code. `nano config_ahya.txt`
+
+```
+/scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/ahya/ahya_1_S27_L001_R1_001_trim.fastq ah1
+/scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/ahya/ahya_2_S28_L001_R1_001_trim.fastq ah2
+/scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/ahya/ahya_3_S29_L001_R1_001_trim.fastq ah3
+/scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/ahya/ahya_4_S30_L001_R1_001_trim.fastq ah4
+```
+
+`nano mapper_mirdeep2_ahya.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=10
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=10GB
+#SBATCH -t 72:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/ahya
+
+# Load modules 
+module load uri/main Bowtie/1.3.1-GCC-11.3.0
+
+# Define paths 
+OUT_DIR="/scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/ahya/mirdeep2"
+GENOME="/scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/ahya/Ahyacinthus.chrsV1.fasta"
+
+# Create output directories if they don't exist
+mkdir -p "${OUT_DIR}"
+
+echo "Index Ahya genome" $(date)
+
+# Index the reference genome for Ahya 
+bowtie-build "${GENOME}" Ahya_ref.btindex
+
+echo "Referece genome indexed!" $(date)
+echo "Unload unneeded packages and run mapper script for trimmed reads" $(date)
+
+# Load modules
+module unload Bowtie/1.3.1-GCC-11.3.0
+module load conda/latest
+conda activate /work/pi_hputnam_uri_edu/conda/envs/mirdeep2 
+
+mapper.pl config_ahya.txt -d -e -h -l 18 -v -m -p Ahya_ref.btindex -s "${OUT_DIR}"/mapped_reads_ahya.fa -t "${OUT_DIR}"/mapped_reads_vs_genome_ahya.arf
+
+echo "Mapping complete!" $(date)
+```
+
+Submitted batch job 2075654. Output: 
+
+```
+# reads processed: 1130403
+# reads with at least one alignment: 418508 (37.02%)
+# reads that failed to align: 711895 (62.98%)
+# reads with alignments suppressed due to -m: 132251 (11.70%)
+Reported 559265 alignments
+
+Log file for this run is in mapper_logs and called mapper.log_3518088
+Mapping statistics
+
+#desc	total	mapped	unmapped	%mapped	%unmapped
+total: 18356818	5999155	12357663	32.681	67.319
+ah1: 3854254	1450157	2404097	37.625	62.375
+ah2: 2358949	367553	1991396	15.581	84.419
+ah3: 5907632	2059409	3848223	34.860	65.140
+ah4: 6235983	2122036	4113947	34.029	65.971
+```
+
+About the same mapping rates as previously. 
+
+Run mirdeep2 miRNA ID. Use the [miRNA reference fasta](https://github.com/JillAshey/DevelopmentalTimeseries/blob/main/data/references/miRNA_reference_fixed.fasta) that I made for the Mcap miRNA ID. 
+
+`nano id_mirdeep2_ahya.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=10
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=10GB
+#SBATCH -t 5-00:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/ahya
+
+# Load modules 
+module load conda/latest
+conda activate /work/pi_hputnam_uri_edu/conda/envs/mirdeep2 
+
+# Define paths 
+OUT_DIR="/scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/ahya/mirdeep2"
+GENOME="/scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/ahya/Ahyacinthus.chrsV1.fasta"
+
+echo "ID miRNAs" $(date)
+
+miRDeep2.pl "${OUT_DIR}"/mapped_reads_ahya.fa "${GENOME}" "${OUT_DIR}"/mapped_reads_vs_genome_ahya.arf miRNA_reference_fixed.fasta none none -P -g -1 2>report.log
+
+echo "miRNA ID complete" $(date)
+```
+
+Submitted batch job 2076154
+
+Run for apoc. Make a config file with file location and 3 letter code. `nano config_apoc.txt`
+
+```
+/scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/apoc/apoc_2_S31_L001_R1_001_trim.fastq ap2
+/scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/apoc/apoc_3_S32_L001_R1_001_trim.fastq ap3
+/scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/apoc/apoc_4_S33_L001_R1_001_trim.fastq ap4
+```
+
+`nano mapper_mirdeep2_apoc.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=10
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=10GB
+#SBATCH -t 72:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/apoc
+
+# Load modules 
+module load uri/main Bowtie/1.3.1-GCC-11.3.0
+
+# Define paths 
+OUT_DIR="/scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/apoc/mirdeep2"
+GENOME="/work/pi_hputnam_uri_edu/genomes/Apoc/apoculata.genome.fasta"
+
+# Create output directories if they don't exist
+mkdir -p "${OUT_DIR}"
+
+echo "Index Apoc genome" $(date)
+
+# Index the reference genome for Apoc
+bowtie-build "${GENOME}" Apoc_ref.btindex
+
+echo "Referece genome indexed!" $(date)
+echo "Unload unneeded packages and run mapper script for trimmed reads" $(date)
+
+# Load modules
+module unload Bowtie/1.3.1-GCC-11.3.0
+module load conda/latest
+conda activate /work/pi_hputnam_uri_edu/conda/envs/mirdeep2 
+
+mapper.pl config_apoc.txt -d -e -h -l 18 -v -m -p Apoc_ref.btindex -s "${OUT_DIR}"/mapped_reads_apoc.fa -t "${OUT_DIR}"/mapped_reads_vs_genome_apoc.arf
+
+echo "Mapping complete!" $(date)
+```
+
+Submitted batch job 2076550. Output: 
+
+```
+# reads processed: 978632
+# reads with at least one alignment: 73845 (7.55%)
+# reads that failed to align: 904787 (92.45%)
+# reads with alignments suppressed due to -m: 5118 (0.52%)
+Reported 193356 alignments
+
+Log file for this run is in mapper_logs and called mapper.log_1802917
+Mapping statistics
+
+#desc	total	mapped	unmapped	%mapped	%unmapped
+total: 17530458	3704783	13825675	21.133	78.867
+ap2: 6555995	1977598	4578397	30.165	69.835
+ap3: 5968483	1025679	4942804	17.185	82.815
+ap4: 5005980	701506	4304474	14.013	85.987
+```
+
+Run mirdeep2 miRNA ID. Use the [miRNA reference fasta](https://github.com/JillAshey/DevelopmentalTimeseries/blob/main/data/references/miRNA_reference_fixed.fasta) that I made for the Mcap miRNA ID. 
+
+`nano id_mirdeep2_apoc.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=10
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=10GB
+#SBATCH -t 5-00:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/apoc
+
+# Load modules 
+module load conda/latest
+conda activate /work/pi_hputnam_uri_edu/conda/envs/mirdeep2 
+
+# Define paths 
+OUT_DIR="/scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/apoc/mirdeep2"
+GENOME="/work/pi_hputnam_uri_edu/genomes/Apoc/apoculata.genome.fasta"
+
+echo "ID miRNAs" $(date)
+
+miRDeep2.pl "${OUT_DIR}"/mapped_reads_apoc.fa "${GENOME}" "${OUT_DIR}"/mapped_reads_vs_genome_apoc.arf miRNA_reference_fixed.fasta none none -P -g -1 2>report.log
+
+echo "miRNA ID complete" $(date)
+```
+
+Submitted batch job 2077152
+
+
+
+
+
+
+
+
+
+
+Run for nvec. Make a config file with file location and 3 letter code. `nano config_nvec.txt`
+
+```
+/scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/nvec/nvec_1_S25_L001_R1_001_trim.fastq nv1
+/scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/nvec/nvec_2_S26_L001_R1_001_trim.fastq nv2
+/scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/nvec/nvec_3_S34_L001_R1_001_trim.fastq nv3
+/scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/nvec/nvec_4_S35_L001_R1_001_trim.fastq nv4
+```
+
+`nano mapper_mirdeep2_nvec.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=10
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=10GB
+#SBATCH -t 72:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/nvec
+
+# Load modules 
+module load uri/main Bowtie/1.3.1-GCC-11.3.0
+
+# Define paths 
+OUT_DIR="/scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/nvec/mirdeep2"
+GENOME="/scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/nvec/genome/Nvec200.fasta"
+
+# Create output directories if they don't exist
+mkdir -p "${OUT_DIR}"
+
+echo "Index Nvec genome" $(date)
+
+# Index the reference genome for Nvec
+bowtie-build "${GENOME}" Nvec_ref.btindex
+
+echo "Referece genome indexed!" $(date)
+echo "Unload unneeded packages and run mapper script for trimmed reads" $(date)
+
+# Load modules
+module unload Bowtie/1.3.1-GCC-11.3.0
+module load conda/latest
+conda activate /work/pi_hputnam_uri_edu/conda/envs/mirdeep2 
+
+mapper.pl config_nvec.txt -d -e -h -l 18 -v -m -p Nvec_ref.btindex -s "${OUT_DIR}"/mapped_reads_nvec.fa -t "${OUT_DIR}"/mapped_reads_vs_genome_nvec.arf
+
+echo "Mapping complete!" $(date)
+```
+
+Submitted batch job 2077507. Output: 
+
+```
+# reads processed: 1032159
+# reads with at least one alignment: 131481 (12.74%)
+# reads that failed to align: 900678 (87.26%)
+# reads with alignments suppressed due to -m: 61901 (6.00%)
+
+Log file for this run is in mapper_logs and called mapper.log_426881
+Mapping statistics
+
+#desc	total	mapped	unmapped	%mapped	%unmapped
+total: 27436082	1058988	26377094	3.860	96.140
+nv1: 6011442	356824	5654618	5.936	94.064
+nv2: 8054309	257649	7796660	3.199	96.801
+nv3: 7134137	227350	6906787	3.187	96.813
+nv4: 6236194	217165	6019029	3.482	96.518
+``` 
+
+Run mirdeep2 miRNA ID. Use the [miRNA reference fasta](https://github.com/JillAshey/DevelopmentalTimeseries/blob/main/data/references/miRNA_reference_fixed.fasta) that I made for the Mcap miRNA ID. 
+
+`nano id_mirdeep2_nvec.sh`
+
+```
+#!/usr/bin/env bash
+#SBATCH --export=NONE
+#SBATCH --nodes=1 --ntasks-per-node=10
+#SBATCH --partition=uri-cpu
+#SBATCH --no-requeue
+#SBATCH --mem=10GB
+#SBATCH -t 5-00:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH -o slurm-%j.out
+#SBATCH -e slurm-%j.error
+#SBATCH -D /scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/nvec
+
+# Load modules 
+module load conda/latest
+conda activate /work/pi_hputnam_uri_edu/conda/envs/mirdeep2 
+
+# Define paths 
+OUT_DIR="/scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/nvec/mirdeep2"
+GENOME="/scratch4/workspace/jillashey_uri_edu-cnidarian_sperm_part2/nvec/genome/Nvec200.fasta"
+
+echo "ID miRNAs" $(date)
+
+miRDeep2.pl "${OUT_DIR}"/mapped_reads_nvec.fa "${GENOME}" "${OUT_DIR}"/mapped_reads_vs_genome_nvec.arf miRNA_reference_fixed.fasta none none -P -g -1 2>report.log
+
+echo "miRNA ID complete" $(date)
+```
+
+Submitted batch job 2078099

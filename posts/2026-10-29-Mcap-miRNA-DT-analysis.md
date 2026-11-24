@@ -472,7 +472,7 @@ echo "miRNA ID complete" $(date)
 #miRDeep2.pl ahya_1_processed.fa /scratch3/workspace/jillashey_uri_edu-cnidarian_sperm/ahya/Ahyacinthus.chrsV1.fasta ahya_1_mappings.arf /work/#pi_hputnam_uri_edu/jillashey/cnidarian_sperm_smRNA/data/miRNA_reference_cleaned.fasta none none -t N.vectensis -P
 ```
 
-Submitted batch job 66549321
+Submitted batch job 66549321. This took almost 10 days wtf. 
 
 Now I need to filter for putative miRNAs based on the following qualities from Fromm et al. 2015 and Praher et al. 2021. `nano parse_mcap_miRNAs.py`
 
@@ -801,7 +801,7 @@ Now time to run the quantifier module of mirdeep2 which will determine the expre
 #SBATCH --nodes=1 --ntasks-per-node=10
 #SBATCH --partition=uri-cpu
 #SBATCH --no-requeue
-#SBATCH --mem=20GB
+#SBATCH --mem=100GB
 #SBATCH -t 5-00:00:00
 #SBATCH --mail-type=BEGIN,END,FAIL
 #SBATCH -o slurm-%j.out
@@ -809,6 +809,7 @@ Now time to run the quantifier module of mirdeep2 which will determine the expre
 #SBATCH -D /scratch3/workspace/jillashey_uri_edu-mcap_mirna
 
 # Load modules 
+module load conda/latest
 conda activate /work/pi_hputnam_uri_edu/conda/envs/mirdeep2 
 
 # Define paths 
@@ -826,7 +827,45 @@ echo "Quantifying complete!" $(date)
 conda deactivate
 ```
 
-Submitted batch job 1872213
+Submitted batch job 1904546.
+
+Low mapping rate. I think mirdeep2 is confused because the fastas all have the same headers. Add mature or star to header names 
+
+```
+# Keep precursor file as is (or ensure it uses T bases)
+awk '{if ($0 ~ /^>/) print $1; else {gsub(/U/,"T"); gsub(/u/,"t"); print $0}}' \
+  mcap_miRNA_precursor.fa > precursor_clean.fa
+
+# Append '_mature' to mature FASTA headers
+awk '{if ($0 ~ /^>/) print $1"_mature"; else {gsub(/U/,"T"); gsub(/u/,"t"); print $0}}' \
+  mcap_miRNA_mature.fa > mature_clean.fa
+
+# Append '_star' to star FASTA headers
+awk '{if ($0 ~ /^>/) print $1"_star"; else {gsub(/U/,"T"); gsub(/u/,"t"); print $0}}' \
+  mcap_miRNA_star.fa > star_clean.fa
+  
+head -n 4 precursor_clean.fa mature_clean.fa star_clean.fa
+==> precursor_clean.fa <==
+>Montipora_capitata_HIv3___Scaffold_2_271104
+CAATGTTTCGGCTTGTTCCCGTTTTCGGGAACAAGTCGAAACATTAGA
+>Montipora_capitata_HIv3___Scaffold_8_1538851
+CAATGTTTCGGCTTGTTCCCGTTTTCGGAAGCAAGCCGAAACATTGTA
+==> mature_clean.fa <==
+>Montipora_capitata_HIv3___Scaffold_2_271104_mature
+CAATGTTTCGGCTTGTTCCCG
+>Montipora_capitata_HIv3___Scaffold_8_1538851_mature
+CAATGTTTCGGCTTGTTCCCG
+==> star_clean.fa <==
+>Montipora_capitata_HIv3___Scaffold_2_271104_star
+GGAACAAGTCGAAACATTAGA
+>Montipora_capitata_HIv3___Scaffold_8_1538851_star
+GAAGCAAGCCGAAACATTGTA
+```
+
+Rerun quantifier with the clean fastas as input. Submitted batch job 1906954. Not much difference. 
+
+try gene ext for polyA libraries?
+
 
 
 /home/jillashey_uri_edu/.conda/envs/targetfinder
